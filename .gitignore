@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.slidev/
+*.local
+.DS_Store
+.impeccable/
+
+# 配布用ハンドアウト（npm run export:handout の生成物・一時ビルド）
+handout.pdf
+.handout-tmp/

@@ -1,0 +1,686 @@
+/* ============================================================
+   JoJo / AIエージェント入門 — Dark Tech Theme
+   アクセント: グラデーション (cyan #22d3ee → purple #a855f7)
+   方針: グラデは見出しキーワード/ラベル/装飾に限定。本文はソリッドで可読性優先。
+   ============================================================ */
+
+:root {
+  --brand-a: #22d3ee;
+  --brand-b: #a855f7;
+  --brand-grad: linear-gradient(90deg, var(--brand-a), var(--brand-b));
+  --bg-0: #07080d;
+  --bg-1: #0b0d15;
+  --ink: #e9edf6;
+  --ink-soft: #c6cdda;
+  --muted: #8b93a7;
+  --line: rgba(255, 255, 255, .08);
+  /* Warm accent tier — sparse emphasis over the immutable cyan/purple base (DESIGN §2/§6).
+     Already latent in the deck's art (duck=amber, pitfalls/lobster=rose); promoted here to
+     documented semantic tokens. amber = 重要/結論/いま を1点強調 ・ rose = 注意/リスク. Keep ≤~10%. */
+  --accent-warm: #fbbf24;
+  --accent-warm-ink: #fcd34d;
+  --accent-warn: #fb7185;
+  /* Premium panel material — shared by .card / .row / .pillar / .ptn.
+     Top-lit gradient (light source from above, matching the bg glow axis) +
+     inner top highlight + soft elevation shadow. Lifts every card-based slide
+     out of the flat rgba-white look. Portable: retune the two values only. */
+  --surface: linear-gradient(180deg, rgba(255, 255, 255, .052), rgba(255, 255, 255, .016));
+  --surface-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 14px 34px -22px rgba(0, 0, 0, .9);
+}
+
+html { color-scheme: dark; }
+
+/* ---- Base slide surface: layered depth ----
+   Four stacked layers create atmosphere on the immutable dark base:
+   (1) cyan glow lit from the top-left, (2) purple glow from the bottom-right
+   (= the brand's cyan→purple diagonal as a light axis), (3) a soft vignette that
+   darkens the off-axis corners so content floats, (4) the base vertical gradient.
+   Grain (::after) + blueprint grid (::before) add material on top. */
+.slidev-layout {
+  background:
+    radial-gradient(1080px 560px at 4% -16%, color-mix(in srgb, var(--brand-a) 22%, transparent), transparent 56%),
+    radial-gradient(1040px 620px at 116% 122%, color-mix(in srgb, var(--brand-b) 21%, transparent), transparent 55%),
+    radial-gradient(145% 135% at 50% 32%, transparent 44%, color-mix(in srgb, #000 58%, transparent) 100%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+  color: var(--ink);
+  font-family: 'Noto Sans JP', system-ui, sans-serif;
+  padding: 3rem;
+}
+/* blueprint grid — faint technical texture, masked toward the lit top-left corner */
+.slidev-layout::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none; opacity: .5; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .038) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .038) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask: radial-gradient(128% 128% at 1% 0%, black, transparent 72%);
+          mask: radial-gradient(128% 128% at 1% 0%, black, transparent 72%);
+}
+/* fine film grain — premium "material" that keeps large flat darks from reading as dead flat.
+   Grayscale fractal noise, very low opacity, sits below content (z-1) so type stays crisp. */
+.slidev-layout::after {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+.slidev-layout > * { position: relative; z-index: 1; }
+
+/* ---- Typography ---- */
+.slidev-layout h1 { font-weight: 900; letter-spacing: .01em; line-height: 1.16; color: #f4f6fb; }
+.slidev-layout h2 { font-weight: 900; letter-spacing: .01em; color: #f1f4fa; }
+.slidev-layout h3 { font-weight: 700; color: #eaeefb; }
+.slidev-layout p, .slidev-layout li { color: var(--ink-soft); line-height: 1.7; word-break: auto-phrase; }
+.slidev-layout strong { color: #ffffff; font-weight: 700; }
+.slidev-layout a { color: var(--brand-a); text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--brand-a) 45%, transparent); }
+.slidev-layout code { font-family: 'JetBrains Mono', monospace; font-size: .92em; }
+.slidev-layout :not(pre) > code {
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid var(--line);
+  padding: .08em .4em; border-radius: .35em; color: #e7ecfb;
+}
+.slidev-layout blockquote {
+  border: 1px solid color-mix(in srgb, var(--brand-a) 26%, var(--line));
+  background: color-mix(in srgb, var(--brand-a) 7%, transparent);
+  padding: .6rem 1rem; border-radius: .5rem; color: var(--ink-soft);
+}
+.slidev-layout hr { border: none; border-top: 1px solid var(--line); margin: 1rem 0; }
+
+/* bullet markers in brand color */
+.slidev-layout ul > li::marker { color: var(--brand-a); }
+
+/* ---- Brand utilities ---- */
+.grad {
+  background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: 'JetBrains Mono', monospace; font-weight: 800;
+  font-size: .8rem; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--brand-a);
+}
+.eyebrow::before {
+  content: ""; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--brand-a); box-shadow: 0 0 12px 2px var(--brand-a);
+}
+.muted { color: var(--muted); }
+.soft  { color: var(--ink-soft); }
+.glow-a { text-shadow: 0 0 26px color-mix(in srgb, var(--brand-a) 55%, transparent); }
+.lead { font-size: 1.15rem; color: var(--ink-soft); }
+/* Big single-statement hero — for "1 slide = 1 message" focal moments (e.g. the definition
+   formula p8). Large, centered, confident; pairs with .chip-row below it. */
+.bigstate { text-align: center; font-weight: 900; font-size: 3.15rem; line-height: 1.3; letter-spacing: .004em; }
+.bigstate .grad { padding: 0 .04em; }
+/* Closing hero — bigger thanks + a one-line reprise of the deck's thesis as the last thought. */
+.closing__thanks { font-size: 2.5rem; font-weight: 900; letter-spacing: .01em; margin-top: 1.1rem; }
+.closing__thesis { margin-top: 1.05rem; font-size: 1.3rem; line-height: 1.7; color: var(--ink-soft); font-weight: 600; text-wrap: balance; }
+/* annotation reference mark (※) — recedes as a note marker in titles */
+.kome { color: var(--muted); font-size: .68em; font-weight: 800; vertical-align: .14em; margin-right: .12em; }
+
+/* ---- Chips (evolution / tags) ---- */
+.chip {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: .82rem;
+  padding: .38rem .72rem; border-radius: .6rem;
+  border: 1px solid color-mix(in srgb, var(--brand-a) 38%, var(--line));
+  background: color-mix(in srgb, var(--brand-a) 8%, transparent);
+  color: #dfe4ee; white-space: nowrap;
+}
+.chip .arrow { color: var(--brand-a); margin: 0 .15rem; }
+.chip-now {
+  border-color: var(--brand-b); color: #f0d6ff;
+  box-shadow: 0 0 18px -4px var(--brand-b);
+}
+.chip-row { display: flex; flex-wrap: wrap; gap: .55rem; align-items: center; }
+
+/* pattern grid (2×2 explained cards) */
+.ptn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; }
+.ptn {
+  border: 1px solid var(--line); border-radius: .8rem;
+  padding: .72rem .9rem; background: var(--surface); box-shadow: var(--surface-shadow);
+  display: flex; flex-direction: column; gap: .42rem;
+}
+.ptn__h { display: flex; align-items: center; gap: .55rem; }
+.ptn__ico {
+  flex: none; width: 2.15rem; height: 2.15rem; border-radius: .5rem; font-size: 1.18rem;
+  display: flex; align-items: center; justify-content: center;
+  --_c: var(--c, var(--brand-a));
+  color: color-mix(in srgb, var(--_c) 92%, #fff);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--_c) 28%, transparent), color-mix(in srgb, var(--_c) 10%, transparent));
+  border: 1px solid color-mix(in srgb, var(--_c) 46%, var(--line));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent), 0 6px 16px -8px color-mix(in srgb, var(--_c) 72%, transparent);
+}
+.ptn__name {
+  font-weight: 800; font-size: 1rem; color: #eef1f8; line-height: 1.2;
+  display: inline-flex; align-items: baseline; gap: .45rem; flex-wrap: wrap;
+}
+.ptn__en {
+  font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 700;
+  letter-spacing: .02em; color: var(--muted);
+}
+.ptn__d { font-size: .85rem; line-height: 1.5; color: var(--ink-soft); }
+.ptn__d strong { color: #eef1f8; font-weight: 700; }
+.ptn__ex { display: block; margin-top: .18rem; font-size: .75rem; color: var(--muted); }
+
+/* ---- Cards / grids ---- */
+.card {
+  position: relative;
+  border: 1px solid var(--line); border-radius: .85rem;
+  background: var(--surface); box-shadow: var(--surface-shadow); padding: 1rem 1.15rem;
+}
+.card.accent { border-color: color-mix(in srgb, var(--brand-a) 45%, var(--line)); }
+/* 天面アクセントバー＝色が意味を持つカード（対比ペア/色分けセット）にのみ付与。
+   参照デッキの左サイドストライプ(p08/p12)を、side-stripe 禁止に反しない“天面額縁”へ翻案。
+   無地の並列グリッド(.card 単体)には付けない＝blanket 装飾にしない。 */
+.card.accent::before,
+.card.ac-cy::before, .card.ac-sk::before, .card.ac-in::before,
+.card.ac-pu::before, .card.ac-am::before, .card.ac-ro::before, .card.ac-gr::before {
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+  border-radius: .85rem .85rem 0 0;
+  background: var(--c, var(--brand-a));
+  box-shadow: 0 0 14px -3px var(--c, var(--brand-a));
+}
+/* before/after ヘッダラベル（参照 p05 の色付き見出し帯を軽量なキッカーへ翻案） */
+.card__ba {
+  display: block; font-family: 'JetBrains Mono', monospace;
+  font-size: .62rem; letter-spacing: .22em; font-weight: 800;
+  text-transform: uppercase; color: var(--muted); margin-bottom: .14rem;
+}
+.card.accent .card__ba, .card.ac-cy .card__ba { color: var(--brand-a); }
+.card.ac-pu .card__ba { color: var(--brand-b); }
+.cols.eq-title .card h3 { min-height: 2.75em; }
+.card h3 { margin: 0 0 .35rem; }
+.card h3 .ico { color: var(--c, var(--brand-a)); font-size: 1.15em; vertical-align: -.16em; margin-right: .15em; }
+.chip .ico { color: var(--brand-a); margin-right: .12em; }
+.chip-now .ico { color: var(--brand-b); }
+/* h1 trailing concept icon (sibling of .grad — gradient text would clip the SVG invisible) */
+.h1ico { color: var(--brand-a); font-size: .72em; vertical-align: -.02em; margin-left: .16em; opacity: .92; }
+/* inline-SVG icons living inside component v-html (RevealTabs badges / card titles / tab glyph) */
+.ico--inline { width: 1em; height: 1em; display: inline-block; vertical-align: -.14em; flex: none; }
+.rt__card-t .ico--inline { color: var(--brand-a); margin-right: .14em; vertical-align: -.16em; }
+.rt__badge .ico--inline { color: var(--brand-a); margin-right: .22em; vertical-align: -.12em; }
+.rt__no .ico--inline { font-size: 1.5rem; vertical-align: -.22em; }
+/* self-made brand-attribution marks (BrandMark.vue) */
+.note__bm { color: var(--brand-a); font-size: 1.3rem; vertical-align: -.22em; margin-right: .18em; }
+.refbm { color: var(--muted); font-size: 1.08em; vertical-align: -.16em; margin-right: .12em; opacity: .85; }
+/* keep card bodies tight — strip the leading/trailing block margins (default <p>/<ul>
+   margins otherwise inflate the box with hollow top/bottom bands) */
+.card > :first-child { margin-top: 0; }
+.card > :last-child { margin-bottom: 0; }
+.card p { margin: .3rem 0 0; }
+.card .k { font-family: 'JetBrains Mono', monospace; color: var(--brand-a); font-weight: 800; }
+.cols { display: grid; gap: 1rem; }
+.cols-2 { grid-template-columns: 1fr 1fr; }
+.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.pro { color: #93e6c0; } /* good */
+.con { color: #f3a8a8; } /* caution */
+
+/* ---- Timeline (進化史) ---- */
+.tl { display: flex; align-items: stretch; gap: .5rem; }
+.tl-step {
+  flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: .7rem;
+  padding: .7rem .8rem; background: rgba(255, 255, 255, .02);
+  display: flex; flex-direction: column; gap: .25rem;
+}
+.tl-step .k { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.05rem; color: #eef1f8; }
+.tl-step .y { font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--muted); }
+.tl-step .d { font-size: .82rem; color: var(--ink-soft); line-height: 1.5; }
+.tl-step.active {
+  border-color: var(--brand-b);
+  background: color-mix(in srgb, var(--brand-b) 12%, transparent);
+  box-shadow: 0 0 22px -6px var(--brand-b);
+}
+.tl-step.active .k { background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tl-arrow { display: flex; align-items: center; color: var(--brand-a); font-weight: 800; }
+
+/* ---- Nesting figure: Prompt ⊂ Context ⊂ Harness ⊂ Loop ---- */
+.nest { display: inline-block; border-radius: 1.15rem; padding: 1.55rem 1.7rem;
+  border: 1px solid color-mix(in srgb, #38bdf8 55%, var(--line)); background: color-mix(in srgb, #38bdf8 8%, transparent);
+  --rc: #38bdf8; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: 1.35s; }
+.nest .lbl { font-family: 'JetBrains Mono', monospace; font-size: .92rem; letter-spacing: .08em; opacity: .92; display: block; margin-bottom: .65rem; }
+.nest-2 { border-radius: .95rem; padding: 1.4rem 1.55rem; border: 1px solid color-mix(in srgb, #22d3ee 55%, var(--line)); background: color-mix(in srgb, #22d3ee 8%, transparent);
+  --rc: #22d3ee; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: .9s; }
+.nest-3 { border-radius: .8rem; padding: 1.25rem 1.4rem; border: 1px solid color-mix(in srgb, #818cf8 55%, var(--line)); background: color-mix(in srgb, #818cf8 9%, transparent);
+  --rc: #818cf8; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: .45s; }
+.nest-4 { border-radius: .65rem; padding: 1.1rem 1.25rem; border: 1px solid color-mix(in srgb, #a855f7 60%, var(--line)); background: color-mix(in srgb, #a855f7 9%, transparent);
+  --rc: #a855f7; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: 0s; }
+.nest-4 .lbl { margin-bottom: 0; }
+/* the glow ripples inner → outer (PROMPT → … → LOOP): the outward spread that
+   the closing line names as "the evolution itself". */
+@keyframes nestpulse {
+  0%, 42%, 100% { box-shadow: 0 0 0 0 transparent; }
+  16% { box-shadow: 0 0 26px -6px color-mix(in srgb, var(--rc) 75%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nest, .nest-2, .nest-3, .nest-4 { animation: none; }
+}
+
+/* ---- Trend feed（X ポスト風カードの縦積み：XPost.vue）---- */
+.xfeed { display: flex; flex-direction: column; gap: .5rem; width: 100%; margin: .6rem auto 0; }
+/* Align the "chrome" (X ロゴ＋リアクションアイコン列) across stacked posts:
+   when a feed contains a mascot card (.xp--deco reserves --xp-gutter on the
+   right), the sibling cards without a mascot reserve the SAME right inset on
+   their header + footer only — body/translation stay full width, so the like
+   icon and X logo line up panel-to-panel with no text re-wrap. Scoped with
+   :has() so a lone deco-less XPost elsewhere never gets a phantom gutter. */
+.xfeed:has(.xp--deco) .xp:not(.xp--deco) .xp__hd,
+.xfeed:has(.xp--deco) .xp:not(.xp--deco) .xp__ft { padding-right: calc(var(--xp-gutter) - 1.1rem); }
+
+/* ---- Rubberduck intro：note 左・アヒル右の二領域（p18）---- */
+.rd-intro { display: flex; align-items: center; gap: 1.2rem; position: relative; min-height: 7rem; }
+.rd-intro .note { flex: 1 1 auto; min-width: 0; max-width: 64%; }
+.rd-intro__duck {
+  position: absolute; bottom: 0; right: 0;
+  width: 24%; aspect-ratio: 258 / 226; z-index: 1; pointer-events: none;
+}
+.rd-intro__duck .duck { width: 100%; height: 100%; }
+
+/* ---- LLM vs Agent：比較スタック左・アシスタント右の二領域（p6）---- */
+.llm-vs { display: flex; align-items: center; gap: 1.1rem; }
+.llm-vs .stack { flex: 1 1 auto; min-width: 0; gap: .7rem; }
+.llm-vs .row { padding: .62rem 1.15rem; grid-template-columns: minmax(128px, 168px) 1fr; }
+.llm-vs .row__body li { margin: .05rem 0; line-height: 1.5; }
+.llm-vs__bot { flex: none; width: 23%; aspect-ratio: 1 / 1; align-self: center; }
+.llm-vs__bot .bot { width: 100%; height: 100%; }
+
+/* ---- MCP：USB-C プラグ図左・before/after カードを縦積みで右に（p11）---- */
+.mcp-vis { display: flex; align-items: center; gap: 1.5rem; }
+.mcp-vis__art { flex: none; width: 22%; aspect-ratio: 280 / 232; align-self: center; }
+.mcp-vis__art .plug { width: 100%; height: 100%; }
+.mcp-cards { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: .7rem; }
+.mcp-cards .card { padding: .68rem 1.05rem; }
+.mcp-cards .card h3 { margin-bottom: .25rem; }
+
+/* ---- Cover ---- */
+.cover { display: flex; flex-direction: column; height: 100%; position: relative; }
+.cover > *:not(.hero) { position: relative; z-index: 1; }
+.cover__top { display: flex; align-items: center; justify-content: space-between; }
+.cover__num { font-family: 'JetBrains Mono', monospace; font-size: .8rem; letter-spacing: .2em; color: var(--muted); }
+.cover__series {
+  margin-top: 2rem; font-size: .9rem; font-weight: 700; letter-spacing: .02em;
+  display: inline-flex; align-items: flex-start; gap: .6rem; color: #a9b2c7;
+  max-width: 60%; line-height: 1.5;
+}
+.cover__series .tag {
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--brand-a);
+  border: 1px solid color-mix(in srgb, var(--brand-a) 45%, var(--line));
+  border-radius: .4rem; padding: .12rem .5rem; flex: none; margin-top: .15rem;
+}
+/* Series title: keep it on one line when it fits (p31), otherwise hang the
+   opening 「 into the margin so 情報強者 / 情報弱者 line up vertically (p1). */
+.cover__series.is-1line { max-width: none; }
+.cover__series .cs-nowrap { white-space: nowrap; }
+.cover__series .cs-hang {
+  display: inline-block;
+  padding-left: 1.02em;   /* = 「 advance (1em + .02em letter-spacing) */
+  text-indent: -1.02em;   /* hang the bracket; both 情報 align at the same x */
+}
+.cover__title { margin: .9rem 0 0; font-size: 3.35rem; font-weight: 900; line-height: 1.1; letter-spacing: -.005em; max-width: 78%; text-wrap: balance; }
+.cover__sub { margin-top: .85rem; font-size: 1.2rem; color: var(--ink-soft); font-weight: 500; max-width: 72%; }
+.cover__foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.author { display: flex; align-items: center; gap: .7rem; }
+.author__avatar {
+  width: 46px; height: 46px; border-radius: 50%; object-fit: cover;
+  border: 1.5px solid color-mix(in srgb, var(--brand-a) 60%, transparent);
+  box-shadow: 0 0 18px -4px var(--brand-b);
+}
+.author__meta { display: flex; flex-direction: column; line-height: 1.25; }
+.author__meta small { font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .22em; color: var(--brand-a); font-weight: 700; }
+.author__meta b { font-size: 1.05rem; font-weight: 800; color: var(--ink); }
+.cover__url { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: var(--muted); }
+
+/* ---- Section divider ---- */
+.slidev-layout.section {
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; position: relative; overflow: hidden;
+  /* adds a centered brand "spotlight" over the inherited depth stack so the title reads as lit */
+  background:
+    radial-gradient(660px 420px at 50% 46%, color-mix(in srgb, var(--brand-a) 14%, transparent), transparent 72%),
+    radial-gradient(1080px 560px at 4% -16%, color-mix(in srgb, var(--brand-a) 22%, transparent), transparent 56%),
+    radial-gradient(1040px 620px at 116% 122%, color-mix(in srgb, var(--brand-b) 21%, transparent), transparent 55%),
+    radial-gradient(145% 135% at 50% 32%, transparent 44%, color-mix(in srgb, #000 58%, transparent) 100%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-0));
+}
+.section__eyebrow { margin-bottom: .8rem; }
+.section__title { font-size: 3.2rem; font-weight: 900; line-height: 1.12; letter-spacing: -.005em; text-wrap: balance; }
+.section__lead { margin: .9rem auto 0; font-size: 1.18rem; color: var(--ink-soft); max-width: 40em; text-wrap: balance; word-break: auto-phrase; }
+/* large outlined chapter numeral — repeating motif on dividers, bled off the top-right */
+.section__chno {
+  position: absolute; top: -1.6rem; right: 1.4rem; z-index: 0;
+  font-family: 'JetBrains Mono', monospace; font-weight: 900;
+  font-size: 15rem; line-height: 1; letter-spacing: -.06em;
+  color: transparent; -webkit-text-stroke: 1.6px rgba(124, 200, 255, .17);
+  pointer-events: none; user-select: none;
+}
+
+/* ---- Entrance motion: dividers / cover / closing ----
+   Enhances an already-visible default. Guarded by prefers-reduced-motion:no-preference,
+   so reduced-motion (and any non-animating renderer) shows content fully visible with no motion.
+   Transform + opacity only; ease-out (no bounce). These "breath" slides get motion; dense
+   content slides rely on their click-reveals instead (motion fits what it reveals). */
+@keyframes riseIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
+@keyframes chnoIn { from { opacity: 0; transform: translateY(-12px) scale(.93); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .slidev-layout.section .section__eyebrow { animation: riseIn .55s cubic-bezier(.22,1,.36,1) .04s both; }
+  .slidev-layout.section h1                { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .12s both; }
+  .slidev-layout.section .section__lead    { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .22s both; }
+  .slidev-layout.section .section__chno    { animation: chnoIn .90s cubic-bezier(.16,1,.3,1) both; }
+  .cover .cover__series { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .12s both; }
+  .cover .cover__title  { animation: riseIn .70s cubic-bezier(.22,1,.36,1) .22s both; }
+  .cover .cover__sub    { animation: riseIn .70s cubic-bezier(.22,1,.36,1) .34s both; }
+  .closing-in > * { animation: riseIn .60s cubic-bezier(.22,1,.36,1) both; }
+  .closing-in > *:nth-child(1) { animation-delay: .08s; }
+  .closing-in > *:nth-child(2) { animation-delay: .18s; }
+  .closing-in > *:nth-child(3) { animation-delay: .28s; }
+  .closing-in > *:nth-child(4) { animation-delay: .38s; }
+}
+
+/* ---- Mermaid: center & spacing ---- */
+.slidev-layout .mermaid { display: flex; justify-content: center; }
+.slidev-layout .mermaid svg { max-height: 430px; }
+
+/* ---- Tables ---- */
+.slidev-layout table { font-size: .9rem; border-collapse: collapse; }
+.slidev-layout th { color: var(--brand-a); border-bottom: 1px solid color-mix(in srgb, var(--brand-a) 40%, var(--line)); text-align: left; padding: .5rem .7rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.slidev-layout td { border-bottom: 1px solid var(--line); padding: .5rem .7rem; color: var(--ink-soft); }
+
+/* slightly smaller default heading top margin for content slides */
+.slidev-layout h1 { margin-bottom: .8rem; }
+
+/* ============================================================
+   Additions: vertical row panels, sources, stats, pitfalls grid
+   (brand tokens unchanged — layout/visual structure only)
+   ============================================================ */
+
+/* ---- Stacked row panels (縦並びパネル: icon rail + body) ---- */
+.stack { display: flex; flex-direction: column; gap: 1rem; }
+.stack.gap-sm { gap: .7rem; }
+.row {
+  display: grid;
+  grid-template-columns: minmax(140px, 196px) 1fr;
+  gap: 1.3rem; align-items: center;
+  border: 1px solid var(--line); border-radius: .85rem;
+  background: var(--surface); box-shadow: var(--surface-shadow);
+  padding: .85rem 1.2rem;
+}
+.row.accent { border-color: color-mix(in srgb, var(--c, var(--brand-a)) 45%, var(--line)); }
+.row.accent-b { border-color: color-mix(in srgb, var(--brand-b) 45%, var(--line)); --c: var(--brand-b); }
+.row__head { display: flex; flex-direction: column; gap: .15rem; }
+.row__ico {
+  font-size: 1.7rem; line-height: 1;
+  width: 2.7rem; height: 2.7rem; border-radius: .6rem;
+  display: flex; align-items: center; justify-content: center;
+  --_c: var(--c, var(--brand-a));
+  color: color-mix(in srgb, var(--_c) 92%, #fff);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--_c) 28%, transparent), color-mix(in srgb, var(--_c) 10%, transparent));
+  border: 1px solid color-mix(in srgb, var(--_c) 46%, var(--line));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent), 0 6px 18px -8px color-mix(in srgb, var(--_c) 72%, transparent);
+  margin-bottom: .35rem;
+}
+.row__title { font-weight: 800; font-size: 1.08rem; color: #eef1fb; line-height: 1.3; }
+.row__tag { font-family: 'JetBrains Mono', monospace; font-size: .7rem; letter-spacing: .04em; color: var(--muted); }
+.row__body { min-width: 0; }
+.row__body > :first-child { margin-top: 0; }
+.row__body > :last-child { margin-bottom: 0; }
+.row__body ul { margin: 0; padding-left: 1.1rem; }
+.row__body li { line-height: 1.55; margin: .12rem 0; }
+.row__body p { margin: .25rem 0; line-height: 1.55; }
+/* a thin connector cue for vs comparisons */
+.vsbadge {
+  align-self: center; margin: -.15rem 0;
+  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .72rem;
+  letter-spacing: .12em; color: var(--muted);
+  display: flex; align-items: center; gap: .6rem;
+}
+.vsbadge::before, .vsbadge::after { content: ""; height: 1px; width: 2.2rem; background: var(--line); }
+/* compact row for short one-line descriptions (e.g. 4-property list) */
+.row.tight { padding: .6rem 1.1rem; }
+.row.tight .row__head { flex-direction: row; align-items: center; gap: .55rem; flex-wrap: wrap; }
+.row.tight .row__ico { width: 2.05rem; height: 2.05rem; font-size: 1.15rem; margin-bottom: 0; }
+.row.tight .row__title { font-size: 1.04rem; }
+.row.tight .row__tag { flex-basis: 100%; margin-left: 2.6rem; margin-top: -.05rem; }
+
+/* ---- Recap: current-mainstream pillars (no-emoji, label + one-liner) ---- */
+.pillars { display: flex; flex-direction: column; gap: .55rem; }
+.pillar {
+  display: grid; grid-template-columns: minmax(186px, 210px) 1fr; gap: 1.15rem;
+  align-items: baseline;
+  border: 1px solid var(--line); border-radius: .7rem;
+  background: var(--surface); box-shadow: var(--surface-shadow); padding: .62rem 1.05rem;
+}
+.pillar__k {
+  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1rem;
+  color: var(--brand-a); line-height: 1.3; white-space: nowrap;
+}
+.pillar__k small {
+  display: block; font-family: 'Noto Sans JP', sans-serif; font-weight: 600;
+  font-size: .66rem; letter-spacing: .02em; color: var(--muted); white-space: nowrap; margin-top: .1rem;
+}
+.pillar__d { font-size: .92rem; line-height: 1.55; color: var(--ink-soft); word-break: auto-phrase; }
+.pillar__d strong { color: #fff; }
+.pillar.b { border-color: color-mix(in srgb, var(--brand-b) 42%, var(--line)); background: color-mix(in srgb, var(--brand-b) 6%, transparent); }
+.pillar.b .pillar__k { color: var(--brand-b); }
+.now-label {
+  margin: 1.15rem 0 .55rem; font-family: 'JetBrains Mono', monospace; font-weight: 800;
+  font-size: .82rem; letter-spacing: .04em; color: var(--accent-warm-ink);
+}
+
+/* ---- Big number stat ---- */
+.stat { display: flex; flex-direction: column; }
+.stat__num {
+  font-family: 'JetBrains Mono', monospace; font-weight: 900;
+  font-size: 2.8rem; line-height: 1;
+  background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.stat__lbl { color: var(--muted); font-size: .82rem; margin-top: .35rem; }
+
+/* ---- Source / citation notes ---- */
+.src {
+  margin-top: .7rem; font-family: 'JetBrains Mono', monospace;
+  font-size: .68rem; line-height: 1.6; color: var(--muted); letter-spacing: .01em;
+}
+.src b { color: var(--ink-soft); font-weight: 700; }
+.srcfoot {
+  position: absolute; left: 3rem; right: 8rem; bottom: 1.15rem; z-index: 1;
+  font-family: 'JetBrains Mono', monospace; font-size: .66rem; line-height: 1.5;
+  color: var(--muted); border-top: 1px solid var(--line); padding-top: .4rem;
+}
+.srcfoot b { color: var(--ink-soft); font-weight: 700; }
+
+/* ---- References slide ---- */
+.refs { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 1.6rem; margin-top: 1rem; }
+.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .75rem .9rem; background: rgba(255,255,255,.02); }
+.refgrp h4 {
+  margin: 0 0 .4rem; font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--brand-a); font-weight: 800;
+}
+.refgrp ul { margin: 0; padding-left: 1rem; }
+.refgrp li { font-size: .8rem; line-height: 1.5; color: var(--ink-soft); margin: .15rem 0; }
+.refgrp .u { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); }
+
+/* ---- Pitfalls / icon grid (2×N) ---- */
+.igrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem .9rem; }
+.igrid.cols1 { grid-template-columns: 1fr; }
+.icell {
+  display: grid; grid-template-columns: 2.4rem 1fr; gap: .7rem; align-items: center;
+  border: 1px solid var(--line); border-radius: .7rem;
+  background: rgba(255, 255, 255, .022); padding: .6rem .8rem;
+}
+.icell .e {
+  font-size: 1.3rem; width: 2.4rem; height: 2.4rem; border-radius: .55rem;
+  display: flex; align-items: center; justify-content: center;
+  --_c: var(--c, var(--brand-a));
+  color: color-mix(in srgb, var(--_c) 92%, #fff);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--_c) 28%, transparent), color-mix(in srgb, var(--_c) 10%, transparent));
+  border: 1px solid color-mix(in srgb, var(--_c) 46%, var(--line));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #fff 18%, transparent), 0 6px 16px -8px color-mix(in srgb, var(--_c) 72%, transparent);
+}
+.icell .t { font-size: .9rem; line-height: 1.45; color: var(--ink-soft); }
+.icell .t strong { color: #fff; }
+
+/* ---- icon-chip accent palette (per-item hue via --c custom property) ---- */
+.ac-cy { --c: #22d3ee; } .ac-sk { --c: #38bdf8; } .ac-in { --c: #818cf8; }
+.ac-pu { --c: #a855f7; } .ac-am { --c: #fbbf24; } .ac-ro { --c: #fb7185; } .ac-gr { --c: #34d399; }
+/* semantic aliases for the warm tier */
+.ac-wm { --c: var(--accent-warm); } .ac-wn { --c: var(--accent-warn); }
+
+/* ---- warm emphasis: the ONE takeaway per slide (use sparingly, ≤1 phrase) ---- */
+.hot { color: var(--accent-warm-ink); font-weight: 800; }
+/* amber "highlighter": white text on a soft amber underline-wash — signals 重要
+   without gradient-text. Reserve for a single key phrase (conclusion / いま). */
+.mk {
+  color: #fff; font-weight: 800; border-radius: .12em;
+  padding: .02em .14em; margin: 0 -.02em;
+  background: linear-gradient(180deg, transparent 58%,
+    color-mix(in srgb, var(--accent-warm) 42%, transparent) 0);
+}
+/* amber "いま/NOW" pill for current-state markers */
+.nowpill {
+  font-family: 'JetBrains Mono', monospace; font-weight: 800;
+  font-size: .62em; letter-spacing: .04em; vertical-align: .12em;
+  padding: .12em .5em; border-radius: 1em; white-space: nowrap;
+  color: #1a1205; background: var(--accent-warm);
+  box-shadow: 0 2px 10px -3px color-mix(in srgb, var(--accent-warm) 70%, transparent);
+}
+/* pattern grid (p21): cohesive cyan→purple ramp so the 4 cards read distinct yet on-brand */
+.ptn-grid .ptn:nth-child(1) { --c: #22d3ee; }
+.ptn-grid .ptn:nth-child(2) { --c: #818cf8; }
+.ptn-grid .ptn:nth-child(3) { --c: #38bdf8; }
+.ptn-grid .ptn:nth-child(4) { --c: #a855f7; }
+/* pitfalls grid (p25): warm "caution" tones (amber / rose) = things that go wrong */
+.igrid .icell:nth-child(odd)  { --c: #fbbf24; }
+.igrid .icell:nth-child(even) { --c: #fb7185; }
+
+/* ---- Agenda / 目次 ---- */
+.agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem 1.6rem; }
+.agenda__item {
+  display: flex; align-items: center; gap: .9rem;
+  padding: .6rem .3rem; border-bottom: 1px solid var(--line);
+}
+.agenda__no {
+  font-family: 'JetBrains Mono', monospace; font-weight: 800;
+  font-size: 1.5rem; line-height: 1; letter-spacing: .01em; min-width: 2.1rem;
+  color: transparent; background: var(--brand-grad);
+  -webkit-background-clip: text; background-clip: text;
+}
+.agenda__txt { display: flex; flex-direction: column; gap: .14rem; min-width: 0; }
+.agenda__t { font-weight: 800; font-size: 1.04rem; color: #eef1fb; line-height: 1.25; }
+.agenda__d { font-size: .8rem; color: var(--muted); line-height: 1.3; }
+.agenda__item--now {
+  border: 1px solid color-mix(in srgb, var(--brand-b) 38%, var(--line));
+  border-radius: .7rem; padding: .55rem .9rem;
+  background: color-mix(in srgb, var(--brand-b) 8%, transparent);
+}
+.agenda__item--now .agenda__no { font-size: 1.35rem; min-width: 1.8rem; }
+.agenda__item--now .agenda__d strong { color: color-mix(in srgb, var(--brand-b) 75%, #fff); }
+
+/* ---- Connector diagram (MCP / hub) ---- */
+.wire { display: flex; align-items: center; justify-content: center; gap: 0; margin-top: .5rem; }
+.wire .node {
+  border: 1px solid color-mix(in srgb, var(--brand-a) 38%, var(--line));
+  background: color-mix(in srgb, var(--brand-a) 7%, transparent);
+  border-radius: .7rem; padding: .7rem 1rem; text-align: center;
+  font-weight: 800; color: #eaf0fb; min-width: 6.5rem;
+}
+.wire .node small { display: block; font-family: 'JetBrains Mono', monospace; font-size: .64rem; color: var(--muted); font-weight: 700; letter-spacing: .08em; margin-top: .2rem; }
+.wire .node.hub { border-color: var(--brand-b); background: color-mix(in srgb, var(--brand-b) 12%, transparent); box-shadow: 0 0 22px -8px var(--brand-b); }
+.wire .link { height: 2px; width: 3.2rem; background: linear-gradient(90deg, color-mix(in srgb, var(--brand-a) 60%, transparent), color-mix(in srgb, var(--brand-b) 60%, transparent)); position: relative; }
+.wire .link::after { content: "MCP"; position: absolute; top: -1.1rem; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: .6rem; letter-spacing: .12em; color: var(--brand-a); }
+.wire .fan { display: flex; flex-direction: column; gap: .4rem; }
+.wire .leaf {
+  font-family: 'JetBrains Mono', monospace; font-size: .76rem; color: #dfe4ee;
+  border: 1px solid var(--line); border-radius: .5rem; padding: .3rem .6rem;
+  background: rgba(255,255,255,.025); white-space: nowrap;
+}
+
+/* ============================================================
+   Vertical balance + centered conclusions + clickable links
+   ============================================================ */
+
+/* Content slides keep their body vertically centered (balanced — no top-cram,
+   no stretched empty bottom). INTERACTIVE reveal slides ALSO center their group:
+   the panel is sized to its content (never ballooned to fill the slide), so any
+   slack is shared as balanced top/bottom margin instead of a hollow panel.
+   Long tab content still paginates — the panel can shrink, just not pad itself out.
+   (section dividers & cover keep their own centering) */
+.slidev-layout:not(.section) { display: flex; flex-direction: column; justify-content: center; }
+/* never let flex squash content — overflow-clip behaves like the old block flow */
+.slidev-layout:not(.section) > * { flex-shrink: 0; }
+/* interactive reveal slides: panel hugs its content (shrinks for pagination, never grows to pad) */
+.slidev-layout:not(.section) > .rt { flex: 0 1 auto; min-height: 0; }
+/* on interactive slides keep the conclusion close to the (content-sized) panel */
+.slidev-layout:not(.section):has(.rt) .tk { margin-top: .9rem; }
+.slidev-layout:not(.section):has(.rt) > .rt { margin-top: .6rem; }
+
+/* clickable links inside the framework table */
+.slidev-layout td a, .slidev-layout th a { color: var(--brand-a); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--brand-a) 38%, transparent); }
+.slidev-layout td a:hover { color: #fff; border-bottom-color: var(--brand-a); }
+
+/* takeaway / conclusion: separated from the body, centered as the closing line */
+.tk { margin-top: 1.4rem; text-align: center; text-wrap: balance; }
+.tk.lead, .tk.muted, .tk.concl { max-width: 54em; margin-left: auto; margin-right: auto; }
+.concl { font-size: 1.18rem; color: var(--ink-soft); line-height: 1.55; }
+.concl strong { color: #fff; }
+/* forward narrative cue: previews the NEXT slide's subject so a new topic never
+   feels cold-inserted. Secondary to .concl (muted, smaller). Divider is a
+   centre-fading SOLID hairline — deliberately NOT dashed, so it can't be mistaken
+   for a diagram flow / loop-back line (e.g. AgentLoop's dashed "再試行" path on p17;
+   dashed = a connector in a figure, a section separator must speak a different
+   language). Shorter + centred + no arrowhead further separates the two. */
+.nextcue {
+  margin: 1.15rem auto 0; max-width: 52em; text-align: center;
+  font-size: .95rem; line-height: 1.55; color: var(--muted);
+  text-wrap: balance; word-break: auto-phrase;
+  padding-top: 1rem; position: relative;
+}
+.nextcue::before {
+  content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: min(48%, 21em); height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--brand-a) 38%, transparent), transparent);
+}
+.nextcue strong { color: var(--ink-soft); font-weight: 700; }
+.nextcue .go { color: var(--accent-warm-ink); font-weight: 800; }
+/* blockquote used as a closing statement: normal separation (group stays centered) */
+.sink { margin-top: 1.3rem; }
+
+/* inline clarifier note — concept contrast; full border (no side-stripe), subtle tint */
+.note {
+  padding: .55rem .9rem; border: 1px solid var(--line); border-radius: 10px;
+  background: color-mix(in srgb, var(--brand-a) 6%, transparent);
+  color: var(--ink-soft); font-size: 1.02rem; line-height: 1.5; text-wrap: balance;
+  word-break: auto-phrase;
+}
+.note strong { color: #fff; }
+
+/* Clickable links (sources, docs, references) */
+.src a, a.doc { color: color-mix(in srgb, var(--brand-a) 82%, var(--ink-soft)); text-decoration: none; border-bottom: 1px solid color-mix(in srgb, var(--brand-a) 35%, transparent); }
+.src a:hover, a.doc:hover { color: var(--brand-a); border-bottom-color: var(--brand-a); }
+.linkchip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-family: 'JetBrains Mono', monospace; font-size: .78rem; font-weight: 700;
+  padding: .3rem .6rem; border-radius: .5rem; text-decoration: none;
+  border: 1px solid color-mix(in srgb, var(--brand-a) 34%, var(--line));
+  background: color-mix(in srgb, var(--brand-a) 7%, transparent); color: #dfe4ee;
+}
+.linkchip:hover { border-color: var(--brand-a); color: #fff; }
+.linkchip::after { content: "↗"; font-size: .7rem; color: var(--brand-a); }
+
+/* ---------- inline glossary term link (jumps to the 用語集 slide) ---------- */
+/* Dotted underline distinguishes an internal 用語 jump from a solid-underline
+   external link. Works inside markdown and component v-html alike. */
+.gterm {
+  color: var(--brand-a); cursor: pointer; text-decoration: none; font-weight: inherit;
+  border-bottom: 1px dotted color-mix(in srgb, var(--brand-a) 72%, transparent);
+  border-radius: 2px; transition: color .15s ease, background .15s ease, border-color .15s ease;
+}
+.gterm :is(strong, b) { color: inherit; }
+.gterm::after { content: "›"; font-size: .82em; opacity: .6; margin-left: .08em; }
+.gterm:hover, .gterm:focus-visible {
+  color: #fff; outline: none;
+  border-bottom: 1px solid var(--brand-a);
+  background: color-mix(in srgb, var(--brand-a) 14%, transparent);
+}
+.gterm:focus-visible { box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-a) 55%, transparent); }
+@media (prefers-reduced-motion: reduce) { .gterm { transition: none; } }
