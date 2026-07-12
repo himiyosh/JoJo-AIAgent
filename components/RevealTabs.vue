@@ -3,15 +3,17 @@ export type RevealItem = {
   key: string
   no?: string            // leading glyph: ① or an emoji
   tag?: string           // small badge: year / category
-  sub?: string           // one-line desc on the tab face (HTML ok)
+  // HTML fields are trusted, repository-owned presentation copy only.
+  // Never pass user input, API responses, or external Markdown to these fields.
+  sub?: string           // one-line desc on the tab face (trusted static HTML)
   now?: boolean          // purple accent + "いま" pill
-  head?: string          // big detail heading; <em> marks the ONE colored key term, .rt__en = muted 2nd (HTML ok)
-  q?: string             // small subtitle under/after the heading (HTML ok)
-  lead?: string          // detail intro line (HTML ok)
-  points?: string[]      // detail bullet list (HTML ok per item)
-  pros?: string[]        // detail pros (HTML ok)
-  cons?: string[]        // detail cons (HTML ok)
-  card?: { title: string; body: string; note?: string }  // side card (HTML ok)
+  head?: string          // big detail heading (trusted static HTML)
+  q?: string             // small subtitle (trusted static HTML)
+  lead?: string          // detail intro line (trusted static HTML)
+  points?: string[]      // detail bullets (trusted static HTML)
+  pros?: string[]        // detail pros (trusted static HTML)
+  cons?: string[]        // detail cons (trusted static HTML)
+  card?: { title: string; body: string; note?: string }  // trusted static HTML
   chips?: string[]       // keyword chips
   source?: { label: string; url: string }            // single citation
   sources?: { label: string; url: string }[]         // multiple citations (takes precedence over `source`)
@@ -19,7 +21,7 @@ export type RevealItem = {
 </script>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount, computed, useId } from 'vue'
 import Cite from './Cite.vue'
 
 const props = withDefaults(defineProps<{
@@ -30,6 +32,9 @@ const props = withDefaults(defineProps<{
 }>(), { variant: 'row', start: 0 })
 
 const sel = ref(props.start)
+const uid = useId().replace(/[^a-zA-Z0-9_-]/g, '')
+const panelId = `${uid}-panel`
+const tabId = (i: number) => `${uid}-tab-${i + 1}`
 
 /* sources to show in the bottom bar: prefer the multi-citation list, fall back to single */
 const curSources = computed(() => {
@@ -94,11 +99,17 @@ async function measureTallest() {
 const select = (i: number) => { sel.value = i }
 
 const onKey = (e: KeyboardEvent, i: number) => {
-  const keys = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown']
+  const keys = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End']
   if (!keys.includes(e.key)) return
   e.preventDefault()
-  const dir = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1
-  sel.value = (i + dir + props.items.length) % props.items.length
+  if (e.key === 'Home')
+    sel.value = 0
+  else if (e.key === 'End')
+    sel.value = props.items.length - 1
+  else {
+    const dir = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1 : -1
+    sel.value = (i + dir + props.items.length) % props.items.length
+  }
   const tabs = (e.currentTarget as HTMLElement)?.parentElement
     ?.querySelectorAll<HTMLElement>('.rt__tab')
   tabs?.[sel.value]?.focus()
@@ -148,16 +159,18 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 
 <template>
   <div class="rt" :class="'rt--' + variant">
-    <div class="rt__tabs" role="tablist" :aria-label="ariaLabel">
+    <div class="rt__tabs" role="tablist" :aria-label="ariaLabel" aria-orientation="horizontal">
       <template v-for="(s, i) in items" :key="s.key">
         <button
           class="rt__tab"
           :class="{ 'is-sel': sel === i, 'is-now': s.now }"
+          :id="tabId(i)"
           role="tab"
           :aria-selected="sel === i"
+          :aria-controls="panelId"
           :tabindex="sel === i ? 0 : -1"
-          @click="select(i)"
-          @keydown="onKey($event, i)"
+          @click.stop="select(i)"
+          @keydown.stop="onKey($event, i)"
         >
           <span class="rt__top">
             <span v-if="s.no" class="rt__no" v-html="s.no" />
@@ -168,6 +181,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
           </span>
           <span v-if="s.tag" class="rt__tag">{{ s.tag }}</span>
           <span v-if="s.sub" class="rt__sub" v-html="s.sub" />
+          <span class="rt__selected" :class="{ 'is-visible': sel === i }" aria-hidden="true">✓ 選択中</span>
         </button>
         <span v-if="variant === 'timeline' && i < items.length - 1" class="rt__arrow" aria-hidden="true">›</span>
         <span v-else-if="variant === 'pair' && i < items.length - 1" class="rt__vs" aria-hidden="true">VS</span>
@@ -176,7 +190,15 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 
     <div class="rt__stage" :style="{ minHeight: detailMinH ? detailMinH + 'px' : undefined }">
     <Transition name="rt" mode="out-in" @after-enter="relayout">
-      <div class="rt__detail" :class="{ 'is-now': items[sel].now, 'rt__detail--card': items[sel].card }" :key="sel" role="tabpanel" :style="{ minHeight: detailMinH ? detailMinH + 'px' : undefined }">
+      <div
+        class="rt__detail"
+        :class="{ 'is-now': items[sel].now, 'rt__detail--card': items[sel].card }"
+        :key="sel"
+        :id="panelId"
+        role="tabpanel"
+        :aria-labelledby="tabId(sel)"
+        :style="{ minHeight: detailMinH ? detailMinH + 'px' : undefined }"
+      >
         <div v-if="items[sel].head || items[sel].no || items[sel].q || items[sel].tag" class="rt__head rt__block">
           <span v-if="items[sel].head" class="rt__badge" v-html="items[sel].head" />
           <span v-else class="rt__badge">
@@ -273,7 +295,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
           class="rt__pbtn"
           :disabled="page === 0"
           aria-label="前のページ"
-          @click="goPage(page - 1)"
+          @click.stop="goPage(page - 1)"
         >‹</button>
         <button
           v-for="p in pageCount"
@@ -282,13 +304,13 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
           :class="{ on: page === p - 1 }"
           :aria-label="'ページ ' + p + ' / ' + pageCount"
           :aria-current="page === p - 1"
-          @click="goPage(p - 1)"
+          @click.stop="goPage(p - 1)"
         />
         <button
           class="rt__pbtn"
           :disabled="page === pageCount - 1"
           aria-label="次のページ"
-          @click="goPage(page + 1)"
+          @click.stop="goPage(page + 1)"
         >›</button>
       </div>
     </div>
@@ -328,15 +350,23 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
   color: inherit; font-family: inherit;
   transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s cubic-bezier(.22, 1, .36, 1);
 }
+.rt__selected {
+  position: absolute; top: .38rem; right: .48rem;
+  color: var(--brand-a); font-family: 'JetBrains Mono', monospace;
+  font-size: .55rem; font-weight: 800; letter-spacing: .02em;
+  opacity: 0; pointer-events: none;
+}
+.rt__selected.is-visible { opacity: 1; }
+.rt__tab.is-now .rt__selected { color: color-mix(in srgb, var(--brand-b) 78%, #fff); }
 .rt__tab:hover {
   border-color: color-mix(in srgb, var(--brand-a) 55%, var(--line));
   background: linear-gradient(180deg, rgba(255, 255, 255, .15), rgba(255, 255, 255, .06));
   transform: translateY(-3px);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 12px 24px -8px rgba(0, 0, 0, .66);
 }
-.rt__tab:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 2px; }
+.rt__tab:focus-visible { outline: 3px solid var(--brand-a); outline-offset: 3px; }
 
-.rt__top { display: flex; align-items: center; gap: .5rem; }
+.rt__top { display: flex; align-items: center; gap: .5rem; padding-right: 3.5rem; }
 .rt__no { font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 1.1rem; color: #eef1f8; line-height: 1; }
 .rt__k {
   font-weight: 800; font-size: .97rem; color: #eef1f8;

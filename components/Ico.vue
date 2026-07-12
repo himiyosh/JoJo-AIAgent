@@ -62,7 +62,6 @@ const dim = (s?: number | string) => (s == null ? undefined : (typeof s === 'num
     stroke-linecap="round"
     stroke-linejoin="round"
     aria-hidden="true"
-    role="img"
     v-html="icons[name] || ''"
   />
 </template>

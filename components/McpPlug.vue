@@ -44,10 +44,10 @@ defineProps<{}>()
       </g>
       <!-- cables (flowing pulse) -->
       <g class="plug__flowwrap" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" pathLength="100">
-        <path class="plug__flow" style="--d:0s" d="M116 92C100 66 80 60 58 62" />
-        <path class="plug__flow" style="--d:.5s" d="M140 90C140 70 140 60 140 50" />
-        <path class="plug__flow" style="--d:1s" d="M164 92C180 66 200 60 222 62" />
-        <path class="plug__flow" style="--d:.25s" d="M140 178C140 198 120 204 104 212" />
+        <path class="plug__flow plug__flow--0" d="M116 92C100 66 80 60 58 62" />
+        <path class="plug__flow plug__flow--1" d="M140 90C140 70 140 60 140 50" />
+        <path class="plug__flow plug__flow--2" d="M164 92C180 66 200 60 222 62" />
+        <path class="plug__flow plug__flow--3" d="M140 178C140 198 120 204 104 212" />
       </g>
 
       <!-- tool chips -->
@@ -104,8 +104,11 @@ defineProps<{}>()
   stroke-dasharray: 16 84;
   stroke-dashoffset: 100;
   animation: pgFlow 2.4s linear infinite;
-  animation-delay: var(--d, 0s);
 }
+.plug__flow--0 { animation-delay: 0s; }
+.plug__flow--1 { animation-delay: .5s; }
+.plug__flow--2 { animation-delay: 1s; }
+.plug__flow--3 { animation-delay: .25s; }
 .plug__core { transform-box: view-box; transform-origin: 140px 120px; animation: pgPulse 2.8s ease-in-out infinite; }
 .plug__usb { transform-box: view-box; transform-origin: 140px 170px; animation: pgSeat 4s ease-in-out infinite; }
 

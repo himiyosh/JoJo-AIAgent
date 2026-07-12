@@ -6,5 +6,6 @@ dist/
 .impeccable/
 
 # 配布用ハンドアウト（npm run export:handout の生成物・一時ビルド）
+slides-export.pdf
 handout.pdf
 .handout-tmp/

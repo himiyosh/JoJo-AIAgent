@@ -39,6 +39,22 @@ jobs:
       - name: Build
         run: npm run build -- --base /${{ github.event.repository.name }}/ --out dist
 
+      - name: Verify Reader View artifact
+        run: |
+          test -f dist/reader/index.html
+          test -f dist/reader/reader-data.json
+          ! grep -qi '<iframe' dist/reader/index.html
+          test -f dist/reader/reader-manifest.json
+          test ! -d dist/reader/images
+          test -d dist/reader/thumbnails
+          node -e "const fs=require('node:fs'),path=require('node:path'); const d=JSON.parse(fs.readFileSync('dist/reader/reader-data.json')); if(d.version!==2||d.slides?.length!==31||d.slides.some((s,i)=>s.number!==i+1||!s.thumbnail||!fs.existsSync(path.join('dist/reader',s.thumbnail)))) process.exit(1)"
+          node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync('dist/reader/reader-manifest.json')); if(m.source!=='slides.md'||m.slides?.length!==31||m.slides.some((s,i)=>s.number!==i+1||!s.note||!s.type||!s.variant)) process.exit(1)"
+          test -f dist/reader-legacy/index.html
+          test -f dist/reader-legacy/reader.js
+          test -f dist/reader-pilot/index.html
+          test -f dist/reader-pilot/coverage-report.json
+          node -e "const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('dist/reader-pilot/coverage-report.json')); if(c.version!==3||c.variant!=='full-height'||c.source!=='slides.md'||c.inventory!==165||c.assigned!==165||c.core!==139||c.coreVisible!==139||c.pages!==16||JSON.stringify(Object.values(c.sources).map(s=>s.pages))!==JSON.stringify([1,5,5,2,1,2])||Object.values(c.truncation).some(Boolean)) process.exit(1)"
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

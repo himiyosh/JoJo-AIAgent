@@ -12,13 +12,13 @@
 //
 // 依存は既存の @slidev/cli / playwright-chromium のみ（新規依存なし）。
 import { spawn } from 'node:child_process';
-import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parse } from '@slidev/parser';
 import pw from 'playwright-chromium';
+import { startStaticServer } from './lib/static-server.mjs';
 
 const { chromium } = pw;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -40,35 +40,6 @@ function run(cmd, args) {
   });
 }
 
-const MIME = {
-  '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript',
-  '.css': 'text/css', '.json': 'application/json', '.png': 'image/png',
-  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
-  '.svg': 'image/svg+xml', '.webp': 'image/webp', '.ico': 'image/x-icon',
-  '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf',
-  '.eot': 'application/vnd.ms-fontobject', '.map': 'application/json',
-};
-
-function startServer(dir) {
-  const server = http.createServer((req, res) => {
-    try {
-      const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
-      const fp = path.join(dir, urlPath);
-      if (!fp.startsWith(dir)) { res.writeHead(403); return res.end(); }
-      if (fs.existsSync(fp) && fs.statSync(fp).isFile()) {
-        res.writeHead(200, { 'content-type': MIME[path.extname(fp)] || 'application/octet-stream' });
-        return fs.createReadStream(fp).pipe(res);
-      }
-      // SPA (history) フォールバック
-      res.writeHead(200, { 'content-type': 'text/html' });
-      return fs.createReadStream(path.join(dir, 'index.html')).pipe(res);
-    } catch (e) {
-      res.writeHead(500); res.end(String(e));
-    }
-  });
-  return new Promise((resolve) => server.listen(0, () => resolve({ server, port: server.address().port })));
-}
-
 async function main() {
   // 1) 本番ビルド（base=/ でルート配信できるようにする）
   log('building deck …');
@@ -76,8 +47,8 @@ async function main() {
   await run(slidevBin, ['build', '--base', '/', '--out', OUT_REL]);
 
   // 2) SPA フォールバック付き静的サーバ
-  const { server, port } = await startServer(OUT_DIR);
-  const BASE = `http://localhost:${port}`;
+  const staticServer = await startStaticServer({ root: OUT_DIR });
+  const BASE = staticServer.origin;
   log('serving build on', BASE);
 
   fs.mkdirSync(SHOT_DIR, { recursive: true });
@@ -150,7 +121,7 @@ async function main() {
 
   // 5) 後片付け
   await browser.close();
-  await new Promise((r) => server.close(r));
+  await staticServer.close();
   fs.rmSync(OUT_DIR, { recursive: true, force: true });
   fs.rmSync(SHOT_DIR, { recursive: true, force: true });
   log(`done → ${PDF_OUT}  (${shots.length} pages)`);

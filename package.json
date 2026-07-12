@@ -6,9 +6,15 @@
   "description": "JoJo「情報強者までいかずとも、情報弱者にならないためのコンテンツ」シリーズ #01 — AIエージェント入門 (Slidev)",
   "scripts": {
     "dev": "slidev --open",
-    "build": "slidev build",
+    "build": "node scripts/build.mjs",
     "export": "slidev export",
-    "export:handout": "node scripts/export-handout.mjs"
+    "export:handout": "node scripts/export-handout.mjs",
+    "preview:production": "node scripts/serve-production.mjs",
+    "qa:production": "node scripts/qa-production.mjs",
+    "qa:build-wrapper": "node scripts/qa-build-wrapper.mjs",
+    "qa:reader-pilot": "node scripts/qa-reader-pilot.mjs",
+    "qa:mobile-pilot": "node scripts/qa-mobile-pilot.mjs",
+    "qa:mobile-reader": "node scripts/qa-mobile-pilot.mjs --route reader"
   },
   "dependencies": {
     "@slidev/cli": "^52.16.0",
@@ -17,6 +23,7 @@
   },
   "devDependencies": {
     "@slidev/parser": "^52.16.0",
-    "playwright-chromium": "^1.61.1"
+    "playwright-chromium": "^1.61.1",
+    "yargs-parser": "^22.0.0"
   }
 }

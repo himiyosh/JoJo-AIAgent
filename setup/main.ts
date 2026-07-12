@@ -1,4 +1,5 @@
 import { defineAppSetup } from '@slidev/types'
+import { installDirectReader } from '../reader/direct-viewer'
 
 /**
  * Fix base-prefixed navigation on static hosts (e.g. GitHub Pages at /<repo>/).
@@ -22,6 +23,7 @@ import { defineAppSetup } from '@slidev/types'
  */
 export default defineAppSetup(({ router }) => {
   const base = import.meta.env.BASE_URL
+  installDirectReader(router, base)
   if (!base || base === '/')
     return
 

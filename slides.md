@@ -181,13 +181,19 @@ class: section
 chapter: "01 · AIエージェントとは"
 ---
 
-<div class="section__chno">01</div>
+<span class="section__chno" aria-hidden="true" data-number="01"></span>
 
-<div class="section__eyebrow eyebrow">CHAPTER 01</div>
+<div class="section__mark" aria-hidden="true"><span></span></div>
 
-# そもそも <span class="grad">AIエージェント</span>とは?
+<p class="section__context">AIエージェント入門 · 最初の問い</p>
+
+# そもそも<br><span class="section__accent">AIエージェント</span>とは?
 
 <p class="section__lead">「賢いチャット」と何が違うの? という素朴な疑問から。</p>
+
+<div class="section__route" aria-label="この章で扱う内容">
+  <span>違いを知る</span><span>4つの性質</span><span>道具と記憶</span>
+</div>
 
 <!--
 ここから第1章です。まずは素朴な疑問——「AIエージェントって、賢いチャットと何が違うの?」——から出発します。言葉の定義に入る前に、いちばん身近な“チャットAI”と比べることで、エージェントの正体を浮かび上がらせていきます。
@@ -414,13 +420,19 @@ class: section
 chapter: "02 · 作り方の全体像"
 ---
 
-<div class="section__chno">02</div>
+<span class="section__chno" aria-hidden="true" data-number="02"></span>
 
-<div class="section__eyebrow eyebrow">CHAPTER 02 · 作り方の全体像</div>
+<div class="section__mark" aria-hidden="true"><span></span></div>
 
-# 作り方は「<span class="grad">外側</span>」へ進化した
+<p class="section__context">作り方の進化 · 全体地図</p>
+
+# 作り方は「<span class="section__accent">外側</span>」へ進化した
 
 <p class="section__lead">Prompt → Context → Harness → Loop。地図と “入れ子” で全体像を。</p>
+
+<div class="section__route" aria-label="この章で扱う内容">
+  <span>外側へ</span><span>進化の地図</span><span>入れ子</span>
+</div>
 
 <!--
 ここから第2章。テーマは「エージェントの作り方は、どう進化してきたか」です。結論を先取りすると、設計で工夫する対象がだんだん“外側”へ——モデルへの一言から、システム全体へ——と広がってきました。その流れを Prompt → Context → Harness → Loop という地図と、“入れ子”の図で見ていきます。
@@ -478,13 +490,19 @@ class: section
 chapter: "03 · いまの動かし方"
 ---
 
-<div class="section__chno">03</div>
+<span class="section__chno" aria-hidden="true" data-number="03"></span>
 
-<div class="section__eyebrow eyebrow">CHAPTER 03 · いまの“動かし方”</div>
+<div class="section__mark" aria-hidden="true"><span></span></div>
 
-# 「<span class="grad">足場・ループ</span>」の時代
+<p class="section__context">現場の現在地 · 動かし方</p>
+
+# 「<span class="section__accent">足場・ループ</span>」の時代
 
 <p class="section__lead">いま大事なのは “動かし方”。Harness → Loop Engineering。</p>
+
+<div class="section__route" aria-label="この章で扱う内容">
+  <span>現場の転換</span><span>ReActループ</span><span>壁打ち</span>
+</div>
 
 <!--
 ここから第3章。前章で見た進化のいちばん外側、つまり“いま最も大事なところ”に踏み込みます。キーワードは「足場（Harness）」と「ループ（Loop）」。うまい一言を考えることより、エージェントを“どう動かし続けるか”の設計が主役になる、という話です。
@@ -590,13 +608,19 @@ class: section
 chapter: "04 · 一体で作る? 分ける?"
 ---
 
-<div class="section__chno">04</div>
+<span class="section__chno" aria-hidden="true" data-number="04"></span>
 
-<div class="section__eyebrow eyebrow">CHAPTER 04</div>
+<div class="section__mark" aria-hidden="true"><span></span></div>
 
-# 一体で作る? <span class="grad">分ける?</span>
+<p class="section__context">設計判断 · 一体か分業か</p>
+
+# 一体で作る? <span class="section__accent">分ける?</span>
 
 <p class="section__lead">単一エージェント vs マルチ（サブエージェント／オーケストレーション）。</p>
+
+<div class="section__route" aria-label="この章で扱う内容">
+  <span>単一 vs マルチ</span><span>分ける判断</span><span>4つの型</span>
+</div>
 
 <!--
 ここから第4章。話は“仕組み”から“実際に作るときの判断”へ移ります。分かれ道は「1体のエージェントにまとめて作るか（単一）」、それとも「役割ごとに複数に分けて連携させるか（マルチ）」。この選び方を、次のページから具体的に見ていきます。
@@ -775,13 +799,19 @@ class: section
 chapter: "05 · 勘所とまとめ"
 ---
 
-<div class="section__chno">05</div>
+<span class="section__chno" aria-hidden="true" data-number="05"></span>
 
-<div class="section__eyebrow eyebrow">CHAPTER 05</div>
+<div class="section__mark" aria-hidden="true"><span></span></div>
 
-# 勘所と <span class="grad">まとめ</span>
+<p class="section__context">実装前後の勘所 · まとめ</p>
+
+# 勘所と <span class="section__accent">まとめ</span>
 
 <p class="section__lead">評価・安全・コスト・落とし穴を押さえ、<span class="whitespace-nowrap">要点と次の一歩へ</span>。<span class="whitespace-nowrap">“動くもの”</span> を <span class="whitespace-nowrap">“使えるもの”</span> にして締めくくる。</p>
+
+<div class="section__route" aria-label="この章で扱う内容">
+  <span>評価・安全・コスト</span><span>落とし穴</span><span>次の一歩</span>
+</div>
 
 <!--
 最終章となる第5章です。ここまでは“作り方”の話でしたが、ここからは、実際に使えるものにするための“勘所”をまとめます。評価・安全・コスト・よくある落とし穴を押さえ、最後に今日の要点と次の一歩へ——“動くもの”を“使えるもの”に仕上げて、締めくくります。
@@ -819,24 +849,41 @@ chapter: "05 · 勘所とまとめ"
 
 ---
 
-# よくある落とし穴 <Ico name="warning" class="h1ico"/>
+# 落とし穴は、<span class="solid-a">3つの工程</span>で塞ぐ <Ico name="warning" class="h1ico"/>
 
-<div class="igrid mt-6">
+<p class="risk-intro">よくある8項目を、発生しやすいタイミングで確認します。</p>
 
-<div class="icell"><span class="e"><Ico name="wrench"/></span><span class="t"><strong>道具を盛りすぎ</strong> → どれを使うか迷う</span></div>
-<div class="icell"><span class="e"><Ico name="users"/></span><span class="t"><strong>いきなりマルチ</strong> → 調整地獄・高コスト</span></div>
-<div class="icell"><span class="e"><Ico name="book"/></span><span class="t"><strong>文脈を詰めすぎ</strong> → 精度もコストも悪化</span></div>
-<div class="icell"><span class="e"><Ico name="eyeoff"/></span><span class="t"><strong>ログ無し</strong> → 失敗の原因が追えない</span></div>
-<div class="icell"><span class="e"><Ico name="infinity"/></span><span class="t"><strong>終了条件なし</strong> → 無限ループ・暴走</span></div>
-<div class="icell"><span class="e"><Ico name="unlock"/></span><span class="t"><strong>ガードレール無し</strong> → 危険操作を素通り</span></div>
-<div class="icell"><span class="e"><Ico name="flask"/></span><span class="t"><strong>評価が無い</strong> → 良くなったか分からない</span></div>
-<div class="icell"><span class="e"><Ico name="brick"/></span><span class="t"><strong>MCP 非対応</strong> → 後で乗り換え困難</span></div>
+<div class="risk-stacks">
+
+<section class="risk-stage risk-stage--design">
+  <h2 class="risk-stage__title"><span>設計前</span><small>複雑さを増やす前に</small></h2>
+  <ul>
+    <li><strong>道具を盛りすぎ</strong><span>どれを使うか迷う</span></li>
+    <li><strong>いきなりマルチ</strong><span>調整地獄・高コスト</span></li>
+    <li><strong>文脈を詰めすぎ</strong><span>精度もコストも悪化</span></li>
+  </ul>
+</section>
+
+<section class="risk-stage risk-stage--run">
+  <h2 class="risk-stage__title"><span>実行中</span><small>止める仕組みを先に</small></h2>
+  <ul>
+    <li><strong>終了条件なし</strong><span>無限ループ・暴走</span></li>
+    <li><strong>ガードレール無し</strong><span>危険操作を素通り</span></li>
+  </ul>
+</section>
+
+<section class="risk-stage risk-stage--operate">
+  <h2 class="risk-stage__title"><span>運用</span><small>観測して直し続ける</small></h2>
+  <ul>
+    <li><strong>ログ無し</strong><span>失敗の原因が追えない</span></li>
+    <li><strong>評価が無い</strong><span>良くなったか分からない</span></li>
+    <li><strong>MCP 非対応</strong><span>後で乗り換え困難</span></li>
+  </ul>
+</section>
 
 </div>
 
-<div class="tk muted">
-多くは <span class="grad" style="font-weight:700">「足場・ループの設計（＝今の主役）」</span> を軽視すると起きます。
-</div>
+<div class="tk muted risk-takeaway">チェックする順番も、<strong>設計 → 実行 → 運用</strong>。</div>
 
 <!--
 実際に作るときにハマりがちな失敗を、8つ並べたページです。道具を盛りすぎてどれを使うか迷う／いきなりマルチにして調整地獄・高コストになる／文脈を詰め込みすぎて精度もコストも悪化する／ログを残さず失敗の原因を追えない／終了条件を決めず無限ループ・暴走する／ガードレールがなく危険な操作を素通りさせる／評価がなく良くなったか分からない／MCPに非対応で後から乗り換えづらい。よく見ると、その多くは“足場・ループの設計”（この資料の主役）を軽視すると起きるものばかり。自分の状況に当てはめながら読むと、チェックリストとして役立ちます。
@@ -994,6 +1041,7 @@ foot: false
 ---
 layout: center
 class: section
+chapter: クロージング
 ---
 
 <div class="flex flex-col items-center text-center closing-in">
