@@ -53,7 +53,10 @@ jobs:
           test -f dist/reader-legacy/reader.js
           test -f dist/reader-pilot/index.html
           test -f dist/reader-pilot/coverage-report.json
-          node -e "const fs=require('node:fs'); const c=JSON.parse(fs.readFileSync('dist/reader-pilot/coverage-report.json')); if(c.version!==3||c.variant!=='full-height'||c.source!=='slides.md'||c.inventory!==165||c.assigned!==165||c.core!==139||c.coreVisible!==139||c.pages!==16||JSON.stringify(Object.values(c.sources).map(s=>s.pages))!==JSON.stringify([1,5,5,2,1,2])||Object.values(c.truncation).some(Boolean)) process.exit(1)"
+
+      # Pilotの件数・構成契約は専用QAへ集約し、workflowとの二重管理を避ける。
+      - name: Verify Reader pilot
+        run: npm run qa:reader-pilot -- --base /${{ github.event.repository.name }}/ --out dist
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
