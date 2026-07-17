@@ -36,3 +36,8 @@
 - `global-bottom.vue` … 用語リンク（`.gterm`）の委譲ハンドラ
 - `setup/main.ts` … GitHub Pages ベースパスのナビ修正（Pages 公開に必須）
 - `DESIGN.md` … デザイン規律・再利用手順（**最優先で参照**）
+
+## プロジェクト専用 Copilot カスタマイズ
+
+- `.github/agents/JoJoSlideAgent.agent.md` … 日本語既定で、Slidev／PDF／Reader を横断してスライドの作成・監査・再設計・実装・検証を行う。Copilot CLI の `/agent` から **JoJoSlideAgent** を選択する。
+- `.github/skills/hallmark/` … Hallmark 1.1.0 の anti-AI-slop 設計規律。JoJoSlideAgent は Web 固有の仕組みをそのまま持ち込まず、物語構造・構図・階層・タイポ・色・画像・コピー・自己批評をスライドへ翻訳して使う。
