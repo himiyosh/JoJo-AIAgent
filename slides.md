@@ -426,7 +426,7 @@ chapter: "02 · 作り方の全体像"
 
 <p class="section__context">作り方の進化 · 全体地図</p>
 
-# 作り方は「<span class="section__accent">外側</span>」へ進化した
+# 作り方は「<span class="section__accent">外側</span>」へ<br><span class="whitespace-nowrap">進化した</span>
 
 <p class="section__lead">Prompt → Context → Harness → Loop。地図と “入れ子” で全体像を。</p>
 

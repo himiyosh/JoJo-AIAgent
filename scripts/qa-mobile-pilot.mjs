@@ -122,6 +122,11 @@ async function inspectLayout(page) {
           .filter(element => getComputedStyle(element).display !== 'none')
       : [...(frame.contentDocument?.querySelectorAll('[class*="control"]') ?? [])]
           .filter(element => getComputedStyle(element).display !== 'none')
+    const documentStyle = getComputedStyle(document.documentElement)
+    const readerTitle = direct?.querySelector('[data-direct-reader-title]')
+    const readerTitleStyle = readerTitle ? getComputedStyle(readerTitle) : null
+    const readerTitleRect = readerTitle?.getBoundingClientRect()
+    const readerTitleLineHeight = readerTitleStyle ? Number.parseFloat(readerTitleStyle.lineHeight) : 0
     return {
       viewport: { width: innerWidth, height: innerHeight },
       documentOverflow: {
@@ -143,6 +148,21 @@ async function inspectLayout(page) {
       nestedFrames: document.querySelectorAll('iframe').length,
       directRoots: document.querySelectorAll('.direct-reader[data-direct-reader]').length,
       slidevControls: slidevControls.length,
+      readerChrome: direct
+        ? {
+            top: Number.parseFloat(documentStyle.getPropertyValue('--direct-reader-top')),
+            bottom: Number.parseFloat(documentStyle.getPropertyValue('--direct-reader-bottom')),
+            title: {
+              text: readerTitle?.textContent?.trim() ?? '',
+              lines: readerTitleRect && readerTitleLineHeight
+                ? Math.round(readerTitleRect.height / readerTitleLineHeight)
+                : 0,
+              overflowX: readerTitle ? Math.max(0, readerTitle.scrollWidth - readerTitle.clientWidth) : 0,
+              overflowY: readerTitle ? Math.max(0, readerTitle.scrollHeight - readerTitle.clientHeight) : 0,
+              whiteSpace: readerTitleStyle?.whiteSpace ?? '',
+            },
+          }
+        : null,
       state: window.__mobileViewer.getState(),
     }
   })
@@ -160,7 +180,11 @@ function assertLayout(layout, label) {
     assert.equal(layout.nestedFrames, 0, `${label} nested the canonical deck inside an iframe.`)
     assert.equal(layout.directRoots, 1, `${label} did not render exactly one direct Reader overlay.`)
     if (layout.viewport.height > layout.viewport.width) {
-      const availableHeight = layout.viewport.height - 110 - 72
+      assert(layout.readerChrome.title.lines >= 1 && layout.readerChrome.title.lines <= 2, `${label} current title is not fully readable within two lines.`)
+      assert.equal(layout.readerChrome.title.overflowX, 0, `${label} current title overflows horizontally.`)
+      assert.equal(layout.readerChrome.title.overflowY, 0, `${label} current title is vertically clipped.`)
+      assert.notEqual(layout.readerChrome.title.whiteSpace, 'nowrap', `${label} current title is forced into a truncated single line.`)
+      const availableHeight = layout.viewport.height - layout.readerChrome.top - layout.readerChrome.bottom
       const expectedFitHeight = Math.min(layout.viewport.width * 552 / 980, availableHeight)
       assert(Math.abs(layout.stage.height - expectedFitHeight) <= 2, `${label} did not hug the fitted 16:9 slide.`)
     }
