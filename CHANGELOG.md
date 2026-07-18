@@ -17,6 +17,7 @@
 
 ### Changed
 
+- MCP、単一／マルチエージェント、4つの構成パターンに、主体・境界・処理方向を比較できる図解を追加
 - スマホReaderをiframe方式から通常Slidevへの直接統合へ変更し、閲覧面が入れ子に見える構造を解消
 - GitHub Pagesのbase path、deep reload、hash/history navigationへの対応を強化
 

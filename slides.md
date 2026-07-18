@@ -373,9 +373,9 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 
 <div class="eyebrow">MODEL CONTEXT PROTOCOL · 道具をつなぐ</div>
 
-<div class="note mt-4"><BrandMark name="mcp" class="note__bm"/> <a class="gterm" data-term="mcp"><strong>MCP</strong></a> は、エージェントと<span class="whitespace-nowrap">ツール／データ</span>を繋ぐ<strong><span class="grad whitespace-nowrap">共通の規格</span></strong>。<strong>USB-C のように「挿せばつながる」</strong>。</div>
+<div class="note mt-2"><BrandMark name="mcp" class="note__bm"/> <a class="gterm" data-term="mcp"><strong>MCP</strong></a> は、アプリ内の <strong>Client</strong> と <strong>Server</strong> を繋ぐ<strong><span class="grad whitespace-nowrap">共通の作法</span></strong>。<span class="whitespace-nowrap">API を置き換えず、<strong>AIアプリとの接続境界を標準化</strong></span>。<span class="muted whitespace-nowrap">USB-C のように「挿せばつながる」。</span></div>
 
-<div class="mcp-vis mt-4">
+<div class="mcp-vis mt-1">
 
 <div class="mcp-vis__art"><McpPlug /></div>
 
@@ -386,7 +386,7 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 <div class="card__ba">BEFORE</div>
 
 ### <Ico name="puzzle"/> これまで
-道具ごと・枠組みごとに<strong>専用の“配線”</strong>を自作していた。
+道具ごと・枠組みごとに<strong>専用の“配線”</strong>を自作。
 
 </div>
 
@@ -395,7 +395,7 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 <div class="card__ba">AFTER</div>
 
 ### <Ico name="plug"/> MCP のあと
-同じ道具を<strong>どの枠組みでも</strong>再利用。公開サーバを<strong>挿して組み合わせる</strong>だけ。
+同じサーバを<strong>どの枠組みでも</strong>再利用。<strong>挿すだけ</strong>。
 
 </div>
 
@@ -403,15 +403,17 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 
 </div>
 
-<div class="tk concl">“配線を書く” 時代から、<span class="grad" style="font-weight:700">“組み合わせる”</span> 時代へ。2026 の事実上の標準に。</div>
+<div class="tk concl">“配線を書く” 時代から、<span class="grad" style="font-weight:700">“標準で挿す”</span> 時代へ。2026 の事実上の標準に。</div>
 
 <Cite :items="[
-  { label: 'modelcontextprotocol.io — Introduction', url: 'https://modelcontextprotocol.io/' },
+  { label: 'MCP 公式 — Architecture', url: 'https://modelcontextprotocol.io/docs/learn/architecture' },
   { label: 'Anthropic — Introducing MCP', url: 'https://www.anthropic.com/news/model-context-protocol' },
+  { label: 'Google Cloud Tech — How MCP actually works', url: 'https://www.youtube.com/watch?v=cGuyrANVi4A' },
+  { label: 'Google Cloud Tech — MCP vs API', url: 'https://www.youtube.com/watch?v=185XGEMefgc' },
 ]" />
 
 <!--
-前ページで出た「道具のつなぎ方の標準化」を、くわしく説明するページです。MCP（Model Context Protocol）は、エージェントとツール／データをつなぐための共通規格。イメージはUSB-Cで、“挿せばつながる”ように道具を接続できます。これまでは、道具ごと・使うフレームワークごとに、専用の“配線”を毎回自作する必要がありました。MCP以降は、同じ道具をどの枠組みからでも再利用でき、公開されているMCPサーバを挿して組み合わせるだけで使えます。つまり“配線を書く”時代から、“組み合わせる”時代へ。2026年には、これが事実上の標準になりつつあります。
+前ページで出た「道具のつなぎ方の標準化」を、くわしく説明するページです。MCP（Model Context Protocol）は、AIアプリ（MCP Host）の中の「MCP Client」と、外側の「MCP Server」をつなぐための共通の作法（プロトコル）です。図の流れは、①Host内のClientが「この道具を使いたい」と要求を出す→②Serverが受け取る→③Serverがツール（Tools）やデータ（Resources）を実際に実行・取得する→④結果をClientへ返す、の一巡。ここで大事なのは、実際にツールを動かすのはServer側であって、LLM自身が直接実行するわけではない、という点です（LLMは「使いたい」と宣言するだけ）。図は分かりやすさのため Client 1つ : Server 1つ の最小例にしていますが、実際のHostは「つなぐServerごとに1つのClientを作る」ので、複数のMCPサーバを同時に挿すこともできます。Serverが公開する部品（primitives）は Tools（実行できる道具）／Resources（読めるデータ）／Prompts（定型の指示）で、通信路は同じPC内なら stdio、離れた先なら Streamable HTTP が使われます。よくある誤解は「MCPがAPIを置き換える」というもの。そうではなく、MCP Serverが既存APIやローカル機能を利用しつつ、AIアプリとの接続境界を共通化します。イメージはUSB-Cで、“挿せばつながる”。こうして「配線を毎回書く」時代から、「標準で挿す」時代へ——2026年には、これが事実上の標準になりつつあります。
 -->
 
 ---
@@ -630,7 +632,7 @@ chapter: "04 · 一体で作る? 分ける?"
 
 # 単一 vs マルチエージェント
 
-<SingleVsMulti class="mt-4" />
+<SingleVsMulti class="mt-1" />
 
 <div class="tk muted">「オーケストレーション」＝ 指揮役が複数のサブエージェントをまとめる構成。</div>
 
@@ -698,22 +700,22 @@ chapter: "04 · 一体で作る? 分ける?"
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="split"/></span><span class="ptn__name">ルーティング<span class="ptn__en">Routing</span></span></div>
-<div class="ptn__d">入力を見て<strong>得意な担当へ振り分け</strong>。<span class="ptn__ex">例: 問い合わせを種類で仕分け</span></div>
+<div class="ptn__foot"><div class="ptn__d">入力を見て<strong>得意な担当へ振り分け</strong>。<span class="ptn__ex">例: 問い合わせを種類で仕分け</span></div><PatternGlyph type="routing" /></div>
 </div>
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="compass"/></span><span class="ptn__name">オーケストレーター–ワーカー<span class="ptn__en">Orchestrator–Workers</span></span></div>
-<div class="ptn__d">親が<strong>計画して割り振り→集約</strong>。<span class="ptn__ex">例: 調査・執筆・校正を分担</span></div>
+<div class="ptn__foot"><div class="ptn__d">親が<strong>計画して割り振り→集約</strong>。<span class="ptn__ex">例: 調査・執筆・校正を分担</span></div><PatternGlyph type="orchestrator" /></div>
 </div>
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="swap"/></span><span class="ptn__name">ハンドオフ<span class="ptn__en">Handoff</span></span></div>
-<div class="ptn__d">担当を<strong>順に引き継ぐ</strong>。<span class="ptn__ex">例: 一次受付 → 専門担当へ</span></div>
+<div class="ptn__foot"><div class="ptn__d">担当を<strong>順に引き継ぐ</strong>。<span class="ptn__ex">例: 一次受付 → 専門担当へ</span></div><PatternGlyph type="handoff" /></div>
 </div>
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="loop"/></span><span class="ptn__name">評価–改善ループ<span class="ptn__en">Evaluator–Optimizer</span></span></div>
-<div class="ptn__d"><strong>作る役と直す役</strong>で品質を上げる。<span class="ptn__ex">例: 生成 → 批評 → 修正</span></div>
+<div class="ptn__foot"><div class="ptn__d"><strong>作る役と直す役</strong>で品質を上げる。<span class="ptn__ex">例: 生成 → 批評 → 修正</span></div><PatternGlyph type="evaluator" /></div>
 </div>
 
 </div>

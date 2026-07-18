@@ -163,6 +163,8 @@ html { color-scheme: dark; }
 .ptn__d { font-size: .85rem; line-height: 1.5; color: var(--ink-soft); }
 .ptn__d strong { color: #eef1f8; font-weight: 700; }
 .ptn__ex { display: block; margin-top: .18rem; font-size: .75rem; color: var(--muted); }
+.ptn__foot { display: flex; align-items: center; gap: .8rem; }
+.ptn__foot .ptn__d { flex: 1 1 auto; min-width: 0; }
 
 /* ---- Cards / grids ---- */
 .card {
@@ -285,13 +287,33 @@ html { color-scheme: dark; }
 .llm-vs__bot { flex: none; width: 23%; aspect-ratio: 1 / 1; align-self: center; }
 .llm-vs__bot .bot { width: 100%; height: 100%; }
 
-/* ---- MCP：USB-C プラグ図左・before/after カードを縦積みで右に（p11）---- */
-.mcp-vis { display: flex; align-items: center; gap: 1.5rem; }
-.mcp-vis__art { flex: none; width: 22%; aspect-ratio: 280 / 232; align-self: center; }
+/* ---- MCP：アクター＋境界＋フロー図を上に全幅・before/after を下に2カラム（p11）---- */
+.mcp-vis { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
+.mcp-vis__art { flex: none; width: 100%; max-width: 560px; aspect-ratio: 740 / 250; }
 .mcp-vis__art .plug { width: 100%; height: 100%; }
-.mcp-cards { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: .7rem; }
-.mcp-cards .card { padding: .68rem 1.05rem; }
-.mcp-cards .card h3 { margin-bottom: .25rem; }
+.mcp-cards { flex: 0 0 auto; width: 100%; display: flex; flex-direction: row; gap: .9rem; }
+.mcp-cards .card { flex: 1 1 0; min-width: 0; padding: .6rem 1rem; }
+.mcp-cards .card h3 { margin-bottom: .2rem; }
+
+/* ---- Single vs Multi topology header (slide 20, above the RevealTabs) ---- */
+.sm-wrap { display: flex; flex-direction: column; }
+.sm-topo {
+  display: flex; align-items: stretch; justify-content: center; gap: 1.2rem;
+  margin: 0 0 .2rem; padding: 0 .4rem;
+}
+.sm-topo__side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: .05rem; }
+.sm-topo__cap {
+  display: inline-flex; align-items: baseline; gap: .4rem;
+  font-size: .72rem; color: var(--ink-soft);
+}
+.sm-topo__cap b { color: #eef1f8; font-weight: 800; }
+.sm-topo__cap span { font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.sm-topo__svg { width: 100%; max-width: 232px; height: auto; display: block; }
+.sm-topo__vs {
+  flex: none; align-self: center;
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 800;
+  letter-spacing: .06em; color: var(--muted);
+}
 
 /* ---- Cover ---- */
 .cover { display: flex; flex-direction: column; height: 100%; position: relative; }
