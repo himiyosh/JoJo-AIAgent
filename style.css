@@ -287,13 +287,45 @@ html { color-scheme: dark; }
 .llm-vs__bot { flex: none; width: 23%; aspect-ratio: 1 / 1; align-self: center; }
 .llm-vs__bot .bot { width: 100%; height: 100%; }
 
-/* ---- MCP：アクター＋境界＋フロー図を上に全幅・before/after を下に2カラム（p11）---- */
+/* ---- MCP：アクター＋境界＋フロー図と REST API 役割比較（p11）---- */
 .mcp-vis { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
 .mcp-vis__art { flex: none; width: 100%; max-width: 560px; aspect-ratio: 740 / 250; }
 .mcp-vis__art .plug { width: 100%; height: 100%; }
 .mcp-cards { flex: 0 0 auto; width: 100%; display: flex; flex-direction: row; gap: .9rem; }
-.mcp-cards .card { flex: 1 1 0; min-width: 0; padding: .6rem 1rem; }
-.mcp-cards .card h3 { margin-bottom: .2rem; }
+.mcp-cards .card { flex: 1 1 0; min-width: 0; padding: .48rem .72rem; }
+.mcp-cards .card h3 { margin: 0 0 .22rem; font-size: .88rem; line-height: 1.2; }
+.mcp-compare { display: flex; flex-direction: column; gap: .18rem; }
+.mcp-compare__flow {
+  display: flex; align-items: center; justify-content: center; gap: .28rem;
+  min-width: 0; min-height: 2.25rem;
+}
+.mcp-compare__node {
+  min-width: 0; padding: .3rem .42rem; border: 1px solid var(--line);
+  border-radius: .48rem; background: rgba(255, 255, 255, .025);
+  color: #eef1f8; font-family: 'JetBrains Mono', monospace;
+  font-size: .57rem; font-weight: 800; line-height: 1.25; text-align: center;
+  white-space: nowrap;
+}
+.mcp-compare--rest .mcp-compare__node:last-child {
+  border-color: color-mix(in srgb, var(--brand-a) 42%, var(--line));
+}
+.mcp-compare--mcp .mcp-compare__node:nth-of-type(2) {
+  border-color: color-mix(in srgb, var(--brand-b) 48%, var(--line));
+  background: color-mix(in srgb, var(--brand-b) 8%, transparent);
+}
+.mcp-compare__arrow {
+  flex: none; display: flex; flex-direction: column; align-items: center;
+  color: var(--brand-a); font-size: .92rem; font-weight: 900; line-height: 1;
+}
+.mcp-compare--mcp .mcp-compare__arrow:first-of-type { color: var(--brand-b); }
+.mcp-compare__arrow small {
+  margin-top: .12rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+  font-size: .47rem; font-weight: 700; line-height: 1;
+}
+.mcp-compare p {
+  margin: .05rem 0 0; color: var(--ink-soft); font-size: .7rem;
+  line-height: 1.35; text-align: center; text-wrap: balance;
+}
 
 /* ---- Single vs Multi topology header (slide 20, above the RevealTabs) ---- */
 .sm-wrap { display: flex; flex-direction: column; }
@@ -355,12 +387,12 @@ html { color-scheme: dark; }
 
 /* ---- Section divider ---- */
 .slidev-layout.section {
-  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
-  text-align: left; position: relative; overflow: clip;
-  padding-left: 14%; padding-right: 4.5rem;
-  /* Off-center light keeps the reading column dominant while the numeral recedes. */
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; position: relative; overflow: clip;
+  padding-left: 4.5rem; padding-right: 4.5rem;
+  /* The foreground shares one central axis; the numeral remains a quiet edge layer. */
   background:
-    radial-gradient(700px 440px at 31% 48%, color-mix(in srgb, var(--brand-a) 13%, transparent), transparent 72%),
+    radial-gradient(700px 440px at 50% 48%, color-mix(in srgb, var(--brand-a) 13%, transparent), transparent 72%),
     radial-gradient(1080px 560px at 4% -16%, color-mix(in srgb, var(--brand-a) 22%, transparent), transparent 56%),
     radial-gradient(1040px 620px at 116% 122%, color-mix(in srgb, var(--brand-b) 21%, transparent), transparent 55%),
     radial-gradient(145% 135% at 50% 32%, transparent 44%, color-mix(in srgb, #000 58%, transparent) 100%),
@@ -368,7 +400,9 @@ html { color-scheme: dark; }
 }
 /* Slidev wraps Markdown in a centered relative container. Keep chapter decorations
    anchored to the full slide instead, so the right numeral never enters the title column. */
-.slidev-layout.section > :has(.section__chno) { position: static; }
+.slidev-layout.section > :has(.section__chno) {
+  position: static; display: flex; flex-direction: column; align-items: center; width: 100%;
+}
 .section__context,
 .slidev-layout.section h1,
 .section__lead,
@@ -376,22 +410,25 @@ html { color-scheme: dark; }
   position: relative; z-index: 1;
 }
 .section__context {
+  width: 100%; max-width: 46rem; text-align: center;
   margin: 0 0 .8rem; color: color-mix(in srgb, var(--ink-soft) 74%, transparent);
   font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700;
   letter-spacing: .04em;
 }
-.section__title {
-  max-width: 12em; margin: 0; font-size: 3.2rem; font-weight: 900;
+.section__title,
+.slidev-layout.section h1 {
+  width: 100%; max-width: 15em; margin: 0; text-align: center;
+  font-size: 3.2rem; font-weight: 900;
   line-height: 1.12; letter-spacing: -.005em; text-wrap: balance;
 }
 .section__accent { color: var(--brand-a); }
 .section__lead {
-  margin: .9rem 0 0; max-width: 39em; color: var(--ink-soft);
+  width: 100%; margin: .9rem 0 0; max-width: 44em; text-align: center; color: var(--ink-soft);
   font-size: 1.12rem; text-wrap: balance; word-break: auto-phrase;
 }
 .section__mark {
-  position: absolute; left: 4.7rem; top: 50%; width: 2.7rem; height: 2.7rem;
-  transform: translateY(-50%) rotate(45deg);
+  position: relative; left: auto; top: auto; width: 2.7rem; height: 2.7rem;
+  flex: none; margin: 0 0 1.15rem; transform: rotate(45deg);
   border: 1px solid color-mix(in srgb, var(--brand-a) 55%, transparent);
   border-radius: .45rem; z-index: 1;
 }
@@ -401,8 +438,8 @@ html { color-scheme: dark; }
   box-shadow: 0 0 18px color-mix(in srgb, var(--brand-a) 45%, transparent);
 }
 .section__route {
-  display: flex; align-items: center; flex-wrap: wrap; gap: .5rem;
-  margin-top: 1.45rem;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem;
+  width: 100%; margin-top: 1.45rem;
 }
 .section__route span {
   padding: .42rem .62rem; border: 1px solid var(--line); border-radius: .45rem;
@@ -713,6 +750,10 @@ html { color-scheme: dark; }
    Long tab content still paginates — the panel can shrink, just not pad itself out.
    (section dividers & cover keep their own centering) */
 .slidev-layout:not(.section) { display: flex; flex-direction: column; justify-content: center; }
+/* Dynamic reveal content must never recenter the whole slide in engines whose
+   hidden-panel measurements settle a frame later. Pin the outer composition to
+   the slide's normal top padding; only the panel interior is allowed to change. */
+.slidev-layout:not(.section):has(> .rt) { justify-content: flex-start; }
 /* never let flex squash content — overflow-clip behaves like the old block flow */
 .slidev-layout:not(.section) > * { flex-shrink: 0; }
 /* interactive reveal slides: panel hugs its content (shrinks for pagination, never grows to pad) */

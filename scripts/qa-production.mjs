@@ -116,10 +116,26 @@ async function visibleOverflow(locator) {
 async function framePositions(group) {
   return group.evaluate((root) => {
     const selectors = ['.rt__tabs', '.rt__stage', '.rt__bar']
-    return Object.fromEntries(selectors.map(selector => [
-      selector,
-      Math.round((root.querySelector(selector)?.getBoundingClientRect().top ?? 0) * 10) / 10,
-    ]))
+    return Object.fromEntries(selectors.flatMap((selector) => {
+      const rect = root.querySelector(selector)?.getBoundingClientRect()
+      return [
+        [`${selector}:top`, Math.round((rect?.top ?? 0) * 10) / 10],
+        [`${selector}:height`, Math.round((rect?.height ?? 0) * 10) / 10],
+      ]
+    }))
+  })
+}
+
+async function slidePositions(slide) {
+  return slide.evaluate((root) => {
+    const selectors = ['h1', '.eyebrow', '.rt', '.tk']
+    return Object.fromEntries(selectors.flatMap((selector) => {
+      const rect = root.querySelector(selector)?.getBoundingClientRect()
+      return [
+        [`${selector}:top`, Math.round((rect?.top ?? 0) * 10) / 10],
+        [`${selector}:height`, Math.round((rect?.height ?? 0) * 10) / 10],
+      ]
+    }))
   })
 }
 
@@ -186,6 +202,17 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
       },
       foregroundZ: [...root.querySelectorAll('.section__context, h1, .section__lead, .section__route')]
         .map(element => getComputedStyle(element).zIndex),
+      foregroundAlign: [...root.querySelectorAll('.section__context, h1, .section__lead, .section__route')]
+        .map(element => getComputedStyle(element).textAlign),
+      routeJustify: getComputedStyle(root.querySelector('.section__route')).justifyContent,
+      compositionCenterDelta: (() => {
+        const rects = [...root.querySelectorAll('.section__context, h1, .section__lead, .section__route')]
+          .map(element => element.getBoundingClientRect())
+        const left = Math.min(...rects.map(rect => rect.left))
+        const right = Math.max(...rects.map(rect => rect.right))
+        return Math.abs((left + right - bounds.left - bounds.right) / 2)
+      })(),
+      markCenterDelta: mark ? Math.abs((mark.left + mark.right - bounds.left - bounds.right) / 2) : Infinity,
       rightRatio: (bounds.right - numeral.right) / bounds.width,
       bottomGap: bounds.bottom - numeral.bottom,
       titleOverlap: titleRects.some(rect => overlaps(numeral, rect)),
@@ -203,6 +230,9 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
     && metrics.wrapper.userSelect === 'none'
     && metrics.wrapper.zIndex === '0', `Slide ${slideNumber}: chapter numeral wrapper differs from the approved full-slide layer.`)
   assert(metrics.foregroundZ.every(zIndex => zIndex === '1'), `Slide ${slideNumber}: foreground is not explicitly above the numeral.`)
+  assert(metrics.foregroundAlign.every(alignment => alignment === 'center')
+    && metrics.routeJustify === 'center', `Slide ${slideNumber}: chapter composition is not centered.`)
+  assert(metrics.compositionCenterDelta <= 1 && metrics.markCenterDelta <= 1, `Slide ${slideNumber}: chapter axis is off-center by ${metrics.compositionCenterDelta}px (mark ${metrics.markCenterDelta}px).`)
   assert(Math.abs(metrics.rightRatio - 0.025) <= 0.002 && Math.abs(metrics.bottomGap) <= 1, `Slide ${slideNumber}: chapter numeral is not anchored at right 2.5% / bottom 0.`)
   assert(!metrics.titleOverlap && !metrics.markOverlap, `Slide ${slideNumber}: chapter numeral overlaps foreground content.`)
 }
@@ -253,17 +283,55 @@ async function testTabs(page, baseUrl, slideNumber) {
     assert(page.url() === slideUrl, `Slide ${slideNumber}: tab keyboard input advanced the deck.`)
 
     const baseline = await framePositions(group)
+    const slideBaseline = await slidePositions(slide)
     for (let tabIndex = 0; tabIndex < count; tabIndex += 1) {
       await tabs.nth(tabIndex).click()
-      await page.waitForTimeout(300)
+      for (const delay of [0, 30, 30, 60, 120]) {
+        await page.waitForTimeout(delay)
+        const frameDelta = maxPositionDelta(baseline, await framePositions(group))
+        const slideDelta = maxPositionDelta(slideBaseline, await slidePositions(slide))
+        assert(frameDelta <= 1, `Slide ${slideNumber}: tab ${tabIndex + 1} shifted the frame by ${frameDelta}px during transition.`)
+        assert(slideDelta <= 1, `Slide ${slideNumber}: tab ${tabIndex + 1} shifted the outer slide by ${slideDelta}px during transition.`)
+      }
       const selected = group.locator('[role="tab"][aria-selected="true"]')
       assert(await selected.count() === 1, `Slide ${slideNumber}: expected exactly one selected tab.`)
       assert(await selected.getAttribute('tabindex') === '0', `Slide ${slideNumber}: selected tab is not in the tab order.`)
       assert(await panel.getAttribute('aria-labelledby') === await selected.getAttribute('id'), `Slide ${slideNumber}: panel label is disconnected.`)
-      const delta = maxPositionDelta(baseline, await framePositions(group))
-      assert(delta <= 1, `Slide ${slideNumber}: tab ${tabIndex + 1} shifted the frame by ${delta}px.`)
     }
   }
+}
+
+async function testMcpDiagram(slide) {
+  const result = await slide.locator('.mcp-vis__art svg').evaluate((svg) => {
+    const nodes = new Map([...svg.querySelectorAll('[data-node]')]
+      .map(element => [element.getAttribute('data-node'), element.getBBox()]))
+    return [...svg.querySelectorAll('[data-fit]')].map((element) => {
+      const bounds = nodes.get(element.getAttribute('data-fit'))
+      const rect = element.getBBox()
+      return {
+        text: element.textContent.trim(),
+        overflow: bounds
+          ? Math.max(0, bounds.x - rect.x, rect.x + rect.width - bounds.x - bounds.width,
+              bounds.y - rect.y, rect.y + rect.height - bounds.y - bounds.height)
+          : Infinity,
+      }
+    })
+  })
+  assert(result.length >= 12 && result.every(item => item.overflow <= 1), `Slide 11: MCP labels overflow their nodes: ${JSON.stringify(result.filter(item => item.overflow > 1))}`)
+
+  const comparison = await slide.locator('.mcp-cards').evaluate((root) => ({
+    label: root.getAttribute('aria-label'),
+    cards: root.querySelectorAll('.mcp-compare').length,
+    text: root.textContent.replace(/\s+/g, ' ').trim(),
+    nodeOverflow: [...root.querySelectorAll('.mcp-compare__node')]
+      .map(element => Math.max(element.scrollWidth - element.clientWidth, element.scrollHeight - element.clientHeight)),
+  }))
+  assert(comparison.label === 'REST APIとMCPの役割比較'
+    && comparison.cards === 2
+    && comparison.text.includes('REST API')
+    && comparison.text.includes('MCP Server')
+    && comparison.text.includes('役割は競合しない'), 'Slide 11: REST API / MCP comparison is incomplete.')
+  assert(comparison.nodeOverflow.every(overflow => overflow <= 1), `Slide 11: comparison node text overflows by ${JSON.stringify(comparison.nodeOverflow)}.`)
 }
 
 async function testReaderDeepLink(browser, server, target) {
@@ -1005,6 +1073,8 @@ try {
     }
     if (CHAPTER_NUMBERS.has(number))
       await testChapterDivider(slide, number, CHAPTER_NUMBERS.get(number))
+    if (number === 11)
+      await testMcpDiagram(slide)
 
     const citations = slide.locator('.cite > summary')
     citeCount += await citations.count()

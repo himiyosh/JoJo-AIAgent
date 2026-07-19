@@ -373,29 +373,41 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 
 <div class="eyebrow">MODEL CONTEXT PROTOCOL · 道具をつなぐ</div>
 
-<div class="note mt-2"><BrandMark name="mcp" class="note__bm"/> <a class="gterm" data-term="mcp"><strong>MCP</strong></a> は、アプリ内の <strong>Client</strong> と <strong>Server</strong> を繋ぐ<strong><span class="grad whitespace-nowrap">共通の作法</span></strong>。<span class="whitespace-nowrap">API を置き換えず、<strong>AIアプリとの接続境界を標準化</strong></span>。<span class="muted whitespace-nowrap">USB-C のように「挿せばつながる」。</span></div>
+<div class="note mt-2"><BrandMark name="mcp" class="note__bm"/> <a class="gterm" data-term="mcp"><strong>MCP</strong></a> は、AIアプリ内の <strong>Client</strong> と <strong>Server</strong> を繋ぐ<strong><span class="grad">共通プロトコル</span></strong>。REST APIを置き換えず、Serverの内側で既存APIやローカル機能を利用できます。</div>
 
 <div class="mcp-vis mt-1">
 
 <div class="mcp-vis__art"><McpPlug /></div>
 
-<div class="mcp-cards">
+<div class="mcp-cards" aria-label="REST APIとMCPの役割比較">
 
-<div class="card">
+<div class="card mcp-compare mcp-compare--rest">
 
-<div class="card__ba">BEFORE</div>
+<div class="card__ba">REST API · DIRECT</div>
 
-### <Ico name="puzzle"/> これまで
-道具ごと・枠組みごとに<strong>専用の“配線”</strong>を自作。
+<h3>サービスごとに直接つなぐ</h3>
+<div class="mcp-compare__flow" aria-hidden="true">
+  <span class="mcp-compare__node">AIアプリ</span>
+  <span class="mcp-compare__arrow">→<small>HTTP</small></span>
+  <span class="mcp-compare__node">サービス固有<br>REST endpoint</span>
+</div>
+<p>URL・認証・仕様はサービスごとに実装。</p>
 
 </div>
 
-<div class="card accent">
+<div class="card accent mcp-compare mcp-compare--mcp">
 
-<div class="card__ba">AFTER</div>
+<div class="card__ba">MCP · COMMON BOUNDARY</div>
 
-### <Ico name="plug"/> MCP のあと
-同じサーバを<strong>どの枠組みでも</strong>再利用。<strong>挿すだけ</strong>。
+<h3>AIとの接続を共通化</h3>
+<div class="mcp-compare__flow" aria-hidden="true">
+  <span class="mcp-compare__node">Host / Client</span>
+  <span class="mcp-compare__arrow">⇄<small>MCP</small></span>
+  <span class="mcp-compare__node">MCP Server</span>
+  <span class="mcp-compare__arrow">→<small>内部</small></span>
+  <span class="mcp-compare__node">REST API<br>ローカル機能</span>
+</div>
+<p>Server内でRESTも使える。役割は競合しない。</p>
 
 </div>
 
@@ -403,7 +415,7 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 
 </div>
 
-<div class="tk concl">“配線を書く” 時代から、<span class="grad" style="font-weight:700">“標準で挿す”</span> 時代へ。2026 の事実上の標準に。</div>
+<div class="tk concl">RESTは<strong>サービスとの通信</strong>、MCPは<strong>AIとの接続ルール</strong>。<span class="grad" style="font-weight:700">置き換えではなく併用</span>できます。</div>
 
 <Cite :items="[
   { label: 'MCP 公式 — Architecture', url: 'https://modelcontextprotocol.io/docs/learn/architecture' },
@@ -413,7 +425,7 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 ]" />
 
 <!--
-前ページで出た「道具のつなぎ方の標準化」を、くわしく説明するページです。MCP（Model Context Protocol）は、AIアプリ（MCP Host）の中の「MCP Client」と、外側の「MCP Server」をつなぐための共通の作法（プロトコル）です。図の流れは、①Host内のClientが「この道具を使いたい」と要求を出す→②Serverが受け取る→③Serverがツール（Tools）やデータ（Resources）を実際に実行・取得する→④結果をClientへ返す、の一巡。ここで大事なのは、実際にツールを動かすのはServer側であって、LLM自身が直接実行するわけではない、という点です（LLMは「使いたい」と宣言するだけ）。図は分かりやすさのため Client 1つ : Server 1つ の最小例にしていますが、実際のHostは「つなぐServerごとに1つのClientを作る」ので、複数のMCPサーバを同時に挿すこともできます。Serverが公開する部品（primitives）は Tools（実行できる道具）／Resources（読めるデータ）／Prompts（定型の指示）で、通信路は同じPC内なら stdio、離れた先なら Streamable HTTP が使われます。よくある誤解は「MCPがAPIを置き換える」というもの。そうではなく、MCP Serverが既存APIやローカル機能を利用しつつ、AIアプリとの接続境界を共通化します。イメージはUSB-Cで、“挿せばつながる”。こうして「配線を毎回書く」時代から、「標準で挿す」時代へ——2026年には、これが事実上の標準になりつつあります。
+前ページで出た「道具のつなぎ方の標準化」を、くわしく説明するページです。MCP（Model Context Protocol）は、AIアプリ（MCP Host）の中の「MCP Client」と、外側の「MCP Server」をつなぐための共通の作法（プロトコル）です。図の流れは、①Host内のClientが「この道具を使いたい」と要求を出す→②Serverが受け取る→③Serverがツール（Tools）やデータ（Resources）を実際に実行・取得する→④結果をClientへ返す、の一巡。ここで大事なのは、実際にツールを動かすのはServer側であって、LLM自身が直接実行するわけではない、という点です（LLMは「使いたい」と宣言するだけ）。下段はREST APIとの役割の違いです。RESTではAIアプリ側がサービス固有のURL・認証・仕様へ直接つなぎます。MCPはAIアプリとServerの間の発見・呼び出し方を共通化し、Serverの内側では既存のREST APIやローカル機能をそのまま利用できます。つまり同じ層の置き換えではなく、組み合わせて使える関係です。図は分かりやすさのため Client 1つ : Server 1つ の最小例にしていますが、実際のHostは「つなぐServerごとに1つのClientを作る」ので、複数のMCPサーバを同時に挿すこともできます。
 -->
 
 ---
