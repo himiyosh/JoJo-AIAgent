@@ -308,10 +308,20 @@ async function verifyInteraction(page, baseUrl) {
       assert.equal((await fullscreen.textContent()).trim(), '全画面', 'Fullscreen control used an ambiguous icon-only label.')
       await fullscreen.click()
       await page.waitForFunction(() => Boolean(document.fullscreenElement))
+      await page.waitForFunction(() => {
+        const control = document.querySelector('[data-direct-reader-fullscreen]')
+        return control?.getAttribute('aria-pressed') === 'true'
+          && control.textContent?.trim() === '終了'
+      })
       assert.equal(await fullscreen.getAttribute('aria-pressed'), 'true', 'Fullscreen control did not expose its active state.')
       assert.equal((await fullscreen.textContent()).trim(), '終了', 'Fullscreen control did not expose its exit action.')
       await fullscreen.click()
       await page.waitForFunction(() => !document.fullscreenElement)
+      await page.waitForFunction(() => {
+        const control = document.querySelector('[data-direct-reader-fullscreen]')
+        return control?.getAttribute('aria-pressed') === 'false'
+          && control.textContent?.trim() === '全画面'
+      })
       assert.equal(await fullscreen.getAttribute('aria-pressed'), 'false', 'Fullscreen control did not clear its active state.')
     }
   }

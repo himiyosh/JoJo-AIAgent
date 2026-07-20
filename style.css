@@ -20,6 +20,7 @@
   --accent-warm: #fbbf24;
   --accent-warm-ink: #fcd34d;
   --accent-warn: #fb7185;
+  --accent-success: #22c55e;
   /* Premium panel material — shared by .card / .row / .pillar / .ptn.
      Top-lit gradient (light source from above, matching the bg glow axis) +
      inner top highlight + soft elevation shadow. Lifts every card-based slide

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useId } from 'vue'
+import McpPlug from './McpPlug.vue'
 
 type ComparisonMode = {
   key: string
@@ -27,12 +28,12 @@ const modes: ComparisonMode[] = [
     ruleLabel: '通信の相手',
     ruleValue: 'サービス',
     points: [
-      '通信の相手：サービス',
-      'URL・認証・データ形式はサービスごとに実装',
+      '① HTTPで要求を送り、② endpointが認証・振り分け',
+      '③ サービスが処理し、④ JSONなどで結果を返す',
     ],
     card: {
       title: 'REST APIがそろえるもの',
-      body: 'サービスへ要求を送り、結果を受け取る通信方法。',
+      body: 'サービスへ要求を送り、処理結果を受け取る通信方法。',
       note: '例：天気API、社内システムAPI',
     },
   },
@@ -45,8 +46,8 @@ const modes: ComparisonMode[] = [
     ruleLabel: '共通化するもの',
     ruleValue: 'AIと道具の接続',
     points: [
-      '接続の相手：MCP Server',
-      'Serverの内側でREST APIやローカル機能を利用',
+      '① Clientが要求し、② Serverが受理、③ 道具を実行',
+      '④ 結果をClientへ返す。Server内でREST APIも利用可能',
     ],
     card: {
       title: 'MCPがそろえるもの',
@@ -132,45 +133,45 @@ async function onKey(event: KeyboardEvent, index: number) {
             </div>
           </div>
 
-          <div v-if="selected === 0" class="api-mcp__diagram api-mcp__diagram--rest" aria-hidden="true">
+          <div
+            v-if="selected === 0"
+            class="api-mcp__diagram api-mcp__diagram--rest"
+            role="img"
+            aria-label="REST APIの流れ。①AIアプリがHTTP要求を送り、②REST endpointが認証して処理先へ振り分け、③サービスが処理やデータ取得を行い、④JSONなどで結果を返す"
+          >
             <div class="api-mcp__node">
               <small>CALLER</small>
               <b>AIアプリ</b>
+              <em>サービスごとに実装</em>
             </div>
-            <div class="api-mcp__link">
-              <span>HTTP / JSON</span>
+            <div class="api-mcp__rest-lanes">
+              <div class="api-mcp__rest-lane is-request">
+                <span>① HTTP要求</span>
+                <i>→</i>
+              </div>
+              <div class="api-mcp__rest-lane is-result">
+                <span>④ JSON結果</span>
+                <i>←</i>
+              </div>
+            </div>
+            <div class="api-mcp__node api-mcp__node--endpoint">
+              <small>REST API</small>
+              <b>REST endpoint</b>
+              <em>② 認証・振り分け</em>
+            </div>
+            <div class="api-mcp__link api-mcp__link--internal">
+              <span>③ 呼び出す</span>
               <i>→</i>
             </div>
             <div class="api-mcp__node api-mcp__node--target">
               <small>SERVICE</small>
-              <b>REST endpoint</b>
+              <b>処理 / DB</b>
               <em>サービス固有</em>
             </div>
           </div>
 
-          <div v-else class="api-mcp__diagram api-mcp__diagram--mcp" aria-hidden="true">
-            <div class="api-mcp__node">
-              <small>MCP HOST</small>
-              <b>AIアプリ</b>
-              <em>MCP Client</em>
-            </div>
-            <div class="api-mcp__link api-mcp__link--mcp">
-              <span>MCP</span>
-              <i>⇄</i>
-            </div>
-            <div class="api-mcp__node api-mcp__node--server">
-              <small>COMMON ENTRY</small>
-              <b>MCP Server</b>
-            </div>
-            <div class="api-mcp__link api-mcp__link--internal">
-              <span>内部で利用</span>
-              <i>→</i>
-            </div>
-            <div class="api-mcp__node api-mcp__node--target">
-              <small>SERVICE / LOCAL</small>
-              <b>REST API</b>
-              <em>ローカル機能も可</em>
-            </div>
+          <div v-else class="api-mcp__mcp-detail">
+            <McpPlug />
           </div>
         </article>
       </Transition>
@@ -327,8 +328,8 @@ async function onKey(event: KeyboardEvent, index: number) {
 .api-mcp__stage {
   position: relative;
   flex: none;
-  height: 11.35rem;
-  min-height: 11.35rem;
+  height: 13.4rem;
+  min-height: 13.4rem;
 }
 
 .api-mcp__panel {
@@ -350,6 +351,10 @@ async function onKey(event: KeyboardEvent, index: number) {
 
 .api-mcp__panel.is-mcp {
   --mode-color: var(--brand-b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: .25rem .5rem;
 }
 
 .api-mcp__copy {
@@ -411,12 +416,21 @@ async function onKey(event: KeyboardEvent, index: number) {
 }
 
 .api-mcp__diagram--rest {
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.18fr);
+  grid-template-columns: minmax(0, .88fr) auto minmax(0, 1fr) auto minmax(0, .88fr);
+  gap: .28rem;
 }
 
-.api-mcp__diagram--mcp {
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1.08fr);
-  gap: .3rem;
+.api-mcp__mcp-detail {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.api-mcp__mcp-detail :deep(.plug) {
+  width: min(100%, 610px);
+  height: auto;
+  aspect-ratio: 740 / 250;
 }
 
 .api-mcp__node {
@@ -433,14 +447,9 @@ async function onKey(event: KeyboardEvent, index: number) {
   text-align: center;
 }
 
-.is-mcp .api-mcp__node {
-  border-color: color-mix(in srgb, var(--brand-b) 34%, var(--line));
-  background: color-mix(in srgb, var(--brand-b) 6%, var(--bg-1));
-}
-
-.api-mcp__node--server {
-  border-color: color-mix(in srgb, var(--brand-b) 66%, var(--line)) !important;
-  box-shadow: 0 0 20px -10px var(--brand-b);
+.api-mcp__node--endpoint {
+  border-color: color-mix(in srgb, var(--brand-a) 58%, var(--line));
+  box-shadow: 0 0 18px -12px var(--brand-a);
 }
 
 .api-mcp__node--target {
@@ -500,8 +509,70 @@ async function onKey(event: KeyboardEvent, index: number) {
   line-height: 1;
 }
 
-.api-mcp__link--mcp {
-  color: color-mix(in srgb, var(--brand-b) 74%, var(--ink));
+.api-mcp__rest-lanes {
+  display: grid;
+  gap: .48rem;
+  min-width: 4.8rem;
+}
+
+.api-mcp__rest-lane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 4.8rem;
+  padding-bottom: .26rem;
+  color: var(--brand-a);
+}
+
+.api-mcp__rest-lane::before {
+  content: "";
+  position: absolute;
+  right: .12rem;
+  bottom: .12rem;
+  left: .12rem;
+  height: 2px;
+  border-radius: 2px;
+  background: color-mix(in srgb, currentColor 48%, transparent);
+}
+
+.api-mcp__rest-lane::after {
+  content: "";
+  position: absolute;
+  bottom: .02rem;
+  left: .12rem;
+  width: .34rem;
+  height: .34rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: apiMcpRestFlow 2.4s linear infinite;
+  animation-fill-mode: backwards;
+}
+
+.api-mcp__rest-lane.is-result {
+  color: var(--accent-success);
+}
+
+.api-mcp__rest-lane.is-result::after {
+  animation-delay: 1.2s;
+  animation-direction: reverse;
+}
+
+.api-mcp__rest-lane span {
+  color: currentColor;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: .47rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.api-mcp__rest-lane i {
+  margin-top: .08rem;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .api-mcp__link--internal {
@@ -559,6 +630,23 @@ async function onKey(event: KeyboardEvent, index: number) {
   opacity: 0;
 }
 
+@keyframes apiMcpRestFlow {
+  0% {
+    left: .12rem;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% - .46rem);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .api-mcp__tab,
   .api-mcp-enter-active,
@@ -568,6 +656,12 @@ async function onKey(event: KeyboardEvent, index: number) {
 
   .api-mcp__tab:hover {
     transform: none;
+  }
+
+  .api-mcp__rest-lane::after {
+    left: 50%;
+    animation: none;
+    opacity: .8;
   }
 }
 </style>

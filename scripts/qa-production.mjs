@@ -328,6 +328,47 @@ async function testMcpDiagram(slide) {
       && state.text.includes(expected[index][1])
       && state.text.includes(expected[index][2]), `Slide 11: ${expected[index][0]} state is incomplete.`)
     assert(state.nodeOverflow.every(overflow => overflow <= 1), `Slide 11: ${expected[index][0]} state overflows by ${JSON.stringify(state.nodeOverflow)}.`)
+    if (state.mode === 'rest') {
+      const restFlow = await panel.evaluate(root => ({
+        lanes: root.querySelectorAll('.api-mcp__rest-lane').length,
+        label: root.querySelector('.api-mcp__diagram--rest')?.getAttribute('aria-label'),
+        animationNames: [...root.querySelectorAll('.api-mcp__rest-lane')]
+          .map(element => getComputedStyle(element, '::after').animationName),
+        animationFillModes: [...root.querySelectorAll('.api-mcp__rest-lane')]
+          .map(element => getComputedStyle(element, '::after').animationFillMode),
+      }))
+      assert(restFlow.lanes === 2
+        && ['①', '②', '③', '④'].every(step => restFlow.label?.includes(step))
+        && restFlow.animationNames.every(name => name.startsWith('apiMcpRestFlow')), `Slide 11: REST request/result animation is incomplete: ${JSON.stringify(restFlow)}`)
+      assert(restFlow.animationFillModes.every(mode => mode === 'backwards'), `Slide 11: REST animation exposes a marker before its phase starts: ${JSON.stringify(restFlow.animationFillModes)}`)
+    }
+    else {
+      assert(await panel.locator('h3').count() === 1, 'Slide 11: MCP state exposes duplicate headings.')
+      const mcpFlow = await panel.locator('.plug svg').evaluate((svg) => {
+        const nodes = new Map([...svg.querySelectorAll('[data-node]')]
+          .map(element => [element.getAttribute('data-node'), element.getBBox()]))
+        const labels = [...svg.querySelectorAll('[data-fit]')].map((element) => {
+          const bounds = nodes.get(element.getAttribute('data-fit'))
+          const rect = element.getBBox()
+          return {
+            text: element.textContent.trim(),
+            overflow: bounds
+              ? Math.max(0, bounds.x - rect.x, rect.x + rect.width - bounds.x - bounds.width,
+                  bounds.y - rect.y, rect.y + rect.height - bounds.y - bounds.height)
+              : Infinity,
+          }
+        })
+        return {
+          labels,
+          animationNames: [...svg.querySelectorAll('.mcp__flow')]
+            .map(element => getComputedStyle(element).animationName),
+        }
+      })
+      assert(mcpFlow.labels.length >= 12
+        && mcpFlow.labels.every(item => item.overflow <= 1), `Slide 11: MCP labels overflow their nodes: ${JSON.stringify(mcpFlow.labels.filter(item => item.overflow > 1))}`)
+      assert(mcpFlow.animationNames.length === 2
+        && mcpFlow.animationNames.every(name => name.startsWith('mcpFlow')), `Slide 11: MCP request/result animation is incomplete: ${JSON.stringify(mcpFlow.animationNames)}`)
+    }
     const overflow = await visibleOverflow(slide)
     assert(overflow.length === 0, `Slide 11: ${expected[index][0]} state overflows the slide: ${JSON.stringify(overflow)}`)
   }
