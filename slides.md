@@ -369,53 +369,13 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 
 ---
 
-# MCP ＝ 道具をつなぐ「共通プラグ」
+# REST API と MCP は、役割が違う
 
-<div class="eyebrow">MODEL CONTEXT PROTOCOL · 道具をつなぐ</div>
+<div class="eyebrow">SERVICE CONNECTION / AI CONNECTION · ボタンで切り替え</div>
 
-<div class="note mt-2"><BrandMark name="mcp" class="note__bm"/> <a class="gterm" data-term="mcp"><strong>MCP</strong></a> は、AIアプリ内の <strong>Client</strong> と <strong>Server</strong> を繋ぐ<strong><span class="grad">共通プロトコル</span></strong>。REST APIを置き換えず、Serverの内側で既存APIやローカル機能を利用できます。</div>
+<ApiMcpSwitch />
 
-<div class="mcp-vis mt-1">
-
-<div class="mcp-vis__art"><McpPlug /></div>
-
-<div class="mcp-cards" aria-label="REST APIとMCPの役割比較">
-
-<div class="card mcp-compare mcp-compare--rest">
-
-<div class="card__ba">REST API · DIRECT</div>
-
-<h3>サービスごとに直接つなぐ</h3>
-<div class="mcp-compare__flow" aria-hidden="true">
-  <span class="mcp-compare__node">AIアプリ</span>
-  <span class="mcp-compare__arrow">→<small>HTTP</small></span>
-  <span class="mcp-compare__node">サービス固有<br>REST endpoint</span>
-</div>
-<p>URL・認証・仕様はサービスごとに実装。</p>
-
-</div>
-
-<div class="card accent mcp-compare mcp-compare--mcp">
-
-<div class="card__ba">MCP · COMMON BOUNDARY</div>
-
-<h3>AIとの接続を共通化</h3>
-<div class="mcp-compare__flow" aria-hidden="true">
-  <span class="mcp-compare__node">Host / Client</span>
-  <span class="mcp-compare__arrow">⇄<small>MCP</small></span>
-  <span class="mcp-compare__node">MCP Server</span>
-  <span class="mcp-compare__arrow">→<small>内部</small></span>
-  <span class="mcp-compare__node">REST API<br>ローカル機能</span>
-</div>
-<p>Server内でRESTも使える。役割は競合しない。</p>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="tk concl">RESTは<strong>サービスとの通信</strong>、MCPは<strong>AIとの接続ルール</strong>。<span class="grad" style="font-weight:700">置き換えではなく併用</span>できます。</div>
+<div class="tk concl">どちらか一方ではありません。<span class="grad" style="font-weight:700">REST API と MCP は重ねて使えます。</span></div>
 
 <Cite :items="[
   { label: 'MCP 公式 — Architecture', url: 'https://modelcontextprotocol.io/docs/learn/architecture' },
@@ -425,7 +385,7 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 ]" />
 
 <!--
-前ページで出た「道具のつなぎ方の標準化」を、くわしく説明するページです。MCP（Model Context Protocol）は、AIアプリ（MCP Host）の中の「MCP Client」と、外側の「MCP Server」をつなぐための共通の作法（プロトコル）です。図の流れは、①Host内のClientが「この道具を使いたい」と要求を出す→②Serverが受け取る→③Serverがツール（Tools）やデータ（Resources）を実際に実行・取得する→④結果をClientへ返す、の一巡。ここで大事なのは、実際にツールを動かすのはServer側であって、LLM自身が直接実行するわけではない、という点です（LLMは「使いたい」と宣言するだけ）。下段はREST APIとの役割の違いです。RESTではAIアプリ側がサービス固有のURL・認証・仕様へ直接つなぎます。MCPはAIアプリとServerの間の発見・呼び出し方を共通化し、Serverの内側では既存のREST APIやローカル機能をそのまま利用できます。つまり同じ層の置き換えではなく、組み合わせて使える関係です。図は分かりやすさのため Client 1つ : Server 1つ の最小例にしていますが、実際のHostは「つなぐServerごとに1つのClientを作る」ので、複数のMCPサーバを同時に挿すこともできます。
+REST API と MCP を同時に詰め込まず、ボタンで片方ずつ見ます。まず REST API。これは、AIアプリなどの呼び出し側が、サービスの機能を HTTP で直接呼ぶ仕組みです。接続するサービスごとに、URL、認証、要求と応答のデータ形式を合わせます。次に MCP。こちらはサービスそのものの通信方法ではなく、AIアプリ内の MCP Client と MCP Server の間で「道具を見つけ、要求し、結果を受け取る」作法を共通化します。大切なのは、MCP Server の内側で既存の REST API やローカル機能を使えることです。REST API は「サービスとどう通信するか」、MCP は「AIと道具をどうつなぐか」。役割の層が違うため、置き換えではなく重ねて使えます。
 -->
 
 ---

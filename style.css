@@ -287,45 +287,9 @@ html { color-scheme: dark; }
 .llm-vs__bot { flex: none; width: 23%; aspect-ratio: 1 / 1; align-self: center; }
 .llm-vs__bot .bot { width: 100%; height: 100%; }
 
-/* ---- MCP：アクター＋境界＋フロー図と REST API 役割比較（p11）---- */
-.mcp-vis { display: flex; flex-direction: column; align-items: center; gap: .3rem; }
-.mcp-vis__art { flex: none; width: 100%; max-width: 560px; aspect-ratio: 740 / 250; }
-.mcp-vis__art .plug { width: 100%; height: 100%; }
-.mcp-cards { flex: 0 0 auto; width: 100%; display: flex; flex-direction: row; gap: .9rem; }
-.mcp-cards .card { flex: 1 1 0; min-width: 0; padding: .48rem .72rem; }
-.mcp-cards .card h3 { margin: 0 0 .22rem; font-size: .88rem; line-height: 1.2; }
-.mcp-compare { display: flex; flex-direction: column; gap: .18rem; }
-.mcp-compare__flow {
-  display: flex; align-items: center; justify-content: center; gap: .28rem;
-  min-width: 0; min-height: 2.25rem;
-}
-.mcp-compare__node {
-  min-width: 0; padding: .3rem .42rem; border: 1px solid var(--line);
-  border-radius: .48rem; background: rgba(255, 255, 255, .025);
-  color: #eef1f8; font-family: 'JetBrains Mono', monospace;
-  font-size: .57rem; font-weight: 800; line-height: 1.25; text-align: center;
-  white-space: nowrap;
-}
-.mcp-compare--rest .mcp-compare__node:last-child {
-  border-color: color-mix(in srgb, var(--brand-a) 42%, var(--line));
-}
-.mcp-compare--mcp .mcp-compare__node:nth-of-type(2) {
-  border-color: color-mix(in srgb, var(--brand-b) 48%, var(--line));
-  background: color-mix(in srgb, var(--brand-b) 8%, transparent);
-}
-.mcp-compare__arrow {
-  flex: none; display: flex; flex-direction: column; align-items: center;
-  color: var(--brand-a); font-size: .92rem; font-weight: 900; line-height: 1;
-}
-.mcp-compare--mcp .mcp-compare__arrow:first-of-type { color: var(--brand-b); }
-.mcp-compare__arrow small {
-  margin-top: .12rem; color: var(--muted); font-family: 'JetBrains Mono', monospace;
-  font-size: .47rem; font-weight: 700; line-height: 1;
-}
-.mcp-compare p {
-  margin: .05rem 0 0; color: var(--ink-soft); font-size: .7rem;
-  line-height: 1.35; text-align: center; text-wrap: balance;
-}
+/* ---- REST API / MCP comparison (p11) ----
+   ApiMcpSwitch owns its visual and interaction contract. Its `.rt` root
+   intentionally joins the shared fixed-frame, Reader, and handout pipelines. */
 
 /* ---- Single vs Multi topology header (slide 20, above the RevealTabs) ---- */
 .sm-wrap { display: flex; flex-direction: column; }

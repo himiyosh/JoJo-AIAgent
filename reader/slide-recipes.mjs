@@ -97,10 +97,10 @@ export const SLIDE_RECIPES = [
     number: 11,
     type: 'visual-diagram',
     variant: 'mcp',
+    expectedTabs: 2,
+    expectedSources: 4,
     extracts: [
-      { key: 'note', selector: '.note', mode: 'texts', required: true },
-      { key: 'art', selector: '.mcp-vis__art .plug', mode: 'fragment', required: true },
-      { key: 'cards', selector: '.mcp-cards .card', mode: 'groups', required: true },
+      { key: 'states', selector: '.api-mcp__measure-state', mode: 'groups', required: true },
       { key: 'takeaway', selector: '.tk', mode: 'texts', required: true },
     ],
   },

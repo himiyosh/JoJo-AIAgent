@@ -212,18 +212,17 @@ function renderAnatomy(slide) {
 
 function renderMcp(slide) {
   const data = slide.visualData
-  const cards = data.cards ?? []
+  const states = data.states ?? []
   return figure(slide, `
-    <div class="pv-mcp__art">${first(data.art)}</div>
-    <div class="pv-mcp__shift" aria-label="REST APIとMCPの役割比較">
-      ${cards.map((card, index) => `
-        <section class="${index ? 'is-after' : 'is-before'}">
-          <small>${text(card.subtitle, 16)}</small>
-          <h3>${text(card.title, 28)}</h3>
-          <p>${groupSummary(card, 50)}</p>
-        </section>
-        ${index === 0 ? '<span aria-hidden="true">≠</span>' : ''}`).join('')}
+    <div class="pv-mcp__states" aria-label="REST APIとMCPの役割比較">
+      ${states.map((state, index) => `
+        <section class="${index ? 'is-mcp' : 'is-rest'}">
+          <small>${text(state.subtitle, 32)}</small>
+          <h3>${text(state.title, 42)}</h3>
+          <p>${text((state.items ?? []).slice(0, 2).join(' ／ '), 78)}</p>
+        </section>`).join('')}
     </div>
+    <div class="pv-mcp__bridge"><b>MCP Server</b> の内側で <b>REST API</b> を使える</div>
   `)
 }
 

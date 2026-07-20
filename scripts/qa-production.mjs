@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-chromium'
 import { extractRecipeData } from '../reader/extract-visuals.mjs'
+import { SLIDE_RECIPES } from '../reader/slide-recipes.mjs'
 import { normalizeBase, startStaticServer } from './lib/static-server.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -302,36 +303,43 @@ async function testTabs(page, baseUrl, slideNumber) {
 }
 
 async function testMcpDiagram(slide) {
-  const result = await slide.locator('.mcp-vis__art svg').evaluate((svg) => {
-    const nodes = new Map([...svg.querySelectorAll('[data-node]')]
-      .map(element => [element.getAttribute('data-node'), element.getBBox()]))
-    return [...svg.querySelectorAll('[data-fit]')].map((element) => {
-      const bounds = nodes.get(element.getAttribute('data-fit'))
-      const rect = element.getBBox()
-      return {
-        text: element.textContent.trim(),
-        overflow: bounds
-          ? Math.max(0, bounds.x - rect.x, rect.x + rect.width - bounds.x - bounds.width,
-              bounds.y - rect.y, rect.y + rect.height - bounds.y - bounds.height)
-          : Infinity,
-      }
-    })
-  })
-  assert(result.length >= 12 && result.every(item => item.overflow <= 1), `Slide 11: MCP labels overflow their nodes: ${JSON.stringify(result.filter(item => item.overflow > 1))}`)
+  const comparison = slide.locator('.api-mcp')
+  assert(await comparison.count() === 1, 'Slide 11: API/MCP switch is missing or duplicated.')
+  const tabs = comparison.locator('[role="tab"]')
+  assert(await tabs.count() === 2, 'Slide 11: API/MCP switch must expose exactly two states.')
+  assert(await tabs.nth(0).textContent().then(text => text?.includes('REST API'))
+    && await tabs.nth(1).textContent().then(text => text?.includes('MCP')), 'Slide 11: switch labels are incomplete.')
 
-  const comparison = await slide.locator('.mcp-cards').evaluate((root) => ({
-    label: root.getAttribute('aria-label'),
-    cards: root.querySelectorAll('.mcp-compare').length,
-    text: root.textContent.replace(/\s+/g, ' ').trim(),
-    nodeOverflow: [...root.querySelectorAll('.mcp-compare__node')]
-      .map(element => Math.max(element.scrollWidth - element.clientWidth, element.scrollHeight - element.clientHeight)),
-  }))
-  assert(comparison.label === 'REST APIとMCPの役割比較'
-    && comparison.cards === 2
-    && comparison.text.includes('REST API')
-    && comparison.text.includes('MCP Server')
-    && comparison.text.includes('役割は競合しない'), 'Slide 11: REST API / MCP comparison is incomplete.')
-  assert(comparison.nodeOverflow.every(overflow => overflow <= 1), `Slide 11: comparison node text overflows by ${JSON.stringify(comparison.nodeOverflow)}.`)
+  const expected = [
+    ['rest', 'サービスの機能を、HTTPで直接呼ぶ', 'REST endpoint'],
+    ['mcp', 'AIと道具のつなぎ方を、共通化する', 'MCP Server'],
+  ]
+  for (let index = 0; index < expected.length; index += 1) {
+    await tabs.nth(index).click()
+    await new Promise(resolve => setTimeout(resolve, 220))
+    const panel = comparison.locator('[role="tabpanel"]')
+    const state = await panel.evaluate((root) => ({
+      mode: root.getAttribute('data-mode'),
+      text: root.textContent.replace(/\s+/g, ' ').trim(),
+      nodeOverflow: [...root.querySelectorAll('.api-mcp__node')]
+        .map(element => Math.max(element.scrollWidth - element.clientWidth, element.scrollHeight - element.clientHeight)),
+    }))
+    assert(state.mode === expected[index][0]
+      && state.text.includes(expected[index][1])
+      && state.text.includes(expected[index][2]), `Slide 11: ${expected[index][0]} state is incomplete.`)
+    assert(state.nodeOverflow.every(overflow => overflow <= 1), `Slide 11: ${expected[index][0]} state overflows by ${JSON.stringify(state.nodeOverflow)}.`)
+    const overflow = await visibleOverflow(slide)
+    assert(overflow.length === 0, `Slide 11: ${expected[index][0]} state overflows the slide: ${JSON.stringify(overflow)}`)
+  }
+
+  const bridge = await comparison.locator('.api-mcp__bar').textContent()
+  assert(bridge?.includes('MCP Server の内側で REST API を使える'), 'Slide 11: the REST/MCP relationship is missing.')
+
+  const recipe = SLIDE_RECIPES.find(item => item.number === 11)
+  assert(recipe, 'Slide 11: Reader recipe is missing.')
+  const extracted = await extractRecipeData(slide, recipe, 11)
+  assert(JSON.stringify(extracted.states.map(state => state.title)) === JSON.stringify(expected.map(item => item[1])),
+    `Slide 11: legacy Reader headings are incorrect: ${JSON.stringify(extracted.states.map(state => state.title))}`)
 }
 
 async function testReaderDeepLink(browser, server, target) {
@@ -1102,7 +1110,7 @@ try {
   }
   assert(citeCount >= 8, `Expected at least 8 citation controls, found ${citeCount}.`)
 
-  for (const slideNumber of [7, 13, 20])
+  for (const slideNumber of [7, 11, 13, 20])
     await testTabs(page, server.baseUrl, slideNumber)
 
   if (screenshots) {
