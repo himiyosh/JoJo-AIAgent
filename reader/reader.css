@@ -266,6 +266,7 @@ input:focus-visible,
   line-height: 1.16;
   letter-spacing: -0.025em;
   text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .reader-page__title p {
@@ -275,6 +276,7 @@ input:focus-visible,
   font-size: clamp(0.67rem, 1.45svh, 0.79rem);
   line-height: 1.38;
   text-wrap: pretty;
+  word-break: auto-phrase;
 }
 
 .reader-page__controls {

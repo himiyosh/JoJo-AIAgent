@@ -82,12 +82,13 @@ function back() {
 .gl__term {
   font-size: .82rem; font-weight: 800; line-height: 1.22; color: #f3f6fc;
   display: flex; align-items: baseline; flex-wrap: wrap; gap: .2rem .4rem;
+  word-break: auto-phrase;
 }
 .gl__en {
   font-family: 'JetBrains Mono', monospace; font-size: .58rem; font-weight: 600;
   letter-spacing: .02em; color: var(--brand-a);
 }
-.gl__def { margin: .12rem 0 0; font-size: .65rem; line-height: 1.36; color: var(--ink-soft); }
+.gl__def { margin: .12rem 0 0; font-size: .65rem; line-height: 1.36; color: var(--ink-soft); word-break: auto-phrase; }
 
 /* highlight when arrived via an inline 用語 link */
 .gl__item.is-hit {

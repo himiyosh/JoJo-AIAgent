@@ -721,6 +721,38 @@ async function testReader(browser, server, screenshots) {
       const caption = visual?.querySelector('figcaption')
       const controls = [...element.querySelectorAll('.reader-page__controls > *')].map(control => control.getBoundingClientRect())
       const meaningfulSelector = 'svg, section, blockquote, ol, ul, dl, .pv-cover__loop, .pv-chapter__mark, .pv-nested__layer, .pv-closing__halo, .pv-split__axis, .pv-launch__spine, .pv-equation__beam, .pv-sources__rail'
+      const titleH2 = element.querySelector('.reader-page__title h2')
+      // Real rendered line-break scan (Range.getClientRects per character), not a
+      // text-length heuristic: flags a line whose first character is a closing
+      // bracket/punctuation/nakaguro/unescaped arrow-or-slash — the same class of
+      // defect documented in DESIGN.md §132 (word-internal/orphan-punctuation breaks).
+      const badLeadingRe = /^[」』）\)】〕》〉、。，．,.·・：:；;！!？?ー]/
+      function titleLines(node) {
+        if (!node?.firstChild) return []
+        const text = node.textContent
+        const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
+        const chars = []
+        let n
+        while ((n = walker.nextNode())) {
+          const range = document.createRange()
+          for (let i = 0; i < n.nodeValue.length; i++) {
+            range.setStart(n, i); range.setEnd(n, i + 1)
+            const rects = range.getClientRects()
+            chars.push({ ch: n.nodeValue[i], top: rects.length ? Math.round(rects[0].top) : null })
+          }
+        }
+        const lines = []
+        let cur = ''; let top = null
+        for (const c of chars) {
+          if (top === null) top = c.top
+          if (c.top !== top) { lines.push(cur); cur = ''; top = c.top }
+          cur += c.ch
+        }
+        if (cur) lines.push(cur)
+        return lines
+      }
+      const titleLineList = titleH2 ? titleLines(titleH2) : []
+      const titleBadLeading = titleLineList.slice(1).some(line => badLeadingRe.test(line.trim()))
       return {
         height: element.getBoundingClientRect().height,
         internalOverflow: element.scrollHeight - element.clientHeight,
@@ -730,6 +762,9 @@ async function testReader(browser, server, screenshots) {
         counter: element.querySelector('.reader-page__position')?.textContent?.replace(/\s+/g, ' ').trim(),
         title: element.querySelector('.reader-page__title h2')?.textContent?.trim() ?? '',
         titleId: element.querySelector('.reader-page__title h2')?.id ?? '',
+        titleWordBreak: titleH2 ? getComputedStyle(titleH2).wordBreak : '',
+        titleLines: titleLineList,
+        titleBadLeading,
         visualKind: visual?.getAttribute('data-reader-visual-kind') ?? '',
         visualText: visual?.textContent?.replace(/\s+/g, '').length ?? 0,
         visualStructure: visual?.querySelectorAll(meaningfulSelector).length ?? 0,
@@ -748,6 +783,8 @@ async function testReader(browser, server, screenshots) {
     assert(metrics.snapAlign === 'start' && metrics.snapStop === 'always', `Reader page ${number} is missing snap alignment or stop.`)
     assert(metrics.counter?.includes(`${String(number).padStart(2, '0')} / 33`), `Reader page ${number} counter is incorrect.`)
     assert(metrics.title && metrics.titleId === `slide-title-${number}`, `Reader page ${number} title is missing or disconnected.`)
+    assert(metrics.titleWordBreak === 'auto-phrase', `Reader page ${number} title lost its word-break:auto-phrase protection (mid-word break risk).`)
+    assert(!metrics.titleBadLeading, `Reader page ${number} title wraps with a bad line-start character: ${JSON.stringify(metrics.titleLines)}`)
     assert(metrics.visualKind && metrics.visualStructure >= 1, `Reader page ${number} lacks a meaningful native visual structure.`)
     assert(metrics.visualText >= 4 && metrics.visualText <= 380, `Reader page ${number} has ${metrics.visualText} visible visual characters.`)
     assert(metrics.figure && metrics.figure.width >= 300 && metrics.figure.height >= 120, `Reader page ${number} portrait visual is too small at 390x844.`)

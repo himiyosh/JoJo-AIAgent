@@ -1029,7 +1029,7 @@ chapter: "05 · 勘所とまとめ"
 </div>
 
 <div class="refgrp">
-<h4>グラフの兆し（Graph Engineering・未確定・2026-07）</h4>
+<h4>グラフの兆し（Graph Engineering・未確定）</h4>
 
 - <a href="https://x.com/steipete/status/2078277297791189132" target="_blank">Peter Steinberger — X post</a> <span class="u">x.com · 2026-07-18</span>
 - <a href="https://x.com/HamelHusain/status/2078346425621237935" target="_blank">Hamel Husain — “Loop Engineering Is Dead. Enter Graph Engineering”</a> <span class="u">x.com · 2026-07-18</span>
