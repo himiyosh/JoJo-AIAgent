@@ -20,6 +20,7 @@
   --accent-warm: #fbbf24;
   --accent-warm-ink: #fcd34d;
   --accent-warn: #fb7185;
+  --accent-success: #22c55e;
   /* Premium panel material — shared by .card / .row / .pillar / .ptn.
      Top-lit gradient (light source from above, matching the bg glow axis) +
      inner top highlight + soft elevation shadow. Lifts every card-based slide
@@ -163,6 +164,8 @@ html { color-scheme: dark; }
 .ptn__d { font-size: .85rem; line-height: 1.5; color: var(--ink-soft); }
 .ptn__d strong { color: #eef1f8; font-weight: 700; }
 .ptn__ex { display: block; margin-top: .18rem; font-size: .75rem; color: var(--muted); }
+.ptn__foot { display: flex; align-items: center; gap: .8rem; }
+.ptn__foot .ptn__d { flex: 1 1 auto; min-width: 0; }
 
 /* ---- Cards / grids ---- */
 .card {
@@ -285,13 +288,29 @@ html { color-scheme: dark; }
 .llm-vs__bot { flex: none; width: 23%; aspect-ratio: 1 / 1; align-self: center; }
 .llm-vs__bot .bot { width: 100%; height: 100%; }
 
-/* ---- MCP：USB-C プラグ図左・before/after カードを縦積みで右に（p11）---- */
-.mcp-vis { display: flex; align-items: center; gap: 1.5rem; }
-.mcp-vis__art { flex: none; width: 22%; aspect-ratio: 280 / 232; align-self: center; }
-.mcp-vis__art .plug { width: 100%; height: 100%; }
-.mcp-cards { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: .7rem; }
-.mcp-cards .card { padding: .68rem 1.05rem; }
-.mcp-cards .card h3 { margin-bottom: .25rem; }
+/* ---- REST API / MCP comparison (p11) ----
+   ApiMcpSwitch owns its visual and interaction contract. Its `.rt` root
+   intentionally joins the shared fixed-frame, Reader, and handout pipelines. */
+
+/* ---- Single vs Multi topology header (slide 20, above the RevealTabs) ---- */
+.sm-wrap { display: flex; flex-direction: column; }
+.sm-topo {
+  display: flex; align-items: stretch; justify-content: center; gap: 1.2rem;
+  margin: 0 0 .2rem; padding: 0 .4rem;
+}
+.sm-topo__side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: .05rem; }
+.sm-topo__cap {
+  display: inline-flex; align-items: baseline; gap: .4rem;
+  font-size: .72rem; color: var(--ink-soft);
+}
+.sm-topo__cap b { color: #eef1f8; font-weight: 800; }
+.sm-topo__cap span { font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.sm-topo__svg { width: 100%; max-width: 232px; height: auto; display: block; }
+.sm-topo__vs {
+  flex: none; align-self: center;
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 800;
+  letter-spacing: .06em; color: var(--muted);
+}
 
 /* ---- Cover ---- */
 .cover { display: flex; flex-direction: column; height: 100%; position: relative; }
@@ -308,7 +327,7 @@ html { color-scheme: dark; }
   border: 1px solid color-mix(in srgb, var(--brand-a) 45%, var(--line));
   border-radius: .4rem; padding: .12rem .5rem; flex: none; margin-top: .15rem;
 }
-/* Series title: keep it on one line when it fits (p31), otherwise hang the
+/* Series title: keep it on one line when it fits (p33), otherwise hang the
    opening 「 into the margin so 情報強者 / 情報弱者 line up vertically (p1). */
 .cover__series.is-1line { max-width: none; }
 .cover__series .cs-nowrap { white-space: nowrap; }
@@ -333,12 +352,12 @@ html { color-scheme: dark; }
 
 /* ---- Section divider ---- */
 .slidev-layout.section {
-  display: flex; flex-direction: column; justify-content: center; align-items: flex-start;
-  text-align: left; position: relative; overflow: clip;
-  padding-left: 14%; padding-right: 4.5rem;
-  /* Off-center light keeps the reading column dominant while the numeral recedes. */
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; position: relative; overflow: clip;
+  padding-left: 4.5rem; padding-right: 4.5rem;
+  /* The foreground shares one central axis; the numeral remains a quiet edge layer. */
   background:
-    radial-gradient(700px 440px at 31% 48%, color-mix(in srgb, var(--brand-a) 13%, transparent), transparent 72%),
+    radial-gradient(700px 440px at 50% 48%, color-mix(in srgb, var(--brand-a) 13%, transparent), transparent 72%),
     radial-gradient(1080px 560px at 4% -16%, color-mix(in srgb, var(--brand-a) 22%, transparent), transparent 56%),
     radial-gradient(1040px 620px at 116% 122%, color-mix(in srgb, var(--brand-b) 21%, transparent), transparent 55%),
     radial-gradient(145% 135% at 50% 32%, transparent 44%, color-mix(in srgb, #000 58%, transparent) 100%),
@@ -346,7 +365,9 @@ html { color-scheme: dark; }
 }
 /* Slidev wraps Markdown in a centered relative container. Keep chapter decorations
    anchored to the full slide instead, so the right numeral never enters the title column. */
-.slidev-layout.section > :has(.section__chno) { position: static; }
+.slidev-layout.section > :has(.section__chno) {
+  position: static; display: flex; flex-direction: column; align-items: center; width: 100%;
+}
 .section__context,
 .slidev-layout.section h1,
 .section__lead,
@@ -354,22 +375,25 @@ html { color-scheme: dark; }
   position: relative; z-index: 1;
 }
 .section__context {
+  width: 100%; max-width: 46rem; text-align: center;
   margin: 0 0 .8rem; color: color-mix(in srgb, var(--ink-soft) 74%, transparent);
   font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700;
   letter-spacing: .04em;
 }
-.section__title {
-  max-width: 12em; margin: 0; font-size: 3.2rem; font-weight: 900;
+.section__title,
+.slidev-layout.section h1 {
+  width: 100%; max-width: 15em; margin: 0; text-align: center;
+  font-size: 3.2rem; font-weight: 900;
   line-height: 1.12; letter-spacing: -.005em; text-wrap: balance;
 }
 .section__accent { color: var(--brand-a); }
 .section__lead {
-  margin: .9rem 0 0; max-width: 39em; color: var(--ink-soft);
+  width: 100%; margin: .9rem 0 0; max-width: 44em; text-align: center; color: var(--ink-soft);
   font-size: 1.12rem; text-wrap: balance; word-break: auto-phrase;
 }
 .section__mark {
-  position: absolute; left: 4.7rem; top: 50%; width: 2.7rem; height: 2.7rem;
-  transform: translateY(-50%) rotate(45deg);
+  position: relative; left: auto; top: auto; width: 2.7rem; height: 2.7rem;
+  flex: none; margin: 0 0 1.15rem; transform: rotate(45deg);
   border: 1px solid color-mix(in srgb, var(--brand-a) 55%, transparent);
   border-radius: .45rem; z-index: 1;
 }
@@ -379,8 +403,8 @@ html { color-scheme: dark; }
   box-shadow: 0 0 18px color-mix(in srgb, var(--brand-a) 45%, transparent);
 }
 .section__route {
-  display: flex; align-items: center; flex-wrap: wrap; gap: .5rem;
-  margin-top: 1.45rem;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem;
+  width: 100%; margin-top: 1.45rem;
 }
 .section__route span {
   padding: .42rem .62rem; border: 1px solid var(--line); border-radius: .45rem;
@@ -542,15 +566,15 @@ html { color-scheme: dark; }
 .srcfoot b { color: var(--ink-soft); font-weight: 700; }
 
 /* ---- References slide ---- */
-.refs { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 1.6rem; margin-top: 1rem; }
-.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .75rem .9rem; background: rgba(255,255,255,.02); }
+.refs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem 1.1rem; margin-top: 1rem; }
+.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .7rem .85rem; background: rgba(255,255,255,.02); }
 .refgrp h4 {
-  margin: 0 0 .4rem; font-family: 'JetBrains Mono', monospace; font-size: .72rem;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--brand-a); font-weight: 800;
+  margin: 0 0 .35rem; font-family: 'JetBrains Mono', monospace; font-size: .66rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--brand-a); font-weight: 800;
 }
-.refgrp ul { margin: 0; padding-left: 1rem; }
-.refgrp li { font-size: .8rem; line-height: 1.5; color: var(--ink-soft); margin: .15rem 0; }
-.refgrp .u { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); }
+.refgrp ul { margin: 0; padding-left: .95rem; }
+.refgrp li { font-size: .74rem; line-height: 1.42; color: var(--ink-soft); margin: .12rem 0; }
+.refgrp .u { font-family: 'JetBrains Mono', monospace; font-size: .64rem; color: var(--muted); }
 
 /* ---- Pitfalls / icon grid (2×N) ---- */
 .igrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem .9rem; }
@@ -691,6 +715,10 @@ html { color-scheme: dark; }
    Long tab content still paginates — the panel can shrink, just not pad itself out.
    (section dividers & cover keep their own centering) */
 .slidev-layout:not(.section) { display: flex; flex-direction: column; justify-content: center; }
+/* Dynamic reveal content must never recenter the whole slide in engines whose
+   hidden-panel measurements settle a frame later. Pin the outer composition to
+   the slide's normal top padding; only the panel interior is allowed to change. */
+.slidev-layout:not(.section):has(> .rt) { justify-content: flex-start; }
 /* never let flex squash content — overflow-clip behaves like the old block flow */
 .slidev-layout:not(.section) > * { flex-shrink: 0; }
 /* interactive reveal slides: panel hugs its content (shrinks for pagination, never grows to pad) */

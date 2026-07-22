@@ -206,50 +206,50 @@ function splitSignals(row, prefix, preserveLast = false) {
   })
 }
 
-function buildSlide21(slide) {
-  const { add, items } = createInventoryBuilder(21)
+function buildSlide23(slide) {
+  const { add, items } = createInventoryBuilder(23)
   const [split, single] = slide.visualData.rows
   const splitItems = splitSignals(split, 'split', true)
   const singleItems = splitSignals(single, 'single')
   if (splitItems.length !== 5 || singleItems.length !== 4)
-    throw new Error(`Reader pilot slide 21 expected 5/4 decision signals, found ${splitItems.length}/${singleItems.length}.`)
+    throw new Error(`Reader pilot slide 23 expected 5/4 decision signals, found ${splitItems.length}/${singleItems.length}.`)
 
-  add('s21.title', 'heading', 'source-title', slide.title)
-  add('s21.eyebrow', 'label', 'source-context', blockStartingWith(slide, 'DECISION GUIDE'))
-  add('s21.principle', 'quote', 'decision-principle', slide.visualData.principle[0])
-  add('s21.row.split.title', 'heading', 'decision-branch', split.title)
-  splitItems.forEach((signal, index) => add(`s21.row.split.signal.${index + 1}`, 'list-item', 'split-signal', signal.text, { groupId: signal.groupId }))
-  add('s21.row.single.title', 'heading', 'decision-branch', single.title)
-  singleItems.forEach((signal, index) => add(`s21.row.single.signal.${index + 1}`, 'list-item', 'single-signal', signal.text, { groupId: signal.groupId }))
-  slide.links.forEach((link, index) => add(`s21.source.${index + 1}`, 'source', 'source-link', sourceValue(link.label, link.href), { importance: 'supplement' }))
-  add('s21.note', 'note', 'presenter-note', slide.note, { importance: 'supplement' })
+  add('s23.title', 'heading', 'source-title', slide.title)
+  add('s23.eyebrow', 'label', 'source-context', blockStartingWith(slide, 'DECISION GUIDE'))
+  add('s23.principle', 'quote', 'decision-principle', slide.visualData.principle[0])
+  add('s23.row.split.title', 'heading', 'decision-branch', split.title)
+  splitItems.forEach((signal, index) => add(`s23.row.split.signal.${index + 1}`, 'list-item', 'split-signal', signal.text, { groupId: signal.groupId }))
+  add('s23.row.single.title', 'heading', 'decision-branch', single.title)
+  singleItems.forEach((signal, index) => add(`s23.row.single.signal.${index + 1}`, 'list-item', 'single-signal', signal.text, { groupId: signal.groupId }))
+  slide.links.forEach((link, index) => add(`s23.source.${index + 1}`, 'source', 'source-link', sourceValue(link.label, link.href), { importance: 'supplement' }))
+  add('s23.note', 'note', 'presenter-note', slide.note, { importance: 'supplement' })
   return items
 }
 
-function buildSlide26(slide) {
-  const { add, items } = createInventoryBuilder(26)
+function buildSlide28(slide) {
+  const { add, items } = createInventoryBuilder(28)
   const stages = slide.visualData.stages
   if (stages.length !== 3 || stages.reduce((sum, stage) => sum + stage.items.length, 0) !== 8)
-    throw new Error('Reader pilot slide 26 expected three lifecycle stages and eight hazards.')
+    throw new Error('Reader pilot slide 28 expected three lifecycle stages and eight hazards.')
 
-  add('s26.title', 'heading', 'source-title', slide.title)
-  add('s26.intro', 'paragraph', 'risk-introduction', blockStartingWith(slide, 'よくある8項目'))
+  add('s28.title', 'heading', 'source-title', slide.title)
+  add('s28.intro', 'paragraph', 'risk-introduction', blockStartingWith(slide, 'よくある8項目'))
   let hazardNumber = 1
   stages.forEach((stage, index) => {
     const number = index + 1
-    add(`s26.stage.${number}.title`, 'heading', 'risk-stage-title', stage.title)
-    add(`s26.stage.${number}.subtitle`, 'label', 'risk-stage-subtitle', stage.subtitle)
+    add(`s28.stage.${number}.title`, 'heading', 'risk-stage-title', stage.title)
+    add(`s28.stage.${number}.subtitle`, 'label', 'risk-stage-subtitle', stage.subtitle)
     stage.items.forEach((_fallback, itemIndex) => {
       const detail = stage.itemDetails?.[itemIndex]
       if (!detail?.heading || !detail?.detail)
-        throw new Error(`Reader pilot slide 26 risk ${hazardNumber} lost its heading/detail structure.`)
-      add(`s26.hazard.${hazardNumber}.title`, 'heading', 'risk-hazard-title', detail.heading)
-      add(`s26.hazard.${hazardNumber}.detail`, 'paragraph', 'risk-hazard-detail', detail.detail)
+        throw new Error(`Reader pilot slide 28 risk ${hazardNumber} lost its heading/detail structure.`)
+      add(`s28.hazard.${hazardNumber}.title`, 'heading', 'risk-hazard-title', detail.heading)
+      add(`s28.hazard.${hazardNumber}.detail`, 'paragraph', 'risk-hazard-detail', detail.detail)
       hazardNumber += 1
     })
   })
-  add('s26.takeaway', 'takeaway', 'source-takeaway', slide.visualData.takeaway[0])
-  add('s26.note', 'note', 'presenter-note', slide.note, { importance: 'supplement' })
+  add('s28.takeaway', 'takeaway', 'source-takeaway', slide.visualData.takeaway[0])
+  add('s28.note', 'note', 'presenter-note', slide.note, { importance: 'supplement' })
   return items
 }
 
@@ -292,16 +292,16 @@ export function buildPilotModel(slides) {
   const s07 = sourceSlide(slides, 7)
   const s13 = sourceSlide(slides, 13)
   const s16 = sourceSlide(slides, 16)
-  const s21 = sourceSlide(slides, 21)
-  const s26 = sourceSlide(slides, 26)
+  const s23 = sourceSlide(slides, 23)
+  const s28 = sourceSlide(slides, 28)
   const slide16 = buildSlide16(s16)
   const inventory = [
     ...buildSlide06(s06),
     ...buildSlide07(s07),
     ...buildSlide13(s13),
     ...slide16.items,
-    ...buildSlide21(s21),
-    ...buildSlide26(s26),
+    ...buildSlide23(s23),
+    ...buildSlide28(s28),
   ]
   const allocations = validateCoverage(inventory, PILOT_PAGE_PLAN)
   const sourceCounts = Object.fromEntries([...PILOT_SOURCE_COUNTS].map(([number, expected]) => {
@@ -314,7 +314,7 @@ export function buildPilotModel(slides) {
       throw new Error(`Reader pilot slide ${number} expected ${expectedPages} v3 pages, found ${pages.length}.`)
     return [number, { expected, actual, pages: expectedPages }]
   }))
-  const sourceByNumber = new Map([s06, s07, s13, s16, s21, s26].map(slide => [slide.number, slide]))
+  const sourceByNumber = new Map([s06, s07, s13, s16, s23, s28].map(slide => [slide.number, slide]))
   const itemById = new Map(inventory.map(item => [item.id, item]))
   const pages = PILOT_PAGE_PLAN.map((page, index) => ({
     ...page,

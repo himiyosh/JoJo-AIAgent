@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from 'playwright-chromium'
 import { extractRecipeData } from '../reader/extract-visuals.mjs'
+import { SLIDE_RECIPES } from '../reader/slide-recipes.mjs'
 import { normalizeBase, startStaticServer } from './lib/static-server.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -11,8 +12,8 @@ const CHAPTER_NUMBERS = new Map([
   [5, '01'],
   [12, '02'],
   [15, '03'],
-  [19, '04'],
-  [24, '05'],
+  [21, '04'],
+  [26, '05'],
 ])
 
 function readArg(name, fallback) {
@@ -116,10 +117,26 @@ async function visibleOverflow(locator) {
 async function framePositions(group) {
   return group.evaluate((root) => {
     const selectors = ['.rt__tabs', '.rt__stage', '.rt__bar']
-    return Object.fromEntries(selectors.map(selector => [
-      selector,
-      Math.round((root.querySelector(selector)?.getBoundingClientRect().top ?? 0) * 10) / 10,
-    ]))
+    return Object.fromEntries(selectors.flatMap((selector) => {
+      const rect = root.querySelector(selector)?.getBoundingClientRect()
+      return [
+        [`${selector}:top`, Math.round((rect?.top ?? 0) * 10) / 10],
+        [`${selector}:height`, Math.round((rect?.height ?? 0) * 10) / 10],
+      ]
+    }))
+  })
+}
+
+async function slidePositions(slide) {
+  return slide.evaluate((root) => {
+    const selectors = ['h1', '.eyebrow', '.rt', '.tk']
+    return Object.fromEntries(selectors.flatMap((selector) => {
+      const rect = root.querySelector(selector)?.getBoundingClientRect()
+      return [
+        [`${selector}:top`, Math.round((rect?.top ?? 0) * 10) / 10],
+        [`${selector}:height`, Math.round((rect?.height ?? 0) * 10) / 10],
+      ]
+    }))
   })
 }
 
@@ -186,6 +203,17 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
       },
       foregroundZ: [...root.querySelectorAll('.section__context, h1, .section__lead, .section__route')]
         .map(element => getComputedStyle(element).zIndex),
+      foregroundAlign: [...root.querySelectorAll('.section__context, h1, .section__lead, .section__route')]
+        .map(element => getComputedStyle(element).textAlign),
+      routeJustify: getComputedStyle(root.querySelector('.section__route')).justifyContent,
+      compositionCenterDelta: (() => {
+        const rects = [...root.querySelectorAll('.section__context, h1, .section__lead, .section__route')]
+          .map(element => element.getBoundingClientRect())
+        const left = Math.min(...rects.map(rect => rect.left))
+        const right = Math.max(...rects.map(rect => rect.right))
+        return Math.abs((left + right - bounds.left - bounds.right) / 2)
+      })(),
+      markCenterDelta: mark ? Math.abs((mark.left + mark.right - bounds.left - bounds.right) / 2) : Infinity,
       rightRatio: (bounds.right - numeral.right) / bounds.width,
       bottomGap: bounds.bottom - numeral.bottom,
       titleOverlap: titleRects.some(rect => overlaps(numeral, rect)),
@@ -203,6 +231,9 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
     && metrics.wrapper.userSelect === 'none'
     && metrics.wrapper.zIndex === '0', `Slide ${slideNumber}: chapter numeral wrapper differs from the approved full-slide layer.`)
   assert(metrics.foregroundZ.every(zIndex => zIndex === '1'), `Slide ${slideNumber}: foreground is not explicitly above the numeral.`)
+  assert(metrics.foregroundAlign.every(alignment => alignment === 'center')
+    && metrics.routeJustify === 'center', `Slide ${slideNumber}: chapter composition is not centered.`)
+  assert(metrics.compositionCenterDelta <= 1 && metrics.markCenterDelta <= 1, `Slide ${slideNumber}: chapter axis is off-center by ${metrics.compositionCenterDelta}px (mark ${metrics.markCenterDelta}px).`)
   assert(Math.abs(metrics.rightRatio - 0.025) <= 0.002 && Math.abs(metrics.bottomGap) <= 1, `Slide ${slideNumber}: chapter numeral is not anchored at right 2.5% / bottom 0.`)
   assert(!metrics.titleOverlap && !metrics.markOverlap, `Slide ${slideNumber}: chapter numeral overlaps foreground content.`)
 }
@@ -253,17 +284,103 @@ async function testTabs(page, baseUrl, slideNumber) {
     assert(page.url() === slideUrl, `Slide ${slideNumber}: tab keyboard input advanced the deck.`)
 
     const baseline = await framePositions(group)
+    const slideBaseline = await slidePositions(slide)
     for (let tabIndex = 0; tabIndex < count; tabIndex += 1) {
       await tabs.nth(tabIndex).click()
-      await page.waitForTimeout(300)
+      for (const delay of [0, 30, 30, 60, 120]) {
+        await page.waitForTimeout(delay)
+        const frameDelta = maxPositionDelta(baseline, await framePositions(group))
+        const slideDelta = maxPositionDelta(slideBaseline, await slidePositions(slide))
+        assert(frameDelta <= 1, `Slide ${slideNumber}: tab ${tabIndex + 1} shifted the frame by ${frameDelta}px during transition.`)
+        assert(slideDelta <= 1, `Slide ${slideNumber}: tab ${tabIndex + 1} shifted the outer slide by ${slideDelta}px during transition.`)
+      }
       const selected = group.locator('[role="tab"][aria-selected="true"]')
       assert(await selected.count() === 1, `Slide ${slideNumber}: expected exactly one selected tab.`)
       assert(await selected.getAttribute('tabindex') === '0', `Slide ${slideNumber}: selected tab is not in the tab order.`)
       assert(await panel.getAttribute('aria-labelledby') === await selected.getAttribute('id'), `Slide ${slideNumber}: panel label is disconnected.`)
-      const delta = maxPositionDelta(baseline, await framePositions(group))
-      assert(delta <= 1, `Slide ${slideNumber}: tab ${tabIndex + 1} shifted the frame by ${delta}px.`)
     }
   }
+}
+
+async function testMcpDiagram(slide) {
+  const comparison = slide.locator('.api-mcp')
+  assert(await comparison.count() === 1, 'Slide 11: API/MCP switch is missing or duplicated.')
+  const tabs = comparison.locator('[role="tab"]')
+  assert(await tabs.count() === 2, 'Slide 11: API/MCP switch must expose exactly two states.')
+  assert(await tabs.nth(0).textContent().then(text => text?.includes('REST API'))
+    && await tabs.nth(1).textContent().then(text => text?.includes('MCP')), 'Slide 11: switch labels are incomplete.')
+
+  const expected = [
+    ['rest', 'サービスの機能を、HTTPで直接呼ぶ', 'REST endpoint'],
+    ['mcp', 'AIと道具のつなぎ方を、共通化する', 'MCP Server'],
+  ]
+  for (let index = 0; index < expected.length; index += 1) {
+    await tabs.nth(index).click()
+    await new Promise(resolve => setTimeout(resolve, 220))
+    const panel = comparison.locator('[role="tabpanel"]')
+    const state = await panel.evaluate((root) => ({
+      mode: root.getAttribute('data-mode'),
+      text: root.textContent.replace(/\s+/g, ' ').trim(),
+      nodeOverflow: [...root.querySelectorAll('.api-mcp__node')]
+        .map(element => Math.max(element.scrollWidth - element.clientWidth, element.scrollHeight - element.clientHeight)),
+    }))
+    assert(state.mode === expected[index][0]
+      && state.text.includes(expected[index][1])
+      && state.text.includes(expected[index][2]), `Slide 11: ${expected[index][0]} state is incomplete.`)
+    assert(state.nodeOverflow.every(overflow => overflow <= 1), `Slide 11: ${expected[index][0]} state overflows by ${JSON.stringify(state.nodeOverflow)}.`)
+    if (state.mode === 'rest') {
+      const restFlow = await panel.evaluate(root => ({
+        lanes: root.querySelectorAll('.api-mcp__rest-lane').length,
+        label: root.querySelector('.api-mcp__diagram--rest')?.getAttribute('aria-label'),
+        animationNames: [...root.querySelectorAll('.api-mcp__rest-lane')]
+          .map(element => getComputedStyle(element, '::after').animationName),
+        animationFillModes: [...root.querySelectorAll('.api-mcp__rest-lane')]
+          .map(element => getComputedStyle(element, '::after').animationFillMode),
+      }))
+      assert(restFlow.lanes === 2
+        && ['①', '②', '③', '④'].every(step => restFlow.label?.includes(step))
+        && restFlow.animationNames.every(name => name.startsWith('apiMcpRestFlow')), `Slide 11: REST request/result animation is incomplete: ${JSON.stringify(restFlow)}`)
+      assert(restFlow.animationFillModes.every(mode => mode === 'backwards'), `Slide 11: REST animation exposes a marker before its phase starts: ${JSON.stringify(restFlow.animationFillModes)}`)
+    }
+    else {
+      assert(await panel.locator('h3').count() === 1, 'Slide 11: MCP state exposes duplicate headings.')
+      const mcpFlow = await panel.locator('.plug svg').evaluate((svg) => {
+        const nodes = new Map([...svg.querySelectorAll('[data-node]')]
+          .map(element => [element.getAttribute('data-node'), element.getBBox()]))
+        const labels = [...svg.querySelectorAll('[data-fit]')].map((element) => {
+          const bounds = nodes.get(element.getAttribute('data-fit'))
+          const rect = element.getBBox()
+          return {
+            text: element.textContent.trim(),
+            overflow: bounds
+              ? Math.max(0, bounds.x - rect.x, rect.x + rect.width - bounds.x - bounds.width,
+                  bounds.y - rect.y, rect.y + rect.height - bounds.y - bounds.height)
+              : Infinity,
+          }
+        })
+        return {
+          labels,
+          animationNames: [...svg.querySelectorAll('.mcp__flow')]
+            .map(element => getComputedStyle(element).animationName),
+        }
+      })
+      assert(mcpFlow.labels.length >= 12
+        && mcpFlow.labels.every(item => item.overflow <= 1), `Slide 11: MCP labels overflow their nodes: ${JSON.stringify(mcpFlow.labels.filter(item => item.overflow > 1))}`)
+      assert(mcpFlow.animationNames.length === 2
+        && mcpFlow.animationNames.every(name => name.startsWith('mcpFlow')), `Slide 11: MCP request/result animation is incomplete: ${JSON.stringify(mcpFlow.animationNames)}`)
+    }
+    const overflow = await visibleOverflow(slide)
+    assert(overflow.length === 0, `Slide 11: ${expected[index][0]} state overflows the slide: ${JSON.stringify(overflow)}`)
+  }
+
+  const bridge = await comparison.locator('.api-mcp__bar').textContent()
+  assert(bridge?.includes('MCP Server の内側で REST API を使える'), 'Slide 11: the REST/MCP relationship is missing.')
+
+  const recipe = SLIDE_RECIPES.find(item => item.number === 11)
+  assert(recipe, 'Slide 11: Reader recipe is missing.')
+  const extracted = await extractRecipeData(slide, recipe, 11)
+  assert(JSON.stringify(extracted.states.map(state => state.title)) === JSON.stringify(expected.map(item => item[1])),
+    `Slide 11: legacy Reader headings are incorrect: ${JSON.stringify(extracted.states.map(state => state.title))}`)
 }
 
 async function testReaderDeepLink(browser, server, target) {
@@ -307,7 +424,7 @@ async function testReaderDeepLink(browser, server, target) {
   }, target)
   assert(state.hash === `#slide-${target}`, `Reader cold load changed slide ${target} to ${state.hash}.`)
   assert(state.offset <= 1, `Reader cold load left slide ${target} at a ${state.offset}px offset.`)
-  assert(state.counter?.includes(`${String(target).padStart(2, '0')} / 31`), `Reader cold load counter is wrong for slide ${target}.`)
+  assert(state.counter?.includes(`${String(target).padStart(2, '0')} / 33`), `Reader cold load counter is wrong for slide ${target}.`)
   assert(state.activeSlide === '', `Reader cold load unexpectedly moved focus into ${state.activeSlide}.`)
   assert(state.events.length === 0, `Reader cold load polluted history for slide ${target}: ${JSON.stringify(state.events)}`)
 
@@ -359,7 +476,7 @@ async function testReaderHistory(browser, server) {
     counter: document.querySelector('#slide-21 .reader-page__position')?.textContent?.replace(/\s+/g, ' ').trim(),
   }))
   assert(backState.activeSlide === 'slide-21', `Reader Back returned focus to an off-screen slide: ${backState.activeSlide}`)
-  assert(backState.counter?.includes('21 / 31'), 'Reader Back did not restore the slide 21 counter.')
+  assert(backState.counter?.includes('21 / 33'), 'Reader Back did not restore the slide 21 counter.')
   await page.goForward()
   await waitForReaderSlide(page, 22)
   assert(await page.locator('dialog.reader-dialog[open]').count() === 0, 'Reader Forward unexpectedly reopened a dialog.')
@@ -496,7 +613,7 @@ async function testReaderViewportFit(browser, server, viewport) {
     })
   })
 
-  assert(results.length === 31, `Reader ${viewport.width}x${viewport.height} contains ${results.length} pages.`)
+  assert(results.length === 33, `Reader ${viewport.width}x${viewport.height} contains ${results.length} pages.`)
   for (const result of results) {
     const label = `Reader page ${result.number} at ${viewport.width}x${viewport.height}`
     assert(Math.abs(result.height - viewport.height) <= 1, `${label} is ${result.height}px high.`)
@@ -525,7 +642,7 @@ async function testReaderViewportFit(browser, server, viewport) {
 }
 
 async function testReader(browser, server, screenshots) {
-  for (const target of [31, 21, 1, 31, 21])
+  for (const target of [33, 21, 1, 33, 21])
     await testReaderDeepLink(browser, server, target)
   await testReaderHistory(browser, server)
   await testReaderDialogNavigation(browser, server, {
@@ -564,13 +681,13 @@ async function testReader(browser, server, screenshots) {
   assert((await fetch(`${server.baseUrl}reader-legacy/reader.js`)).ok, 'Reader script does not resolve under the production base.')
 
   const pages = page.locator('article.reader-page')
-  assert(await pages.count() === 31, 'Reader does not contain 31 snap pages.')
-  assert(await page.locator('dialog.reader-dialog--detail').count() === 31, 'Reader does not contain 31 detail dialogs.')
-  assert(await page.locator('aside.reader-note').count() === 31, 'Reader does not retain 31 presenter notes.')
-  assert(await page.locator('main.reader-pages').count() === 1 && await page.locator('h1').count() === 1 && await page.locator('.reader-page__title h2').count() === 31, 'Reader landmarks or heading hierarchy are incomplete.')
-  assert(await page.locator('figure[data-reader-visual]').count() === 31, 'Reader does not contain one native portrait visual per page.')
+  assert(await pages.count() === 33, 'Reader does not contain 33 snap pages.')
+  assert(await page.locator('dialog.reader-dialog--detail').count() === 33, 'Reader does not contain 33 detail dialogs.')
+  assert(await page.locator('aside.reader-note').count() === 33, 'Reader does not retain 33 presenter notes.')
+  assert(await page.locator('main.reader-pages').count() === 1 && await page.locator('h1').count() === 1 && await page.locator('.reader-page__title h2').count() === 33, 'Reader landmarks or heading hierarchy are incomplete.')
+  assert(await page.locator('figure[data-reader-visual]').count() === 33, 'Reader does not contain one native portrait visual per page.')
   assert(await page.locator('dialog#reader-search-dialog').count() === 1 && await page.locator('#reader-search-data').count() === 1, 'Reader search dialog or static search index is missing.')
-  for (const [slideNumber, expectedSources] of [[7, 2], [13, 12], [20, 2]]) {
+  for (const [slideNumber, expectedSources] of [[7, 2], [13, 12], [22, 2]]) {
     const sourceCount = await page.locator(`#reader-dialog-${slideNumber} .reader-sources a`).count()
     assert(sourceCount === expectedSources, `Reader slide ${slideNumber} retained ${sourceCount}/${expectedSources} RevealTabs sources.`)
   }
@@ -586,7 +703,7 @@ async function testReader(browser, server, screenshots) {
   assert(scrollerStyle.behavior === 'auto', 'Reader does not disable smooth scrolling for reduced motion.')
 
   const manifest = JSON.parse(await fs.readFile(path.join(out, 'reader-legacy', 'reader-manifest.json'), 'utf8'))
-  assert(manifest.source === 'slides.md' && manifest.slides?.length === 31, 'Reader manifest is missing its 31 canonical slide mappings.')
+  assert(manifest.source === 'slides.md' && manifest.slides?.length === 33, 'Reader manifest is missing its 33 canonical slide mappings.')
   assert(manifest.slides.every((entry, index) => entry.number === index + 1 && entry.note && entry.type && entry.variant), 'Reader manifest has an incomplete slide mapping.')
   assert(manifest.slides.every(entry => Object.values(entry.visualFragments).every(count => count > 0)), 'Reader manifest accepted a missing canonical visual fragment.')
   const readerImages = await fs.readdir(path.join(out, 'reader-legacy', 'images')).catch(error => error.code === 'ENOENT' ? [] : Promise.reject(error))
@@ -604,6 +721,38 @@ async function testReader(browser, server, screenshots) {
       const caption = visual?.querySelector('figcaption')
       const controls = [...element.querySelectorAll('.reader-page__controls > *')].map(control => control.getBoundingClientRect())
       const meaningfulSelector = 'svg, section, blockquote, ol, ul, dl, .pv-cover__loop, .pv-chapter__mark, .pv-nested__layer, .pv-closing__halo, .pv-split__axis, .pv-launch__spine, .pv-equation__beam, .pv-sources__rail'
+      const titleH2 = element.querySelector('.reader-page__title h2')
+      // Real rendered line-break scan (Range.getClientRects per character), not a
+      // text-length heuristic: flags a line whose first character is a closing
+      // bracket/punctuation/nakaguro/unescaped arrow-or-slash — the same class of
+      // defect documented in DESIGN.md §132 (word-internal/orphan-punctuation breaks).
+      const badLeadingRe = /^[」』）\)】〕》〉、。，．,.·・：:；;！!？?ー]/
+      function titleLines(node) {
+        if (!node?.firstChild) return []
+        const text = node.textContent
+        const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT)
+        const chars = []
+        let n
+        while ((n = walker.nextNode())) {
+          const range = document.createRange()
+          for (let i = 0; i < n.nodeValue.length; i++) {
+            range.setStart(n, i); range.setEnd(n, i + 1)
+            const rects = range.getClientRects()
+            chars.push({ ch: n.nodeValue[i], top: rects.length ? Math.round(rects[0].top) : null })
+          }
+        }
+        const lines = []
+        let cur = ''; let top = null
+        for (const c of chars) {
+          if (top === null) top = c.top
+          if (c.top !== top) { lines.push(cur); cur = ''; top = c.top }
+          cur += c.ch
+        }
+        if (cur) lines.push(cur)
+        return lines
+      }
+      const titleLineList = titleH2 ? titleLines(titleH2) : []
+      const titleBadLeading = titleLineList.slice(1).some(line => badLeadingRe.test(line.trim()))
       return {
         height: element.getBoundingClientRect().height,
         internalOverflow: element.scrollHeight - element.clientHeight,
@@ -613,6 +762,9 @@ async function testReader(browser, server, screenshots) {
         counter: element.querySelector('.reader-page__position')?.textContent?.replace(/\s+/g, ' ').trim(),
         title: element.querySelector('.reader-page__title h2')?.textContent?.trim() ?? '',
         titleId: element.querySelector('.reader-page__title h2')?.id ?? '',
+        titleWordBreak: titleH2 ? getComputedStyle(titleH2).wordBreak : '',
+        titleLines: titleLineList,
+        titleBadLeading,
         visualKind: visual?.getAttribute('data-reader-visual-kind') ?? '',
         visualText: visual?.textContent?.replace(/\s+/g, '').length ?? 0,
         visualStructure: visual?.querySelectorAll(meaningfulSelector).length ?? 0,
@@ -629,8 +781,10 @@ async function testReader(browser, server, screenshots) {
     assert(Math.abs(metrics.height - 844) <= 1, `Reader page ${number} is ${metrics.height}px instead of one 844px viewport.`)
     assert(metrics.internalOverflow <= 1 && metrics.stageOverflow <= 1, `Reader page ${number} overflows (${metrics.internalOverflow}px article, ${metrics.stageOverflow}px stage).`)
     assert(metrics.snapAlign === 'start' && metrics.snapStop === 'always', `Reader page ${number} is missing snap alignment or stop.`)
-    assert(metrics.counter?.includes(`${String(number).padStart(2, '0')} / 31`), `Reader page ${number} counter is incorrect.`)
+    assert(metrics.counter?.includes(`${String(number).padStart(2, '0')} / 33`), `Reader page ${number} counter is incorrect.`)
     assert(metrics.title && metrics.titleId === `slide-title-${number}`, `Reader page ${number} title is missing or disconnected.`)
+    assert(metrics.titleWordBreak === 'auto-phrase', `Reader page ${number} title lost its word-break:auto-phrase protection (mid-word break risk).`)
+    assert(!metrics.titleBadLeading, `Reader page ${number} title wraps with a bad line-start character: ${JSON.stringify(metrics.titleLines)}`)
     assert(metrics.visualKind && metrics.visualStructure >= 1, `Reader page ${number} lacks a meaningful native visual structure.`)
     assert(metrics.visualText >= 4 && metrics.visualText <= 380, `Reader page ${number} has ${metrics.visualText} visible visual characters.`)
     assert(metrics.figure && metrics.figure.width >= 300 && metrics.figure.height >= 120, `Reader page ${number} portrait visual is too small at 390x844.`)
@@ -642,18 +796,18 @@ async function testReader(browser, server, screenshots) {
     assert(metrics.controls.every(rect => rect.width >= 44 && rect.height >= 44), `Reader page ${number} has an undersized navigation control.`)
   }
 
-  const representative = [5, 7, 9, 13, 14, 16, 17, 20, 21, 26, 29]
+  const representative = [5, 7, 9, 13, 14, 16, 17, 19, 20, 22, 23, 28, 31]
   for (const number of representative) {
     const visual = await page.locator(`#slide-${number} [data-reader-visual]`).boundingBox()
     assert(visual && visual.width >= 300 && visual.height >= 120, `Reader slide ${number} does not preserve a legible native portrait visual.`)
   }
 
   const rawHtml = await (await fetch(`${server.baseUrl}reader-legacy/`)).text()
-  assert((rawHtml.match(/<article\s+class="reader-page\b/g) ?? []).length === 31, 'Reader initial HTML is missing slide pages.')
-  assert((rawHtml.match(/<aside class="reader-note"/g) ?? []).length === 31, 'Reader initial HTML is missing notes.')
-  assert((rawHtml.match(/<dialog class="reader-dialog reader-dialog--detail"/g) ?? []).length === 31, 'Reader initial HTML is missing detail dialogs.')
-  assert((rawHtml.match(/<figure\s+class="portrait-visual/g) ?? []).length === 31, 'Reader initial HTML is missing native portrait visuals.')
-  assert((rawHtml.match(/data-reader-visual-kind=/g) ?? []).length === 31, 'Reader initial HTML is missing visual type metadata.')
+  assert((rawHtml.match(/<article\s+class="reader-page\b/g) ?? []).length === 33, 'Reader initial HTML is missing slide pages.')
+  assert((rawHtml.match(/<aside class="reader-note"/g) ?? []).length === 33, 'Reader initial HTML is missing notes.')
+  assert((rawHtml.match(/<dialog class="reader-dialog reader-dialog--detail"/g) ?? []).length === 33, 'Reader initial HTML is missing detail dialogs.')
+  assert((rawHtml.match(/<figure\s+class="portrait-visual/g) ?? []).length === 33, 'Reader initial HTML is missing native portrait visuals.')
+  assert((rawHtml.match(/data-reader-visual-kind=/g) ?? []).length === 33, 'Reader initial HTML is missing visual type metadata.')
   assert((rawHtml.match(/<img/g) ?? []).length === 0 && !rawHtml.includes('/reader-legacy/images/'), 'Reader initial HTML still references full-slide raster images.')
   assert(rawHtml.includes('id="reader-search-dialog"') && rawHtml.includes('id="reader-search-data"'), 'Reader initial HTML is missing searchable static content.')
   assert(!rawHtml.includes(server.origin), `Reader HTML leaked its temporary build origin: ${server.origin}`)
@@ -696,7 +850,7 @@ async function testReader(browser, server, screenshots) {
   const searchInput = searchDialog.locator('[data-reader-search-input]')
   assert(await searchDialog.getAttribute('open') !== null, 'Reader search dialog did not open.')
   assert(await searchInput.evaluate(element => element === document.activeElement), 'Reader search did not focus its input.')
-  assert(await searchDialog.locator('[data-reader-search-results] a').count() === 31, 'Reader search does not expose all 31 pages before filtering.')
+  assert(await searchDialog.locator('[data-reader-search-results] a').count() === 33, 'Reader search does not expose all 33 pages before filtering.')
   await searchInput.fill('__reader_no_match__')
   assert(await searchDialog.locator('[data-reader-search-results] a').count() === 0, 'Reader search no-match fixture unexpectedly found a page.')
   await page.keyboard.press('Tab')
@@ -738,17 +892,17 @@ async function testReader(browser, server, screenshots) {
     searchDestination.hash === '#slide-18'
       && searchDestination.current === '18'
       && searchDestination.settled === '18'
-      && searchDestination.counter?.includes('18 / 31')
+      && searchDestination.counter?.includes('18 / 33')
       && searchDestination.activeSlide === 'slide-18',
     `Reader search did not synchronize its destination: ${JSON.stringify(searchDestination)}`,
   )
-  await page.goto(`${server.baseUrl}reader-legacy/#slide-21`, { waitUntil: 'networkidle' })
-  await page.locator('.reader-pages[data-reader-ready="true"][data-reader-current="21"]').waitFor()
+  await page.goto(`${server.baseUrl}reader-legacy/#slide-23`, { waitUntil: 'networkidle' })
+  await page.locator('.reader-pages[data-reader-ready="true"][data-reader-current="23"]').waitFor()
 
-  const opener = page.locator('#slide-21 [data-reader-dialog]')
-  const pageTopBeforeDialog = await page.locator('#slide-21').evaluate(element => element.getBoundingClientRect().top)
+  const opener = page.locator('#slide-23 [data-reader-dialog]')
+  const pageTopBeforeDialog = await page.locator('#slide-23').evaluate(element => element.getBoundingClientRect().top)
   await opener.click()
-  const dialog = page.locator('#reader-dialog-21')
+  const dialog = page.locator('#reader-dialog-23')
   assert(await dialog.getAttribute('open') !== null, 'Reader detail dialog did not open.')
   assert(await dialog.locator('[data-reader-close]').evaluate(element => element === document.activeElement), 'Reader dialog did not place focus on its close control.')
   await page.keyboard.press('Shift+Tab')
@@ -768,7 +922,7 @@ async function testReader(browser, server, screenshots) {
   assert(await dialogScroll.evaluate(element => element.scrollTop) === 0, 'Reader PageUp did not scroll the detail dialog back.')
   await dialogScroll.evaluate(element => { element.scrollTop = element.scrollHeight })
   assert(await dialogScroll.evaluate(element => element.scrollTop) > 0, 'Reader dialog content cannot be scrolled.')
-  assert(Math.abs(await page.locator('#slide-21').evaluate(element => element.getBoundingClientRect().top) - pageTopBeforeDialog) <= 1, 'Opening Reader details shifted the slide page.')
+  assert(Math.abs(await page.locator('#slide-23').evaluate(element => element.getBoundingClientRect().top) - pageTopBeforeDialog) <= 1, 'Opening Reader details shifted the slide page.')
   const dialogHash = new URL(page.url()).hash
   const dialogPageTop = await page.locator('.reader-pages').evaluate((element) => {
     const top = element.scrollTop
@@ -785,32 +939,32 @@ async function testReader(browser, server, screenshots) {
   await dialog.evaluate(element => element.dispatchEvent(new MouseEvent('click', { bubbles: true })))
   assert(await dialog.getAttribute('open') === null, 'Reader dialog did not close from a backdrop click.')
 
-  const next = page.locator('#slide-21 .reader-page__controls a[href="#slide-22"]')
+  const next = page.locator('#slide-23 .reader-page__controls a[href="#slide-24"]')
   await next.click()
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-22'), 'Reader next control did not update the hash.')
+  assert(page.url().endsWith('#slide-24'), 'Reader next control did not update the hash.')
   await page.goBack()
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-21'), 'Reader browser Back did not restore the prior page.')
+  assert(page.url().endsWith('#slide-23'), 'Reader browser Back did not restore the prior page.')
   await page.goForward()
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-22'), 'Reader browser Forward did not restore the intended page.')
+  assert(page.url().endsWith('#slide-24'), 'Reader browser Forward did not restore the intended page.')
   await page.goBack()
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-21'), 'Reader second browser Back did not restore the prior page.')
+  assert(page.url().endsWith('#slide-23'), 'Reader second browser Back did not restore the prior page.')
   await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur())
   await page.keyboard.press('ArrowDown')
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-22'), 'Reader ArrowDown did not move to the next page.')
+  assert(page.url().endsWith('#slide-24'), 'Reader ArrowDown did not move to the next page.')
   await page.keyboard.press('PageDown')
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-23'), 'Reader PageDown did not move to the next page.')
+  assert(page.url().endsWith('#slide-25'), 'Reader PageDown did not move to the next page.')
   await page.keyboard.press('ArrowUp')
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-22'), 'Reader ArrowUp did not move to the previous page.')
+  assert(page.url().endsWith('#slide-24'), 'Reader ArrowUp did not move to the previous page.')
   await page.keyboard.press('PageUp')
   await page.waitForTimeout(100)
-  assert(page.url().endsWith('#slide-21'), 'Reader PageUp did not move to the previous page.')
+  assert(page.url().endsWith('#slide-23'), 'Reader PageUp did not move to the previous page.')
 
   await page.evaluate(() => {
     document.documentElement.style.fontSize = '32px'
@@ -918,7 +1072,7 @@ async function testPrimaryReader(browser, server) {
   assert(dataResponse.status() === 200, 'Primary horizontal Reader data does not resolve under the production base.')
   assert(
     config.version === 2
-      && config.slides?.length === 31
+      && config.slides?.length === 33
       && config.slides.every((slide, index) => slide.number === index + 1 && slide.thumbnail),
     'Primary horizontal Reader data has an incomplete canonical mapping.',
   )
@@ -957,7 +1111,7 @@ async function testPrimaryReader(browser, server) {
     }
   })
   assert(
-    state.toc === 31 && state.thumbnails === 31 && state.currentToc === '21' && state.iframeCount === 0,
+    state.toc === 33 && state.thumbnails === 33 && state.currentToc === '21' && state.iframeCount === 0,
     `Primary Reader is not a direct canonical viewer: ${JSON.stringify(state)}`,
   )
   assert(
@@ -989,7 +1143,7 @@ try {
   })
 
   let citeCount = 0
-  for (let number = 1; number <= 31; number += 1) {
+  for (let number = 1; number <= 33; number += 1) {
     await page.goto(`${server.baseUrl}${number}`, { waitUntil: 'networkidle' })
     const slide = page.locator(`.slidev-page-${number} .slidev-layout`)
     await slide.waitFor({ state: 'visible' })
@@ -1005,6 +1159,8 @@ try {
     }
     if (CHAPTER_NUMBERS.has(number))
       await testChapterDivider(slide, number, CHAPTER_NUMBERS.get(number))
+    if (number === 11)
+      await testMcpDiagram(slide)
 
     const citations = slide.locator('.cite > summary')
     citeCount += await citations.count()
@@ -1025,14 +1181,14 @@ try {
         assert(Math.abs(before.y - after.y) <= 1, `Slide ${number}: citation shifted the slide layout.`)
     }
 
-    if (screenshots && [5, 7, 26].includes(number)) {
+    if (screenshots && [5, 7, 28].includes(number)) {
       await page.evaluate(() => (document.activeElement instanceof HTMLElement) && document.activeElement.blur())
       await page.screenshot({ path: path.join(screenshots, `after-slide-${String(number).padStart(2, '0')}.png`) })
     }
   }
   assert(citeCount >= 8, `Expected at least 8 citation controls, found ${citeCount}.`)
 
-  for (const slideNumber of [7, 13, 20])
+  for (const slideNumber of [7, 11, 13, 22])
     await testTabs(page, server.baseUrl, slideNumber)
 
   if (screenshots) {
@@ -1051,7 +1207,7 @@ try {
   await testPrimaryReader(browser, server)
   await testReader(browser, server, screenshots)
   assert(consoleErrors.length === 0, `Browser console errors: ${consoleErrors.join(' | ')}`)
-  console.log('Production QA passed: 31 slides, accessible tabs/citations, direct horizontal Reader, and legacy portrait Reader.')
+  console.log('Production QA passed: 33 slides, accessible tabs/citations, direct horizontal Reader, and legacy portrait Reader.')
 }
 finally {
   await browser.close()
