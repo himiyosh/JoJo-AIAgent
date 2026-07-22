@@ -1566,6 +1566,52 @@ input:focus-visible,
   font-size: 1.15rem;
 }
 
+/* Loop → Graph (single loop is one node inside a bigger execution graph) */
+.pv--loop-graph {
+  display: grid;
+  place-items: center;
+  padding: 0.65rem;
+}
+
+.pv-loop-graph {
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: 22rem;
+  height: 100%;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  gap: 0.4rem;
+}
+
+.pv-loop-graph__bands {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pv-loop-graph__bands li {
+  padding: 0.4rem 0.6rem;
+  border: 1px dashed rgb(251 191 36 / 42%);
+  border-radius: 0.55rem;
+  color: var(--reader-amber);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.pv-loop-graph__bands li:nth-child(2) {
+  border-color: rgb(251 113 133 / 42%);
+  color: var(--reader-rose, #fb7185);
+}
+
+.pv-loop-graph__caption {
+  margin: 0;
+  color: var(--reader-soft);
+  font-size: 0.68rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
 /* Rubberduck */
 .pv--rubberduck {
   display: grid;

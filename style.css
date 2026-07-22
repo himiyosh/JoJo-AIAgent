@@ -327,7 +327,7 @@ html { color-scheme: dark; }
   border: 1px solid color-mix(in srgb, var(--brand-a) 45%, var(--line));
   border-radius: .4rem; padding: .12rem .5rem; flex: none; margin-top: .15rem;
 }
-/* Series title: keep it on one line when it fits (p31), otherwise hang the
+/* Series title: keep it on one line when it fits (p33), otherwise hang the
    opening 「 into the margin so 情報強者 / 情報弱者 line up vertically (p1). */
 .cover__series.is-1line { max-width: none; }
 .cover__series .cs-nowrap { white-space: nowrap; }
@@ -566,15 +566,15 @@ html { color-scheme: dark; }
 .srcfoot b { color: var(--ink-soft); font-weight: 700; }
 
 /* ---- References slide ---- */
-.refs { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem 1.6rem; margin-top: 1rem; }
-.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .75rem .9rem; background: rgba(255,255,255,.02); }
+.refs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem 1.1rem; margin-top: 1rem; }
+.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .7rem .85rem; background: rgba(255,255,255,.02); }
 .refgrp h4 {
-  margin: 0 0 .4rem; font-family: 'JetBrains Mono', monospace; font-size: .72rem;
-  letter-spacing: .14em; text-transform: uppercase; color: var(--brand-a); font-weight: 800;
+  margin: 0 0 .35rem; font-family: 'JetBrains Mono', monospace; font-size: .66rem;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--brand-a); font-weight: 800;
 }
-.refgrp ul { margin: 0; padding-left: 1rem; }
-.refgrp li { font-size: .8rem; line-height: 1.5; color: var(--ink-soft); margin: .15rem 0; }
-.refgrp .u { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); }
+.refgrp ul { margin: 0; padding-left: .95rem; }
+.refgrp li { font-size: .74rem; line-height: 1.42; color: var(--ink-soft); margin: .12rem 0; }
+.refgrp .u { font-family: 'JetBrains Mono', monospace; font-size: .64rem; color: var(--muted); }
 
 /* ---- Pitfalls / icon grid (2×N) ---- */
 .igrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem .9rem; }

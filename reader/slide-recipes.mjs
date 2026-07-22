@@ -158,9 +158,32 @@ export const SLIDE_RECIPES = [
       { key: 'takeaway', selector: '.tk', mode: 'texts', required: true },
     ],
   },
-  { number: 19, type: 'chapter-gate', variant: 'chapter', extracts: chapterExtracts },
+  {
+    number: 19,
+    type: 'quote-editorial',
+    variant: 'xposts',
+    expectedPosts: 2,
+    requirePostDecoration: false,
+    extracts: [
+      { key: 'posts', selector: '.xp', mode: 'xposts', required: true },
+      { key: 'takeaway', selector: '.tk', mode: 'texts', required: true },
+    ],
+  },
   {
     number: 20,
+    type: 'visual-diagram',
+    variant: 'loop-graph',
+    extracts: [
+      { key: 'pills', selector: '.lgraph__pill', mode: 'groups', required: true },
+      { key: 'nodes', selector: '.lgraph__node', mode: 'groups', required: true },
+      { key: 'bands', selector: '.lgraph__band', mode: 'groups', required: true },
+      { key: 'caption', selector: '.lgraph__cap', mode: 'texts', required: true },
+      { key: 'takeaway', selector: '.tk', mode: 'texts', required: true },
+    ],
+  },
+  { number: 21, type: 'chapter-gate', variant: 'chapter', extracts: chapterExtracts },
+  {
+    number: 22,
     type: 'compare-axis',
     variant: 'single-multi',
     expectedTabs: 2,
@@ -170,7 +193,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 21,
+    number: 23,
     type: 'compare-axis',
     variant: 'decision-picker',
     extracts: [
@@ -179,7 +202,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 22,
+    number: 24,
     type: 'visual-diagram',
     variant: 'patterns',
     extracts: [
@@ -188,7 +211,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 23,
+    number: 25,
     type: 'scenario-flow',
     variant: 'support',
     extracts: [
@@ -196,9 +219,9 @@ export const SLIDE_RECIPES = [
       { key: 'takeaway', selector: '.sink', mode: 'texts', required: true },
     ],
   },
-  { number: 24, type: 'chapter-gate', variant: 'chapter', extracts: chapterExtracts },
+  { number: 26, type: 'chapter-gate', variant: 'chapter', extracts: chapterExtracts },
   {
-    number: 25,
+    number: 27,
     type: 'visual-diagram',
     variant: 'control-loop',
     extracts: [
@@ -208,7 +231,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 26,
+    number: 28,
     type: 'risk-pipeline',
     variant: 'risk',
     extracts: [
@@ -217,7 +240,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 27,
+    number: 29,
     type: 'timeline-rail',
     variant: 'summary',
     extracts: [
@@ -227,7 +250,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 28,
+    number: 30,
     type: 'notice-path',
     variant: 'next-steps',
     extracts: [
@@ -236,7 +259,7 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 29,
+    number: 31,
     type: 'source-map',
     variant: 'references',
     extracts: [
@@ -245,16 +268,16 @@ export const SLIDE_RECIPES = [
     ],
   },
   {
-    number: 30,
+    number: 32,
     type: 'term-constellation',
     variant: 'glossary',
-    expectedTerms: 18,
+    expectedTerms: 19,
     extracts: [
       { key: 'terms', selector: '.gl__item', mode: 'glossary', required: true },
     ],
   },
   {
-    number: 31,
+    number: 33,
     type: 'cover-hero',
     variant: 'closing',
     titleSelector: '.closing__thanks',

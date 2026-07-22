@@ -46,6 +46,8 @@ export const GLOSSARY: GlossaryEntry[] = [
     short: '推論(Reason)と行動(Act)を交互に繰り返す、エージェントの基本パターン（Yao+ 2022）。' },
   { id: 'multi-agent', term: 'マルチエージェント', en: 'Multi-agent',
     short: '役割を分けた複数のエージェントが協調して1つのタスクを解く構成。対義は単一エージェント。' },
+  { id: 'graph-engineering', term: 'グラフエンジニアリング', en: 'Graph Engineering（未確定）',
+    short: '2026年7月に急浮上した呼び名。複数のLoop・Tool・Humanをnode／edge／stateで束ねる設計、と暫定的に整理される。標準化された定義はまだ無い。' },
 ]
 
 /** id of the term to highlight on the Glossary slide (set when a `.gterm` link is clicked). */

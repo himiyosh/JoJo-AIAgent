@@ -194,7 +194,7 @@ class DirectReader {
     this.counter.dataset.directReaderSource = ''
 
     const actions = root.querySelector('.direct-reader__actions')!
-    const contents = createButton('全31枚の目次と検索を開く', 'direct-reader__action', '目次')
+    const contents = createButton('全33枚の目次と検索を開く', 'direct-reader__action', '目次')
     const detail = createButton('現在のスライドの補足と出典を開く', 'direct-reader__action', '補足')
     contents.dataset.directReaderTocOpen = ''
     detail.dataset.directReaderInfo = ''
@@ -345,7 +345,7 @@ class DirectReader {
     dialog.innerHTML = `
       <div class="direct-reader-dialog__sheet">
         <header class="direct-reader-dialog__header">
-          <div><p>SEARCH / CONTENTS</p><h2 id="direct-reader-contents-title">全31枚から探す</h2></div>
+          <div><p>SEARCH / CONTENTS</p><h2 id="direct-reader-contents-title">全33枚から探す</h2></div>
           <button type="button" aria-label="目次を閉じる">×</button>
         </header>
         <div class="direct-reader-dialog__scroll direct-reader-contents">
@@ -854,7 +854,7 @@ export function installDirectReader(router: Router, baseUrl: string) {
       const data = await response.json() as ReaderData
       if (data.version !== 2
         || !Array.isArray(data.slides)
-        || data.slides.length !== 31
+        || data.slides.length !== 33
         || data.slides.some(slide => !slide.thumbnail))
         throw new Error('Reader data is incomplete or has an unsupported version.')
       activeReader = new DirectReader(router, data, base)

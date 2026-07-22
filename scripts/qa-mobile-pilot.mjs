@@ -19,8 +19,8 @@ function readArg(name, fallback) {
 const route = readArg('--route', 'mobile-pilot').replace(/^\/+|\/+$/g, '')
 const fullReader = route === 'reader'
 const EXPECTED_SLIDES = fullReader
-  ? Array.from({ length: 31 }, (_, index) => index + 1)
-  : [6, 16, 26]
+  ? Array.from({ length: 33 }, (_, index) => index + 1)
+  : [6, 16, 28]
 const routeLabel = fullReader ? 'Mobile Reader' : 'Mobile pilot'
 
 function directReaderRoute(urlValue) {
@@ -351,9 +351,9 @@ async function verifyInteraction(page, baseUrl) {
     const searchInput = contentsDialog.locator('input[type="search"]')
     assert(await contentsDialog.evaluate(dialog => dialog.open), 'Reader contents dialog did not open.')
     assert(await searchInput.evaluate(element => element === document.activeElement), 'Reader contents search did not receive focus.')
-    assert.equal(await contentsDialog.locator('[data-direct-reader-toc-item]').count(), 31, 'Reader contents did not expose all 31 slides.')
+    assert.equal(await contentsDialog.locator('[data-direct-reader-toc-item]').count(), 33, 'Reader contents did not expose all 33 slides.')
     const thumbnails = contentsDialog.locator('[data-direct-reader-thumbnail]')
-    assert.equal(await thumbnails.count(), 31, 'Reader contents did not expose all 31 slide thumbnails.')
+    assert.equal(await thumbnails.count(), 33, 'Reader contents did not expose all 33 slide thumbnails.')
     const listLayout = await contentsDialog.locator('.direct-reader-contents__list').evaluate((list) => {
       const first = list.querySelector('button')
       const second = list.querySelectorAll('button')[1]
@@ -451,7 +451,7 @@ async function verifyInteraction(page, baseUrl) {
   await page.goto(`${baseUrl}${route}/#slide-16`, { waitUntil: 'networkidle' })
   await waitForCanonicalFrame(page, 16)
   await page.locator(next).click()
-  const historyNext = fullReader ? 17 : 26
+  const historyNext = fullReader ? 17 : 28
   await waitForCanonicalFrame(page, historyNext)
   await page.goBack()
   await waitForCanonicalFrame(page, 16)
@@ -531,7 +531,7 @@ async function createContactSheet(browser, imageFiles, target) {
     h1{margin:0 0 20px;font-size:28px}.grid{display:grid;grid-template-columns:repeat(${fullReader ? 5 : 3},1fr);align-items:start;gap:18px}
     figure{margin:0;padding:8px;border:1px solid #344058;border-radius:10px;background:#111724}
     img{display:block;width:100%;height:auto}figcaption{padding:7px 3px 1px;color:#aebed2;font:700 12px monospace}
-  </style><body><h1>${fullReader ? 'Canonical horizontal Mobile Reader · all 31 slides' : 'Canonical horizontal mobile zoom pilot · 06 / 16 / 26'}</h1><div class="grid">${images.map(image => `<figure><img src="${image.data}"><figcaption>${image.name}</figcaption></figure>`).join('')}</div></body></html>`)
+  </style><body><h1>${fullReader ? 'Canonical horizontal Mobile Reader · all 33 slides' : 'Canonical horizontal mobile zoom pilot · 06 / 16 / 28'}</h1><div class="grid">${images.map(image => `<figure><img src="${image.data}"><figcaption>${image.name}</figcaption></figure>`).join('')}</div></body></html>`)
   await page.screenshot({ path: target, fullPage: true })
   await page.close()
 }
@@ -620,19 +620,19 @@ try {
   assertLayout(widePortraitLayout, '430x932')
 
   const landscape = await browser.newPage({ viewport: { width: 844, height: 390 } })
-  await landscape.goto(`${server.baseUrl}${route}/#slide-26`, { waitUntil: 'networkidle' })
-  await waitForCanonicalFrame(landscape, 26)
+  await landscape.goto(`${server.baseUrl}${route}/#slide-28`, { waitUntil: 'networkidle' })
+  await waitForCanonicalFrame(landscape, 28)
   const landscapeLayout = await inspectLayout(landscape)
   assertLayout(landscapeLayout, '844x390')
 
   const deepPage = await browser.newPage({ viewport: { width: 390, height: 844 } })
-  const deepReload = await deepPage.goto(`${server.baseUrl}${route}/#slide-26`, { waitUntil: 'networkidle' })
+  const deepReload = await deepPage.goto(`${server.baseUrl}${route}/#slide-28`, { waitUntil: 'networkidle' })
   assert.equal(deepReload?.status(), 200, 'Mobile pilot deep reload did not return 200.')
-  await waitForCanonicalFrame(deepPage, 26)
+  await waitForCanonicalFrame(deepPage, 28)
   const deepCurrent = fullReader
     ? await deepPage.locator('[data-direct-reader-current]').getAttribute('data-direct-reader-current')
     : await deepPage.locator('[data-mobile-shell]').getAttribute('data-mobile-current')
-  assert.equal(deepCurrent, '26')
+  assert.equal(deepCurrent, '28')
 
   if (screenshots) {
     const output = path.resolve(screenshots)
@@ -652,7 +652,7 @@ try {
       zoom: 2.25,
       name: 'slide-06-zoom-390.png',
     }))
-    for (const slide of [6, 16, 26]) {
+    for (const slide of [6, 16, 28]) {
       files.push(await captureSample(browser, server.baseUrl, output, {
         viewport: { width: 430, height: 932 },
         slide,
@@ -661,12 +661,12 @@ try {
     }
     files.push(await captureSample(browser, server.baseUrl, output, {
       viewport: { width: 844, height: 390 },
-      slide: 26,
-      name: 'slide-26-fit-844x390.png',
+      slide: 28,
+      name: 'slide-28-fit-844x390.png',
     }))
     if (fullReader)
       await captureContentsSample(browser, server.baseUrl, output)
-    await createContactSheet(browser, files, path.join(output, fullReader ? 'mobile-reader-all-31-contact.png' : 'mobile-zoom-pilot-contact.png'))
+    await createContactSheet(browser, files, path.join(output, fullReader ? 'mobile-reader-all-33-contact.png' : 'mobile-zoom-pilot-contact.png'))
     await fs.writeFile(path.join(output, 'layout-report.json'), `${JSON.stringify({
       portrait390: portraitLayout,
       portrait430: widePortraitLayout,

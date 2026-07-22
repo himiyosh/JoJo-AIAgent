@@ -71,23 +71,23 @@ function back() {
 .gl__back:focus-visible { outline: 2px solid var(--brand-a); outline-offset: 2px; }
 
 .gl__grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
-  gap: .18rem .8rem; margin: 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(205px, 1fr));
+  gap: .16rem .7rem; margin: 0;
 }
 .gl__item {
   border: 1px solid var(--line); border-radius: .6rem;
-  padding: .32rem .65rem; background: rgba(255, 255, 255, .02);
+  padding: .28rem .6rem; background: rgba(255, 255, 255, .02);
   transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
 }
 .gl__term {
-  font-size: .86rem; font-weight: 800; line-height: 1.25; color: #f3f6fc;
-  display: flex; align-items: baseline; flex-wrap: wrap; gap: .2rem .45rem;
+  font-size: .82rem; font-weight: 800; line-height: 1.22; color: #f3f6fc;
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: .2rem .4rem;
 }
 .gl__en {
-  font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace; font-size: .58rem; font-weight: 600;
   letter-spacing: .02em; color: var(--brand-a);
 }
-.gl__def { margin: .14rem 0 0; font-size: .68rem; line-height: 1.4; color: var(--ink-soft); }
+.gl__def { margin: .12rem 0 0; font-size: .65rem; line-height: 1.36; color: var(--ink-soft); }
 
 /* highlight when arrived via an inline 用語 link */
 .gl__item.is-hit {

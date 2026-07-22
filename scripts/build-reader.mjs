@@ -410,8 +410,8 @@ export async function buildReader({
       slides.push(portraitSlide)
     }
 
-    if (slides.length !== 31)
-      throw new Error(`Reader expected 31 slides but extracted ${slides.length}.`)
+    if (slides.length !== 33)
+      throw new Error(`Reader expected 33 slides but extracted ${slides.length}.`)
     if (slides.some(slide => !slide.title || (!slide.blocks.length && !slide.tabs.length)))
       throw new Error('Reader extraction produced a slide without a title or readable body.')
     const thumbnailFiles = await fs.readdir(thumbnailsDir)

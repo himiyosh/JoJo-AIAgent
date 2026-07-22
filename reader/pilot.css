@@ -2980,8 +2980,8 @@ input:focus-visible {
 .pilot-visual > .pf07,
 .pilot-visual > .pf13,
 .pilot-visual > .pf16,
-.pilot-visual > .pf21,
-.pilot-visual > .pf26 {
+.pilot-visual > .pf23,
+.pilot-visual > .pf28 {
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -3025,8 +3025,8 @@ input:focus-visible {
 .pf07 :where(p, h3, blockquote, ul, ol),
 .pf13 :where(p, h3, blockquote, ul, ol),
 .pf16 :where(p, blockquote),
-.pf21 :where(p, h3, blockquote, ul),
-.pf26 :where(p, h3, h4, blockquote, ul) {
+.pf23 :where(p, h3, blockquote, ul),
+.pf28 :where(p, h3, h4, blockquote, ul) {
   margin: 0;
 }
 
@@ -4255,28 +4255,28 @@ input:focus-visible {
   line-height: 1.45;
 }
 
-.pf21 {
+.pf23 {
   display: grid;
   min-height: 0;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 0.55rem;
 }
 
-.pf21__context {
+.pf23__context {
   color: var(--pilot-muted);
   font-family: "JetBrains Mono", monospace;
   font-size: 0.8125rem;
   font-weight: 800;
 }
 
-.pf21__principle {
+.pf23__principle {
   color: var(--pilot-text);
   font-size: 1.05rem;
   font-weight: 800;
   line-height: 1.45;
 }
 
-.pf21__decision {
+.pf23__decision {
   display: grid;
   min-height: 0;
   grid-template-rows:
@@ -4287,7 +4287,7 @@ input:focus-visible {
   gap: 0.45rem;
 }
 
-.pf21__choice {
+.pf23__choice {
   display: grid;
   min-height: 0;
   grid-template-columns: 7.3rem minmax(0, 1fr);
@@ -4297,21 +4297,21 @@ input:focus-visible {
   border-radius: 0.85rem;
 }
 
-.pf21__choice--split {
+.pf23__choice--split {
   background: rgb(168 85 247 / 9%);
 }
 
-.pf21__choice--single {
+.pf23__choice--single {
   background: rgb(34 211 238 / 8%);
 }
 
-.pf21__choice-head {
+.pf23__choice-head {
   display: flex;
   align-items: center;
   gap: 0.55rem;
 }
 
-.pf21__choice-icon {
+.pf23__choice-icon {
   display: grid;
   width: 2.7rem;
   height: 2.7rem;
@@ -4322,7 +4322,7 @@ input:focus-visible {
   color: var(--pilot-cyan);
 }
 
-.pf21__choice-icon svg {
+.pf23__choice-icon svg {
   width: 1.8rem;
   height: 1.8rem;
   fill: none;
@@ -4332,20 +4332,20 @@ input:focus-visible {
   stroke-width: 1.6;
 }
 
-.pf21__choice-head div > span {
+.pf23__choice-head div > span {
   color: var(--pilot-muted);
   font-size: 0.8125rem;
   font-weight: 800;
 }
 
-.pf21__choice-title {
+.pf23__choice-title {
   color: var(--pilot-text);
   font-size: 1rem;
   font-weight: 900;
   line-height: 1.35;
 }
 
-.pf21__signals {
+.pf23__signals {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -4355,13 +4355,13 @@ input:focus-visible {
   list-style: none;
 }
 
-.pf21__signal-group {
+.pf23__signal-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(6.8rem, 1fr));
   gap: 0.35rem;
 }
 
-.pf21__signal {
+.pf23__signal {
   display: block;
   padding: 0.18rem 0.45rem;
   border-radius: 0.4rem;
@@ -4370,7 +4370,7 @@ input:focus-visible {
   line-height: 1.35;
 }
 
-.pf21__decision-rule {
+.pf23__decision-rule {
   position: relative;
   display: flex;
   min-height: 3rem;
@@ -4382,7 +4382,7 @@ input:focus-visible {
   font-size: 0.8125rem;
 }
 
-.pf21__decision-rule::before {
+.pf23__decision-rule::before {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -4394,20 +4394,20 @@ input:focus-visible {
   transform: translateX(-50%);
 }
 
-.pf21__decision-rule span,
-.pf21__decision-rule strong {
+.pf23__decision-rule span,
+.pf23__decision-rule strong {
   position: relative;
   z-index: 1;
   padding-inline: 0.45rem;
   background: var(--pilot-bg);
 }
 
-.pf21__decision-rule strong {
+.pf23__decision-rule strong {
   color: var(--pilot-cyan);
   font-size: 1rem;
 }
 
-.pf21__note {
+.pf23__note {
   padding: 0.55rem 0.75rem;
   border-radius: 0.65rem;
   background: rgb(34 211 238 / 8%);
@@ -4415,25 +4415,25 @@ input:focus-visible {
   text-align: center;
 }
 
-.pf26 {
+.pf28 {
   display: grid;
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr) auto auto;
   gap: 0.5rem;
 }
 
-.pf26__intro {
+.pf28__intro {
   color: var(--pilot-soft);
 }
 
-.pf26__lifecycle {
+.pf28__lifecycle {
   display: grid;
   min-height: 0;
   grid-template-rows: 1.15fr 0.9fr 1.15fr;
   gap: 0.45rem;
 }
 
-.pf26__phase {
+.pf28__phase {
   display: grid;
   min-height: 0;
   grid-template-columns: 5.6rem minmax(0, 1fr);
@@ -4443,46 +4443,46 @@ input:focus-visible {
   border-radius: 0.75rem;
 }
 
-.pf26__phase--1 {
+.pf28__phase--1 {
   background: rgb(34 211 238 / 8%);
 }
 
-.pf26__phase--2 {
+.pf28__phase--2 {
   background: rgb(251 191 36 / 8%);
 }
 
-.pf26__phase--3 {
+.pf28__phase--3 {
   background: rgb(168 85 247 / 9%);
 }
 
-.pf26__stage-head {
+.pf28__stage-head {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: 0.2rem;
 }
 
-.pf26__number {
+.pf28__number {
   color: var(--pilot-muted);
   font-family: "JetBrains Mono", monospace;
   font-size: 0.8125rem;
   font-weight: 900;
 }
 
-.pf26__stage-title {
+.pf28__stage-title {
   color: var(--pilot-text);
   font-size: 1.02rem;
   font-weight: 900;
 }
 
-.pf26__stage-subtitle {
+.pf28__stage-subtitle {
   color: var(--pilot-muted);
   font-size: 0.8125rem;
   font-weight: 700;
   line-height: 1.35;
 }
 
-.pf26__hazards {
+.pf28__hazards {
   display: flex;
   min-height: 0;
   flex-direction: column;
@@ -4492,45 +4492,45 @@ input:focus-visible {
   list-style: none;
 }
 
-.pf26__hazard {
+.pf28__hazard {
   display: grid;
   grid-template-columns: 1.55rem minmax(0, 1fr);
   align-items: baseline;
   gap: 0.4rem;
 }
 
-.pf26__hazard-index {
+.pf28__hazard-index {
   color: var(--pilot-muted);
   font-family: "JetBrains Mono", monospace;
   font-size: 0.8125rem;
   font-weight: 800;
 }
 
-.pf26__hazard > div {
+.pf28__hazard > div {
   display: grid;
   min-width: 0;
   grid-template-columns: minmax(6.9rem, 0.9fr) minmax(0, 1.1fr);
   gap: 0.5rem;
 }
 
-.pf26__hazard-title {
+.pf28__hazard-title {
   color: var(--pilot-text);
   font-size: 1rem;
   font-weight: 850;
   line-height: 1.35;
 }
 
-.pf26__hazard-detail {
+.pf28__hazard-detail {
   color: var(--pilot-soft);
   line-height: 1.35;
 }
 
-.pf26__framing {
+.pf28__framing {
   color: var(--pilot-soft);
   line-height: 1.42;
 }
 
-.pf26__takeaway {
+.pf28__takeaway {
   padding: 0.55rem 0.75rem;
   border-radius: 0.65rem;
   background: rgb(168 85 247 / 10%);
@@ -4541,12 +4541,12 @@ input:focus-visible {
   text-align: center;
 }
 
-.pilot-pages[data-pilot-overflow-safe="true"] :where(.pf06, .pf07, .pf13, .pf16, .pf21, .pf26) {
+.pilot-pages[data-pilot-overflow-safe="true"] :where(.pf06, .pf07, .pf13, .pf16, .pf23, .pf28) {
   height: auto;
   min-height: max-content;
 }
 
-.pilot-pages[data-pilot-overflow-safe="true"] :where(.pf06__comparison, .pf07__trait-map, .pf07__autonomy-map, .pf07__goal-board, .pf07__tool-workbench, .pf07__loop-composition, .pf13__nest, .pf13__editor, .pf13__context-window, .pf13__harness-shell, .pf13__loop-panel, .pf16__posts, .pf21__decision, .pf26__lifecycle) {
+.pilot-pages[data-pilot-overflow-safe="true"] :where(.pf06__comparison, .pf07__trait-map, .pf07__autonomy-map, .pf07__goal-board, .pf07__tool-workbench, .pf07__loop-composition, .pf13__nest, .pf13__editor, .pf13__context-window, .pf13__harness-shell, .pf13__loop-panel, .pf16__posts, .pf23__decision, .pf28__lifecycle) {
   min-height: max-content;
 }
 
@@ -4575,7 +4575,7 @@ input:focus-visible {
   margin-top: 0.7rem;
 }
 
-.pilot-pages[data-pilot-overflow-safe="true"] .pf21__decision {
+.pilot-pages[data-pilot-overflow-safe="true"] .pf23__decision {
   grid-template-rows: auto auto auto;
 }
 
@@ -4584,8 +4584,8 @@ input:focus-visible {
   .pf07,
   .pf13,
   .pf16,
-  .pf21,
-  .pf26 {
+  .pf23,
+  .pf28 {
     gap: 0.35rem;
   }
 
@@ -4636,11 +4636,11 @@ input:focus-visible {
     line-height: 1.35;
   }
 
-  .pf21__choice {
+  .pf23__choice {
     padding-block: 0.45rem;
   }
 
-  .pf26__phase {
+  .pf28__phase {
     padding-block: 0.35rem;
   }
 }

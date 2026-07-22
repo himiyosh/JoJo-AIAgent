@@ -303,6 +303,30 @@ function renderRubberduck(slide) {
   `)
 }
 
+function renderLoopGraph(slide) {
+  const data = slide.visualData
+  const start = first(data.pills)?.title || first(data.pills)?.text
+  const done = data.pills?.at(-1)?.title || data.pills?.at(-1)?.text
+  return figure(slide, `
+    <div class="pv-loop-graph">
+      <div class="pv-loop__terminal pv-loop__terminal--start">${text(start, 28)}</div>
+      <ol>
+        ${(data.nodes ?? []).map((node, index) => `
+          <li>
+            ${icon(node, String(index + 1))}
+            <span><b>${text(node.title, 18)}</b><small>${text(node.subtitle, 18)}</small></span>
+          </li>`).join('')}
+      </ol>
+      <div class="pv-loop__terminal pv-loop__terminal--done">${text(done, 28)}</div>
+      <div class="pv-loop__return" aria-hidden="true"><span>↺</span></div>
+      <ul class="pv-loop-graph__bands">
+        ${(data.bands ?? []).map(band => `<li>${text(band.text, 60)}</li>`).join('')}
+      </ul>
+      <p class="pv-loop-graph__caption">${text(first(data.caption), 96)}</p>
+    </div>
+  `)
+}
+
 function renderSingleMulti(slide) {
   return figure(slide, `
     <div class="pv-split">
@@ -492,6 +516,7 @@ const renderers = {
   xposts: renderQuotes,
   'agent-loop': renderAgentLoop,
   rubberduck: renderRubberduck,
+  'loop-graph': renderLoopGraph,
   'single-multi': renderSingleMulti,
   'decision-picker': renderDecision,
   patterns: renderPatterns,
