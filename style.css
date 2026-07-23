@@ -732,7 +732,7 @@ html { color-scheme: dark; }
 .slidev-layout td a:hover { color: #fff; border-bottom-color: var(--brand-a); }
 
 /* takeaway / conclusion: separated from the body, centered as the closing line */
-.tk { margin-top: 1.4rem; text-align: center; text-wrap: balance; }
+.tk { margin-top: 1.4rem; text-align: center; text-wrap: balance; word-break: auto-phrase; }
 .tk.lead, .tk.muted, .tk.concl { max-width: 54em; margin-left: auto; margin-right: auto; }
 .concl { font-size: 1.18rem; color: var(--ink-soft); line-height: 1.55; }
 .concl strong { color: #fff; }

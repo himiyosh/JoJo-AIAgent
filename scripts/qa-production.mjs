@@ -753,6 +753,15 @@ async function testReader(browser, server, screenshots) {
       }
       const titleLineList = titleH2 ? titleLines(titleH2) : []
       const titleBadLeading = titleLineList.slice(1).some(line => badLeadingRe.test(line.trim()))
+      // Regression guard for the broad figure[data-reader-visual] word-break:auto-phrase
+      // rule (reader.css): every pv-* text node carrying Japanese text must compute
+      // auto-phrase, so a future more-specific override can't silently reopen a
+      // mid-word split (the "エンジニアリング"/"コンテンツ" class of bug).
+      const cjkRe = /[\u3040-\u30ff\u3400-\u9fff]/
+      const visualTextNodes = visual ? [...visual.querySelectorAll('h1, h2, h3, h4, p, span, small, dt, dd, li, blockquote')] : []
+      const visualWordBreakViolations = visualTextNodes
+        .filter(node => cjkRe.test(node.textContent) && getComputedStyle(node).wordBreak !== 'auto-phrase')
+        .map(node => node.textContent.trim().slice(0, 24))
       return {
         height: element.getBoundingClientRect().height,
         internalOverflow: element.scrollHeight - element.clientHeight,
@@ -765,6 +774,7 @@ async function testReader(browser, server, screenshots) {
         titleWordBreak: titleH2 ? getComputedStyle(titleH2).wordBreak : '',
         titleLines: titleLineList,
         titleBadLeading,
+        visualWordBreakViolations,
         visualKind: visual?.getAttribute('data-reader-visual-kind') ?? '',
         visualText: visual?.textContent?.replace(/\s+/g, '').length ?? 0,
         visualStructure: visual?.querySelectorAll(meaningfulSelector).length ?? 0,
@@ -785,6 +795,7 @@ async function testReader(browser, server, screenshots) {
     assert(metrics.title && metrics.titleId === `slide-title-${number}`, `Reader page ${number} title is missing or disconnected.`)
     assert(metrics.titleWordBreak === 'auto-phrase', `Reader page ${number} title lost its word-break:auto-phrase protection (mid-word break risk).`)
     assert(!metrics.titleBadLeading, `Reader page ${number} title wraps with a bad line-start character: ${JSON.stringify(metrics.titleLines)}`)
+    assert(metrics.visualWordBreakViolations.length === 0, `Reader page ${number} visual has Japanese text without word-break:auto-phrase (mid-word break risk): ${JSON.stringify(metrics.visualWordBreakViolations)}`)
     assert(metrics.visualKind && metrics.visualStructure >= 1, `Reader page ${number} lacks a meaningful native visual structure.`)
     assert(metrics.visualText >= 4 && metrics.visualText <= 380, `Reader page ${number} has ${metrics.visualText} visible visual characters.`)
     assert(metrics.figure && metrics.figure.width >= 300 && metrics.figure.height >= 120, `Reader page ${number} portrait visual is too small at 390x844.`)
@@ -1152,6 +1163,16 @@ try {
 
     const overflow = await visibleOverflow(slide)
     assert(overflow.length === 0, `Slide ${number} overflows at 1280x720: ${JSON.stringify(overflow)}`)
+    // Regression guard: any Japanese text inside a .tk (takeaway/conclusion) element
+    // must compute word-break:auto-phrase (style.css), so a shared-class change can't
+    // silently reopen a mid-word split (e.g. "複数" -> "複"/"数の", DESIGN.md §133/§134).
+    const tkViolations = await slide.evaluate((root) => {
+      const cjkRe = /[\u3040-\u30ff\u3400-\u9fff]/
+      return [...root.querySelectorAll('.tk')]
+        .filter(node => cjkRe.test(node.textContent) && getComputedStyle(node).wordBreak !== 'auto-phrase')
+        .map(node => node.textContent.trim().slice(0, 24))
+    })
+    assert(tkViolations.length === 0, `Slide ${number}: .tk element lost word-break:auto-phrase (mid-word break risk): ${JSON.stringify(tkViolations)}`)
     assert(await slide.locator('.ico[aria-hidden="true"][role]').count() === 0, `Slide ${number}: decorative Ico has a conflicting role.`)
     if (number === 1) {
       assert(await slide.locator('.cover__reader').count() === 0, 'Cover retained the obsolete mobile Reader CTA.')

@@ -255,6 +255,19 @@ input:focus-visible,
   overflow: hidden;
 }
 
+/* Every recipe-rendered visual (figure[data-reader-visual]) draws its own set of
+   pv-* text elements (headings/labels/captions). Rather than patch each pv-*
+   selector individually (whack-a-mole — the class of bug this generalizes:
+   word-break:auto-phrase must cover ALL Japanese text containers, not just
+   .reader-page__title, or compound words like "エンジニアリング"/"コンテンツ"
+   split mid-word when a recipe wraps to 2+ lines), apply it once, broadly, at
+   low specificity so any more specific override still wins. Safe for Latin-only
+   text (auto-phrase behaves like normal outside CJK runs per spec).
+   See DESIGN.md §133/§134. */
+figure[data-reader-visual] :where(h1, h2, h3, h4, p, span, small, dt, dd, li, blockquote) {
+  word-break: auto-phrase;
+}
+
 .reader-page__title {
   min-width: 0;
 }

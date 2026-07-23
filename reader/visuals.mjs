@@ -58,12 +58,21 @@ function figure(slide, content, extraClass = '') {
     </figure>`
 }
 
+// The series tagline is long enough to wrap on both the cover and closing visuals;
+// without a hint the line-breaker can cut inside "コンテンツ" (content), the last
+// loanword before the closing quote (e.g. "…のためのコ"/"ンテンツ」シリーズ").
+// A <wbr> right before it gives a meaning-preserving break point instead.
+function seriesLabel(value, maxLength) {
+  const escaped = text(value, maxLength)
+  return escaped.includes('コンテンツ') ? escaped.replace('コンテンツ', '<wbr>コンテンツ') : escaped
+}
+
 function renderCover(slide) {
   const data = slide.visualData
   return figure(slide, `
     <div class="pv-cover__orbit">${first(data.hero)}</div>
     <div class="pv-cover__brand">${first(data.brand)}</div>
-    <p class="pv-cover__series">${text(first(data.series), 74)}</p>
+    <p class="pv-cover__series">${seriesLabel(first(data.series), 74)}</p>
     <p class="pv-cover__subtitle">${text(first(data.subtitle), 58)}</p>
   `)
 }
@@ -77,7 +86,7 @@ function renderClosing(slide) {
     <div class="pv-closing__brand">${first(data.brand)}</div>
     <p class="pv-closing__thanks">${text(first(data.thanks), 34)}</p>
     <p class="pv-closing__thesis">${text(first(data.thesis), 76)}</p>
-    <p class="pv-closing__series">${text(first(data.series), 72)}</p>
+    <p class="pv-closing__series">${seriesLabel(first(data.series), 72)}</p>
   `)
 }
 
@@ -483,13 +492,26 @@ function renderGlossary(slide) {
   const terms = slide.visualData.terms ?? []
   const ids = ['prompt-engineering', 'context-engineering', 'harness', 'loop', 'mcp', 'agent']
   const coreTerms = ids.map(id => terms.find(term => term.id === id)).filter(Boolean)
+  // The orbit badges are narrow (~110px at this font-size), too tight for the two
+  // katakana compound terms ending in "エンジニアリング" (engineering) to fit on one
+  // line. Without a hint, the browser's line-breaker cuts inside that loanword
+  // (e.g. "プロンプトエ"/"ンジニアリング") — a mid-word split. A <wbr> at the real
+  // semantic seam (root term + "エンジニアリング") gives the browser a preferred,
+  // meaning-preserving break point instead, matching the compound-term discipline
+  // used elsewhere in the deck (§4/§116: break at word/phrase boundaries, not mid-word).
+  const termLabel = (term) => {
+    const escaped = text(term.term, 28)
+    return escaped.includes('エンジニアリング') && escaped !== 'エンジニアリング'
+      ? escaped.replace('エンジニアリング', '<wbr>エンジニアリング')
+      : escaped
+  }
   return figure(slide, `
     <div class="pv-terms">
       <span class="pv-terms__ring" aria-hidden="true"></span>
       <span class="pv-terms__core"><i></i><b>LOOP</b></span>
       ${coreTerms.map((term, index) => `
         <section style="--pv-index:${index}">
-          <h3>${text(term.term, 28)}</h3>
+          <h3>${termLabel(term)}</h3>
           <small>${text(term.english, 24)}</small>
         </section>`).join('')}
       <p class="pv-terms__count">${terms.length} TERMS · SEARCHABLE</p>
