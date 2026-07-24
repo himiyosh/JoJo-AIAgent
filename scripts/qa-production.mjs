@@ -144,12 +144,61 @@ function maxPositionDelta(before, after) {
   return Math.max(...Object.keys(before).map(key => Math.abs(before[key] - after[key])))
 }
 
+async function testCoverGraph(slide) {
+  const metrics = await slide.evaluate((root) => {
+    const svg = root.querySelector('.hero__svg')
+    const graph = svg?.querySelector('[data-layer="graph"]')
+    const ring = svg?.querySelector('.hero__loop-ring')
+    const graphBox = graph?.getBBox()
+    const ringBox = ring?.getBBox()
+    const viewBox = svg?.viewBox.baseVal
+    const graphNodes = [...(graph?.querySelectorAll('.hero__graph-node') ?? [])]
+    const insideViewBox = Boolean(graphBox && viewBox
+      && graphBox.x >= viewBox.x
+      && graphBox.y >= viewBox.y
+      && graphBox.x + graphBox.width <= viewBox.x + viewBox.width
+      && graphBox.y + graphBox.height <= viewBox.y + viewBox.height)
+    const enclosesRing = Boolean(graphBox && ringBox
+      && graphBox.x < ringBox.x
+      && graphBox.y < ringBox.y
+      && graphBox.x + graphBox.width > ringBox.x + ringBox.width
+      && graphBox.y + graphBox.height > ringBox.y + ringBox.height)
+    const outerNodes = graphNodes.every((node) => {
+      const x = Number(node.getAttribute('cx'))
+      const y = Number(node.getAttribute('cy'))
+      return Math.hypot(x - 166, y - 138) > 96
+    })
+    return {
+      provisional: graph?.getAttribute('data-provisional'),
+      graphLabel: graph?.querySelector('.hero__graph-label')?.textContent?.trim(),
+      graphNote: graph?.querySelector('.hero__graph-note')?.textContent?.trim(),
+      graphNodes: graphNodes.length,
+      graphEdges: graph?.querySelectorAll('.hero__graph-edge').length ?? 0,
+      stageNumbers: [...(svg?.querySelectorAll('.hero__n') ?? [])].map(node => node.textContent?.trim()),
+      stageLabels: [...(svg?.querySelectorAll('.hero__lab') ?? [])].map(node => node.textContent?.trim()),
+      insideViewBox,
+      enclosesRing,
+      outerNodes,
+    }
+  })
+  assert(metrics.provisional === 'true'
+    && metrics.graphLabel === 'GRAPH?'
+    && metrics.graphNote === 'PROVISIONAL', `Cover Graph cue is not explicitly provisional: ${JSON.stringify(metrics)}`)
+  assert(metrics.graphNodes === 4
+    && metrics.graphEdges === 4
+    && metrics.outerNodes, `Cover Graph must be an outer node/edge topology: ${JSON.stringify(metrics)}`)
+  assert(JSON.stringify(metrics.stageNumbers) === JSON.stringify(['1', '2', '3', '4'])
+    && JSON.stringify(metrics.stageLabels) === JSON.stringify(['PROMPT', 'CONTEXT', 'HARNESS', 'LOOP']), `Cover changed the established four-stage axis: ${JSON.stringify(metrics)}`)
+  assert(metrics.insideViewBox && metrics.enclosesRing, `Cover Graph does not enclose the Loop system inside the SVG safe area: ${JSON.stringify(metrics)}`)
+}
+
 async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFontSize = 144) {
   const number = slide.locator('.section__chno')
   assert(await number.count() === 1, `Slide ${slideNumber}: chapter numeral is missing or duplicated.`)
   assert(await number.evaluate(element => element.tagName === 'SPAN' && !element.textContent?.trim()), `Slide ${slideNumber}: chapter numeral wrapper must be an empty span.`)
   assert(await number.getAttribute('data-number') === expectedNumber, `Slide ${slideNumber}: expected chapter numeral ${expectedNumber}.`)
   assert(await number.getAttribute('aria-hidden') === 'true', `Slide ${slideNumber}: chapter numeral is not decorative.`)
+  await slide.evaluate(root => root.getAnimations({ subtree: true }).forEach(animation => animation.finish()))
 
   const metrics = await slide.evaluate((root) => {
     const layer = root.querySelector('.section__chno')
@@ -185,6 +234,11 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
       titleRects.push(...range.getClientRects())
     }
     const bounds = root.getBoundingClientRect()
+    const flow = ['.section__mark', '.section__context', 'h1', '.section__lead', '.section__route']
+      .map(selector => root.querySelector(selector))
+    const flowRects = flow.map(element => element?.getBoundingClientRect())
+    const flowParent = flow[2]?.parentElement
+    const scale = bounds.width / 980
     const result = {
       content: pseudo?.content.replace(/^['"]|['"]$/g, ''),
       fontSize: Number.parseFloat(pseudo?.fontSize ?? '0'),
@@ -213,6 +267,21 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
         const right = Math.max(...rects.map(rect => rect.right))
         return Math.abs((left + right - bounds.left - bounds.right) / 2)
       })(),
+      compositionVerticalCenterDelta: flowRects.every(Boolean)
+        ? Math.abs((flowRects[0].top + flowRects.at(-1).bottom - bounds.top - bounds.bottom) / 2)
+        : Infinity,
+      flow: {
+        directChildren: flow.every(element => element?.parentElement === flowParent),
+        rowGap: Number.parseFloat(getComputedStyle(flowParent).rowGap),
+        margins: flow.map((element) => {
+          const style = getComputedStyle(element)
+          return [Number.parseFloat(style.marginTop), Number.parseFloat(style.marginBottom)]
+        }),
+        gaps: flowRects.slice(1).map((rect, index) => rect.top - flowRects[index].bottom),
+        safeTop: flowRects[0]?.top - bounds.top,
+        safeBottom: bounds.bottom - flowRects.at(-1)?.bottom,
+        scale,
+      },
       markCenterDelta: mark ? Math.abs((mark.left + mark.right - bounds.left - bounds.right) / 2) : Infinity,
       rightRatio: (bounds.right - numeral.right) / bounds.width,
       bottomGap: bounds.bottom - numeral.bottom,
@@ -234,6 +303,15 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
   assert(metrics.foregroundAlign.every(alignment => alignment === 'center')
     && metrics.routeJustify === 'center', `Slide ${slideNumber}: chapter composition is not centered.`)
   assert(metrics.compositionCenterDelta <= 1 && metrics.markCenterDelta <= 1, `Slide ${slideNumber}: chapter axis is off-center by ${metrics.compositionCenterDelta}px (mark ${metrics.markCenterDelta}px).`)
+  assert(metrics.compositionVerticalCenterDelta <= 1, `Slide ${slideNumber}: chapter composition is vertically off-center by ${metrics.compositionVerticalCenterDelta}px.`)
+  assert(metrics.flow.directChildren
+    && Math.abs(metrics.flow.rowGap - 16) <= 0.1
+    && metrics.flow.margins.flat().every(margin => Math.abs(margin) <= 0.1), `Slide ${slideNumber}: chapter rhythm is not owned by one 1rem parent gap: ${JSON.stringify(metrics.flow)}`)
+  assert(metrics.flow.gaps.every(gap => gap >= 2 * metrics.flow.scale)
+    && metrics.flow.gaps[2] >= 12 * metrics.flow.scale
+    && metrics.flow.gaps[3] >= 12 * metrics.flow.scale, `Slide ${slideNumber}: chapter groups overlap or lack title/lead/route breathing room: ${JSON.stringify(metrics.flow.gaps)}`)
+  assert(metrics.flow.safeTop >= 48 * metrics.flow.scale
+    && metrics.flow.safeBottom >= 48 * metrics.flow.scale, `Slide ${slideNumber}: chapter composition violates the 48px safe area: ${JSON.stringify(metrics.flow)}`)
   assert(Math.abs(metrics.rightRatio - 0.025) <= 0.002 && Math.abs(metrics.bottomGap) <= 1, `Slide ${slideNumber}: chapter numeral is not anchored at right 2.5% / bottom 0.`)
   assert(!metrics.titleOverlap && !metrics.markOverlap, `Slide ${slideNumber}: chapter numeral overlaps foreground content.`)
 }
@@ -1177,6 +1255,7 @@ try {
     if (number === 1) {
       assert(await slide.locator('.cover__reader').count() === 0, 'Cover retained the obsolete mobile Reader CTA.')
       assert(!(await slide.textContent()).includes('スマホで拡大'), 'Cover retained obsolete mobile Reader copy.')
+      await testCoverGraph(slide)
     }
     if (CHAPTER_NUMBERS.has(number))
       await testChapterDivider(slide, number, CHAPTER_NUMBERS.get(number))
@@ -1202,7 +1281,7 @@ try {
         assert(Math.abs(before.y - after.y) <= 1, `Slide ${number}: citation shifted the slide layout.`)
     }
 
-    if (screenshots && [5, 7, 28].includes(number)) {
+    if (screenshots && [1, 5, 7, 12, 15, 21, 26, 28].includes(number)) {
       await page.evaluate(() => (document.activeElement instanceof HTMLElement) && document.activeElement.blur())
       await page.screenshot({ path: path.join(screenshots, `after-slide-${String(number).padStart(2, '0')}.png`) })
     }
@@ -1228,7 +1307,7 @@ try {
   await testPrimaryReader(browser, server)
   await testReader(browser, server, screenshots)
   assert(consoleErrors.length === 0, `Browser console errors: ${consoleErrors.join(' | ')}`)
-  console.log('Production QA passed: 33 slides, accessible tabs/citations, direct horizontal Reader, and legacy portrait Reader.')
+  console.log('Production QA passed: 33 slides, cover Graph topology, chapter spacing, accessible tabs/citations, direct horizontal Reader, and legacy portrait Reader.')
 }
 finally {
   await browser.close()

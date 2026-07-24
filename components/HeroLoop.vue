@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// Cover hero motif: the deck's spine as a living loop.
-// Prompt → Context → Harness → Loop (Loop = いま / now), with an orbiting
-// comet conveying clockwise flow and a pulsing brand-diamond core.
+// Cover hero motif: the deck's established four-stage spine inside a wider,
+// explicitly provisional Graph topology. Graph stays unnumbered so it cannot
+// be read as a settled fifth step after Loop.
 defineProps<{ }>()
 </script>
 
@@ -23,8 +23,23 @@ defineProps<{ }>()
         </radialGradient>
       </defs>
 
+      <!-- provisional topology around the established four-stage loop -->
+      <g class="hero__graph" data-layer="graph" data-provisional="true">
+        <path class="hero__graph-hull" d="M18 62 L300 42 L316 218 L24 232 Z" />
+        <path class="hero__graph-edge" d="M18 62 L166 42" />
+        <path class="hero__graph-edge" d="M300 42 L262 138" />
+        <path class="hero__graph-edge" d="M316 218 L166 234" />
+        <path class="hero__graph-edge" d="M24 232 L70 138" />
+        <circle class="hero__graph-node" cx="18" cy="62" r="4.2" />
+        <circle class="hero__graph-node" cx="300" cy="42" r="4.2" />
+        <circle class="hero__graph-node" cx="316" cy="218" r="4.2" />
+        <circle class="hero__graph-node" cx="24" cy="232" r="4.2" />
+        <text x="312" y="18" class="hero__graph-label" text-anchor="end">GRAPH?</text>
+        <text x="312" y="29" class="hero__graph-note" text-anchor="end">PROVISIONAL</text>
+      </g>
+
       <circle cx="166" cy="138" r="124" fill="url(#hlGlow)" />
-      <circle cx="166" cy="138" r="96" fill="none" stroke="url(#hlRing)" stroke-width="2" stroke-opacity="0.5" />
+      <circle class="hero__loop-ring" cx="166" cy="138" r="96" fill="none" stroke="url(#hlRing)" stroke-width="2" stroke-opacity="0.5" />
 
       <!-- orbiting comet (clockwise) -->
       <g class="hero__spin">
@@ -75,6 +90,42 @@ defineProps<{ }>()
   height: auto;
   max-height: 92%;
   overflow: visible;
+}
+
+.hero__graph-hull {
+  fill: none;
+  stroke: #a855f7;
+  stroke-width: 1.2;
+  stroke-opacity: .3;
+  stroke-dasharray: 6 7;
+}
+.hero__graph-edge {
+  fill: none;
+  stroke: url(#hlRing);
+  stroke-width: 1;
+  stroke-opacity: .2;
+}
+.hero__graph-node {
+  fill: #0b0d15;
+  stroke: #a855f7;
+  stroke-width: 1.3;
+  stroke-opacity: .72;
+}
+.hero__graph-label,
+.hero__graph-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  dominant-baseline: central;
+}
+.hero__graph-label {
+  fill: #d8b4fe;
+  font-size: 9px;
+  letter-spacing: .14em;
+}
+.hero__graph-note {
+  fill: #8b93a7;
+  font-size: 6.5px;
+  letter-spacing: .12em;
 }
 
 .hero__n {

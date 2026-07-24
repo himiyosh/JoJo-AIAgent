@@ -366,7 +366,21 @@ html { color-scheme: dark; }
 /* Slidev wraps Markdown in a centered relative container. Keep chapter decorations
    anchored to the full slide instead, so the right numeral never enters the title column. */
 .slidev-layout.section > :has(.section__chno) {
-  position: static; display: flex; flex-direction: column; align-items: center; width: 100%;
+  position: static; display: flex; flex-direction: column; align-items: center;
+  width: 100%; gap: 1rem;
+  /* Optical compensation for the top diamond's rotated bounding box. */
+  padding-top: .56rem;
+}
+/* Markdown wraps the inline numeral span in an empty paragraph. Remove that
+   host from flex layout so it cannot consume a gap or push the composition down. */
+.slidev-layout.section > :has(.section__chno) > :has(> .section__chno) {
+  display: contents;
+  margin: 0;
+}
+/* The wrapper owns vertical rhythm. Reset theme/Markdown margins so every
+   chapter keeps the same positive title→lead and lead→route spacing. */
+.slidev-layout.section > :has(.section__chno) > :is(.section__mark, .section__context, h1, .section__lead, .section__route) {
+  margin: 0;
 }
 .section__context,
 .slidev-layout.section h1,
@@ -376,7 +390,7 @@ html { color-scheme: dark; }
 }
 .section__context {
   width: 100%; max-width: 46rem; text-align: center;
-  margin: 0 0 .8rem; color: color-mix(in srgb, var(--ink-soft) 74%, transparent);
+  color: color-mix(in srgb, var(--ink-soft) 74%, transparent);
   font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 700;
   letter-spacing: .04em;
 }
@@ -388,12 +402,12 @@ html { color-scheme: dark; }
 }
 .section__accent { color: var(--brand-a); }
 .section__lead {
-  width: 100%; margin: .9rem 0 0; max-width: 44em; text-align: center; color: var(--ink-soft);
+  width: 100%; max-width: 44em; text-align: center; color: var(--ink-soft);
   font-size: 1.12rem; text-wrap: balance; word-break: auto-phrase;
 }
 .section__mark {
   position: relative; left: auto; top: auto; width: 2.7rem; height: 2.7rem;
-  flex: none; margin: 0 0 1.15rem; transform: rotate(45deg);
+  flex: none; transform: rotate(45deg);
   border: 1px solid color-mix(in srgb, var(--brand-a) 55%, transparent);
   border-radius: .45rem; z-index: 1;
 }
@@ -404,7 +418,7 @@ html { color-scheme: dark; }
 }
 .section__route {
   display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: .5rem;
-  width: 100%; margin-top: 1.45rem;
+  width: 100%;
 }
 .section__route span {
   padding: .42rem .62rem; border: 1px solid var(--line); border-radius: .45rem;
@@ -436,12 +450,16 @@ html { color-scheme: dark; }
    content slides rely on their click-reveals instead (motion fits what it reveals). */
 @keyframes riseIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: none; } }
 @keyframes chnoIn { from { opacity: 0; transform: translateY(-12px) scale(.93); } to { opacity: 1; transform: none; } }
+@keyframes sectionMarkIn {
+  from { opacity: 0; transform: translateY(-12px) rotate(45deg) scale(.93); }
+  to { opacity: 1; transform: rotate(45deg); }
+}
 @media (prefers-reduced-motion: no-preference) {
   .slidev-layout.section .section__context { animation: riseIn .55s cubic-bezier(.22,1,.36,1) .04s both; }
   .slidev-layout.section h1                { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .12s both; }
   .slidev-layout.section .section__lead    { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .22s both; }
   .slidev-layout.section .section__route   { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .28s both; }
-  .slidev-layout.section .section__mark    { animation: chnoIn .75s cubic-bezier(.16,1,.3,1) both; }
+  .slidev-layout.section .section__mark    { animation: sectionMarkIn .75s cubic-bezier(.16,1,.3,1) both; }
   .slidev-layout.section .section__chno    { animation: chnoIn .90s cubic-bezier(.16,1,.3,1) both; }
   .cover .cover__series { animation: riseIn .60s cubic-bezier(.22,1,.36,1) .12s both; }
   .cover .cover__title  { animation: riseIn .70s cubic-bezier(.22,1,.36,1) .22s both; }
