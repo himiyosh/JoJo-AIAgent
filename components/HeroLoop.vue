@@ -25,7 +25,7 @@ defineProps<{ }>()
 
       <!-- provisional topology around the established four-stage loop -->
       <g class="hero__graph" data-layer="graph" data-provisional="true">
-        <path class="hero__graph-hull" d="M18 62 L300 42 L316 218 L24 232 Z" />
+        <path class="hero__graph-hull" d="M12 30 L320 30 L326 246 L6 246 Z" />
         <path class="hero__graph-edge" d="M18 62 L166 42" />
         <path class="hero__graph-edge" d="M300 42 L262 138" />
         <path class="hero__graph-edge" d="M316 218 L166 234" />

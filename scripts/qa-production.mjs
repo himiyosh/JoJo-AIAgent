@@ -148,9 +148,9 @@ async function testCoverGraph(slide) {
   const metrics = await slide.evaluate((root) => {
     const svg = root.querySelector('.hero__svg')
     const graph = svg?.querySelector('[data-layer="graph"]')
+    const hull = graph?.querySelector('.hero__graph-hull')
     const ring = svg?.querySelector('.hero__loop-ring')
     const graphBox = graph?.getBBox()
-    const ringBox = ring?.getBBox()
     const viewBox = svg?.viewBox.baseVal
     const graphNodes = [...(graph?.querySelectorAll('.hero__graph-node') ?? [])]
     const insideViewBox = Boolean(graphBox && viewBox
@@ -158,11 +158,25 @@ async function testCoverGraph(slide) {
       && graphBox.y >= viewBox.y
       && graphBox.x + graphBox.width <= viewBox.x + viewBox.width
       && graphBox.y + graphBox.height <= viewBox.y + viewBox.height)
-    const enclosesRing = Boolean(graphBox && ringBox
-      && graphBox.x < ringBox.x
-      && graphBox.y < ringBox.y
-      && graphBox.x + graphBox.width > ringBox.x + ringBox.width
-      && graphBox.y + graphBox.height > ringBox.y + ringBox.height)
+    const ringSampleCount = 64
+    const ringSamplesOutsideHull = []
+    if (svg && hull instanceof SVGGeometryElement && ring instanceof SVGGeometryElement) {
+      const hullProbe = hull.cloneNode()
+      hullProbe.style.fill = '#000'
+      hullProbe.style.stroke = 'none'
+      hullProbe.style.visibility = 'hidden'
+      svg.append(hullProbe)
+      const ringLength = ring.getTotalLength()
+      for (let index = 0; index < ringSampleCount; index += 1) {
+        const point = ring.getPointAtLength((ringLength * index) / ringSampleCount)
+        if (!hullProbe.isPointInFill(point))
+          ringSamplesOutsideHull.push(index)
+      }
+      hullProbe.remove()
+    }
+    const enclosesRing = ringSamplesOutsideHull.length === 0
+      && hull instanceof SVGGeometryElement
+      && ring instanceof SVGGeometryElement
     const outerNodes = graphNodes.every((node) => {
       const x = Number(node.getAttribute('cx'))
       const y = Number(node.getAttribute('cy'))
@@ -178,6 +192,8 @@ async function testCoverGraph(slide) {
       stageLabels: [...(svg?.querySelectorAll('.hero__lab') ?? [])].map(node => node.textContent?.trim()),
       insideViewBox,
       enclosesRing,
+      ringSamples: ringSampleCount,
+      ringSamplesOutsideHull,
       outerNodes,
     }
   })
