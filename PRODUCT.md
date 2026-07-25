@@ -36,4 +36,4 @@ brand
 
 ## Accessibility & Inclusion
 
-検索可能な実テキスト、semantic headings、keyboard/hash/history navigation、44px以上のtouch target、明確なfocus、native dialog、reduced motionを維持する。正式な`/reader/`はiframeや内側の閲覧面を作らず、通常Slidevと同じDOMへ操作UIを直接統合する。canonical HTML全31枚を980×552のまま保持し、全体表示、最大400%拡大、パン、全画面、目次・全文検索、補足dialogをtouch／keyboardの両方で操作可能にする。旧portrait版は比較用`/reader-legacy/`へ分離する。390×844、430×932、844×390でviewer chromeをoverflowさせず、色コントラストはWCAG AAを基準とする。
+検索可能な実テキスト、semantic headings、keyboard/hash/history navigation、44px以上のtouch target、明確なfocus、native dialog、reduced motionを維持する。正式な`/reader/`はiframeや内側の閲覧面を作らず、通常Slidevと同じDOMへ操作UIを直接統合する。canonical HTML全33枚を980×552のまま保持し、全体表示、最大400%拡大、パン、全画面、目次・全文検索、補足dialogをtouch／keyboardの両方で操作可能にする。旧portrait版は比較用`/reader-legacy/`へ分離する。390×844、430×932、844×390でviewer chromeをoverflowさせず、色コントラストはWCAG AAを基準とする。

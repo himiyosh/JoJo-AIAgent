@@ -25,7 +25,7 @@ mdc: true
 <strong style="color:#fff">→ キー</strong>で送ると、同じ内容の Before / After を直接見比べられます。
 </p>
 
-<p class="soft mt-5" style="font-size:.9rem">本編 p1–31 は変更していません（別デッキ・別ポート :3031）。</p>
+<p class="soft mt-5" style="font-size:.9rem">本編 p1–33 は変更していません（別デッキ・別ポート :3031）。</p>
 
 </div>
 
@@ -211,7 +211,7 @@ mdc: true
 
 ---
 
-# 作る前に「評価・安全・コスト」を決めておく <span style="font-family:'JetBrains Mono',monospace;font-size:.9rem;letter-spacing:.06em;color:var(--muted);position:absolute;top:.5rem;right:0">現行 · p25</span>
+# 作る前に「評価・安全・コスト」を決めておく <span style="font-family:'JetBrains Mono',monospace;font-size:.9rem;letter-spacing:.06em;color:var(--muted);position:absolute;top:.5rem;right:0">現行 · p27</span>
 
 <div class="cols cols-3 mt-6">
 

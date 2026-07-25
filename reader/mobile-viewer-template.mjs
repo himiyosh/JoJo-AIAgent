@@ -1,4 +1,4 @@
-export const MOBILE_PILOT_SLIDE_NUMBERS = Object.freeze([6, 16, 26])
+export const MOBILE_PILOT_SLIDE_NUMBERS = Object.freeze([6, 16, 28])
 
 function escapeHtml(value = '') {
   return String(value)
@@ -97,7 +97,7 @@ export function renderDirectReaderEntry({
   <script>
     (() => {
       const match = location.hash.match(/^#slide-(\\d+)$/)
-      const number = match ? Math.max(1, Math.min(31, Number(match[1]))) : 1
+      const number = match ? Math.max(1, Math.min(33, Number(match[1]))) : 1
       const target = ${JSON.stringify(routerMode)} === 'hash'
         ? new URL(\`../#/\${number}?reader=true&embedded=true\`, location.href)
         : new URL(\`../\${number}?reader=true&embedded=true\`, location.href)
@@ -252,7 +252,7 @@ export function renderMobileViewer({
         ${fullReader
           ? `<button type="button" class="mobile-contents-shortcut" data-mobile-toc-open aria-haspopup="dialog" aria-controls="mobile-contents-dialog">
               <span aria-hidden="true">⌕</span>
-              <span>全31枚の目次・検索</span>
+              <span>全33枚の目次・検索</span>
             </button>`
           : `<nav class="mobile-samples" aria-label="代表スライドを選ぶ">
           ${viewerSlides.map((slide, index) => `
@@ -298,7 +298,7 @@ export function renderMobileViewer({
      <header class="mobile-dialog__header">
        <div>
          <p>SEARCH / CONTENTS</p>
-         <h2 id="mobile-contents-title">全31枚から探す</h2>
+         <h2 id="mobile-contents-title">全33枚から探す</h2>
        </div>
        <button type="button" data-mobile-toc-close aria-label="目次を閉じる">×</button>
      </header>

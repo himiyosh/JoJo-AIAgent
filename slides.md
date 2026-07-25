@@ -151,7 +151,7 @@ drawings:
 
 <div class="agenda__item">
 <span class="agenda__no">03</span>
-<span class="agenda__txt"><span class="agenda__t">「足場・ループ」の時代</span><span class="agenda__d">Harness → Loop Engineering</span></span>
+<span class="agenda__txt"><span class="agenda__t">「足場・ループ」の時代</span><span class="agenda__d">Harness → Loop Engineering（+ Graphの兆し）</span></span>
 </div>
 
 <div class="agenda__item">
@@ -172,7 +172,7 @@ drawings:
 </div>
 
 <!--
-資料全体の目次です。イントロに続いて全5章——①そもそもAIエージェントとは（賢いチャットとの違い）、②「指示・文脈」の時代（Prompt→Context Engineering）、③「足場・ループ」の時代（Harness→Loop Engineering）、④一体で作るか分けるか（単一 vs マルチ）、⑤勘所とまとめ（評価・落とし穴→要点・次の一歩）、という流れです。前半で土台（定義と仕組み）を固め、後半で“作り方の進化”と実践に進みます。そして今回いちばんの主役は、最後に出てくる Loop（反復の設計）。全体像を先に見せておくと、途中で新しい言葉が出てきても迷子になりません。
+資料全体の目次です。イントロに続いて全5章——①そもそもAIエージェントとは（賢いチャットとの違い）、②「指示・文脈」の時代（Prompt→Context Engineering）、③「足場・ループ」の時代（Harness→Loop Engineering、そして2026年7月に急浮上した「Graph Engineering」という兆しにも触れます）、④一体で作るか分けるか（単一 vs マルチ）、⑤勘所とまとめ（評価・落とし穴→要点・次の一歩）、という流れです。前半で土台（定義と仕組み）を固め、後半で“作り方の進化”と実践に進みます。そして今回いちばんの主役は、最後に出てくる Loop（反復の設計）。全体像を先に見せておくと、途中で新しい言葉が出てきても迷子になりません。
 -->
 
 ---
@@ -369,49 +369,23 @@ LLM が「この道具を、この引数で使いたい」と**宣言**し、外
 
 ---
 
-# MCP ＝ 道具をつなぐ「共通プラグ」
+# REST API と MCP は、役割が違う
 
-<div class="eyebrow">MODEL CONTEXT PROTOCOL · 道具をつなぐ</div>
+<div class="eyebrow">SERVICE CONNECTION / AI CONNECTION · ボタンで切り替え</div>
 
-<div class="note mt-4"><BrandMark name="mcp" class="note__bm"/> <a class="gterm" data-term="mcp"><strong>MCP</strong></a> は、エージェントと<span class="whitespace-nowrap">ツール／データ</span>を繋ぐ<strong><span class="grad whitespace-nowrap">共通の規格</span></strong>。<strong>USB-C のように「挿せばつながる」</strong>。</div>
+<ApiMcpSwitch />
 
-<div class="mcp-vis mt-4">
-
-<div class="mcp-vis__art"><McpPlug /></div>
-
-<div class="mcp-cards">
-
-<div class="card">
-
-<div class="card__ba">BEFORE</div>
-
-### <Ico name="puzzle"/> これまで
-道具ごと・枠組みごとに<strong>専用の“配線”</strong>を自作していた。
-
-</div>
-
-<div class="card accent">
-
-<div class="card__ba">AFTER</div>
-
-### <Ico name="plug"/> MCP のあと
-同じ道具を<strong>どの枠組みでも</strong>再利用。公開サーバを<strong>挿して組み合わせる</strong>だけ。
-
-</div>
-
-</div>
-
-</div>
-
-<div class="tk concl">“配線を書く” 時代から、<span class="grad" style="font-weight:700">“組み合わせる”</span> 時代へ。2026 の事実上の標準に。</div>
+<div class="tk concl">どちらか一方ではありません。<span class="grad" style="font-weight:700">REST API と MCP は重ねて使えます。</span></div>
 
 <Cite :items="[
-  { label: 'modelcontextprotocol.io — Introduction', url: 'https://modelcontextprotocol.io/' },
+  { label: 'MCP 公式 — Architecture', url: 'https://modelcontextprotocol.io/docs/learn/architecture' },
   { label: 'Anthropic — Introducing MCP', url: 'https://www.anthropic.com/news/model-context-protocol' },
+  { label: 'Google Cloud Tech — How MCP actually works', url: 'https://www.youtube.com/watch?v=cGuyrANVi4A' },
+  { label: 'Google Cloud Tech — MCP vs API', url: 'https://www.youtube.com/watch?v=185XGEMefgc' },
 ]" />
 
 <!--
-前ページで出た「道具のつなぎ方の標準化」を、くわしく説明するページです。MCP（Model Context Protocol）は、エージェントとツール／データをつなぐための共通規格。イメージはUSB-Cで、“挿せばつながる”ように道具を接続できます。これまでは、道具ごと・使うフレームワークごとに、専用の“配線”を毎回自作する必要がありました。MCP以降は、同じ道具をどの枠組みからでも再利用でき、公開されているMCPサーバを挿して組み合わせるだけで使えます。つまり“配線を書く”時代から、“組み合わせる”時代へ。2026年には、これが事実上の標準になりつつあります。
+REST API と MCP を同時に詰め込まず、ボタンで片方ずつ見ます。まず REST API。図は、①AIアプリが HTTP で要求を送る、②endpoint が認証して処理先へ振り分ける、③サービスが処理やデータ取得を行う、④JSONなどで結果を返す、という一巡です。接続するサービスごとに、URL、認証、要求と応答のデータ形式を合わせます。次に MCP。アニメーション図は、MCP Host 内の Client が①要求し、Server が②受理、③ToolsやResourcesを利用し、④結果をClientへ戻す流れを示します。こちらが共通化するのは、サービスそのものの通信方法ではなく、AIと道具の会話ルールです。MCP Server の内側では、既存の REST API やローカル機能を使えます。役割の層が違うため、置き換えではなく重ねて使えます。
 -->
 
 ---
@@ -426,7 +400,7 @@ chapter: "02 · 作り方の全体像"
 
 <p class="section__context">作り方の進化 · 全体地図</p>
 
-# 作り方は「<span class="section__accent">外側</span>」へ進化した
+# 作り方は「<span class="section__accent">外側</span>」へ<br><span class="whitespace-nowrap">進化した</span>
 
 <p class="section__lead">Prompt → Context → Harness → Loop。地図と “入れ子” で全体像を。</p>
 
@@ -501,11 +475,11 @@ chapter: "03 · いまの動かし方"
 <p class="section__lead">いま大事なのは “動かし方”。Harness → Loop Engineering。</p>
 
 <div class="section__route" aria-label="この章で扱う内容">
-  <span>現場の転換</span><span>ReActループ</span><span>壁打ち</span>
+  <span>現場の転換</span><span>ReActループ</span><span>壁打ち</span><span>グラフの兆し</span>
 </div>
 
 <!--
-ここから第3章。前章で見た進化のいちばん外側、つまり“いま最も大事なところ”に踏み込みます。キーワードは「足場（Harness）」と「ループ（Loop）」。うまい一言を考えることより、エージェントを“どう動かし続けるか”の設計が主役になる、という話です。
+ここから第3章。前章で見た進化のいちばん外側、つまり“いま最も大事なところ”に踏み込みます。キーワードは「足場（Harness）」と「ループ（Loop）」。うまい一言を考えることより、エージェントを“どう動かし続けるか”の設計が主役になる、という話です。最後には、2026年7月に急浮上した「Graph Engineering」という最新の兆しにも触れます。
 -->
 
 ---
@@ -603,6 +577,64 @@ foot: false
 -->
 
 ---
+foot: false
+---
+
+# 「Loopの次はGraph」? <span class="whitespace-nowrap">まだ数日の</span><span class="grad">“暫定”ワード</span>
+
+<div class="eyebrow">TREND · 2026-07 · GRAPH ENGINEERING（未確定）</div>
+
+<div class="xfeed">
+
+<XPost name="Peter Steinberger" handle="steipete" accent="a" role="OpenClaw 開発者" date="2026-07-18">
+<template #post>Are we still talking loops or did we shift to graphs yet?</template>
+<template #jp>まだ<span class="whitespace-nowrap">“ループ”</span>の話をしてる? それとも、もう<span class="whitespace-nowrap">“グラフ”</span>に移った?</template>
+</XPost>
+
+<XPost name="Hamel Husain" handle="HamelHusain" accent="b" role="LLM Evals 専門家" date="2026-07-18">
+<template #post>New: <em>"Loop Engineering Is Dead. Enter Graph Engineering."</em></template>
+<template #jp>新記事:「<span class="whitespace-nowrap">Loop Engineeringは終わった</span>。<span class="whitespace-nowrap">Graph Engineeringの時代へ</span>」</template>
+</XPost>
+
+</div>
+
+<div class="note mt-3">
+きっかけは<strong>1行の問いかけ</strong>→その<strong class="hot">約4時間半後</strong>に出た“死亡宣告”記事。<span class="whitespace-nowrap">標準化された定義・比較検証はまだ無い</span>（2026-07時点）。
+</div>
+
+<div class="tk concl">新語は鵜呑みにも無視もせず、<span class="whitespace-nowrap">「誰が・いつ・何を根拠に」</span>を先に見る＝<span class="grad" style="font-weight:700">それが「情報弱者にならない」姿勢</span>。</div>
+
+<Cite :items="[
+  { label: 'Peter Steinberger — X post (2026-07-18)', url: 'https://x.com/steipete/status/2078277297791189132' },
+  { label: 'Hamel Husain — “Loop Engineering Is Dead. Enter Graph Engineering” (X, 2026-07-18)', url: 'https://x.com/HamelHusain/status/2078346425621237935' },
+]" />
+
+<!--
+2026年7月に入って急速に広がった新語「Graph Engineering」の、実際の発端を示すページです。きっかけは2026年7月18日朝、OpenClaw開発者のPeter Steinberger氏が投げた「まだループの話をしてる? もうグラフに移った?」という1行の問いかけ。その約4時間半後、LLM評価（Evals）を専門とするHamel Husain氏が「Loop Engineeringは終わった。Graph Engineeringの時代へ」という記事を公開し、翌日にかけて同種の“死亡宣告”フレーズが他のアカウントでも反復されました。ただしこの資料の基準日（2026年7月時点）でも、標準化された定義や比較検証はまだ存在しません。大事なのは、新語が出た瞬間に鵜呑みにも無視もせず、「誰が・いつ・何を根拠に言ったか」を確認する姿勢——それこそがこのシリーズの目指す「情報弱者にならない」態度です。次のページで、この言葉がいま指している中身を、暫定的に図解します。
+-->
+
+---
+
+# 「Graph」は複数の<span class="grad">Loop</span>をつなぐ配線
+
+<div class="eyebrow">GRAPH ENGINEERING（暫定）· NODE / EDGE / STATE</div>
+
+<LoopGraph class="mt-2" />
+
+<div class="tk concl mt-2">
+<a class="gterm" data-term="graph-engineering"><strong>Graph Engineering</strong></a> は Loop を<span class="hot">置き換える</span>のではなく、複数の Loop を束ねる<span class="grad" style="font-weight:700">“上位の配線”</span>（現時点の暫定的な整理）。
+</div>
+
+<Cite :items="[
+  { label: 'LangGraph — Graph API overview', url: 'https://docs.langchain.com/oss/python/langgraph/graph-api' },
+  { label: 'Anthropic — Building Effective Agents', url: 'https://www.anthropic.com/engineering/building-effective-agents' },
+]" />
+
+<!--
+前ページの“暫定ワード”が、具体的に何を指しているのかを図解するページです。①（紫のバッジ）が付いたLoopノードは、前ページ・前々ページで見たReActループそのもの——つまり「知覚→思考→行動→観察」の反復です。Graph Engineeringが加えるのは、その前後・周辺の配線だと暫定的に整理されています：Plannerが仕事を割り振り、Loopの結果はEvaluator（検証ゲート）で合流・判定され、OKなら統合完了、NGならLoopへ差し戻し（再試行）、人の判断が要るときはHumanへエスカレーションしてから完了へ合流します。点線の枠は、これらのノードが同じState（進捗・チェックポイント）を共有していることを示します。実は、こうしたnode／edge／stateによる実行グラフの仕組み自体はLangGraphなど既存フレームワークにすでにあり、目新しい技術ではありません。新しいのは「複数のLoopをどう束ねるか」という設計対象への注目そのもの——次章「一体で作る? 分ける?」で扱う、単一 vs マルチエージェントの話と地続きです。
+-->
+
+---
 layout: section
 class: section
 chapter: "04 · 一体で作る? 分ける?"
@@ -630,7 +662,7 @@ chapter: "04 · 一体で作る? 分ける?"
 
 # 単一 vs マルチエージェント
 
-<SingleVsMulti class="mt-4" />
+<SingleVsMulti class="mt-1" />
 
 <div class="tk muted">「オーケストレーション」＝ 指揮役が複数のサブエージェントをまとめる構成。</div>
 
@@ -698,22 +730,22 @@ chapter: "04 · 一体で作る? 分ける?"
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="split"/></span><span class="ptn__name">ルーティング<span class="ptn__en">Routing</span></span></div>
-<div class="ptn__d">入力を見て<strong>得意な担当へ振り分け</strong>。<span class="ptn__ex">例: 問い合わせを種類で仕分け</span></div>
+<div class="ptn__foot"><div class="ptn__d">入力を見て<strong>得意な担当へ振り分け</strong>。<span class="ptn__ex">例: 問い合わせを種類で仕分け</span></div><PatternGlyph type="routing" /></div>
 </div>
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="compass"/></span><span class="ptn__name">オーケストレーター–ワーカー<span class="ptn__en">Orchestrator–Workers</span></span></div>
-<div class="ptn__d">親が<strong>計画して割り振り→集約</strong>。<span class="ptn__ex">例: 調査・執筆・校正を分担</span></div>
+<div class="ptn__foot"><div class="ptn__d">親が<strong>計画して割り振り→集約</strong>。<span class="ptn__ex">例: 調査・執筆・校正を分担</span></div><PatternGlyph type="orchestrator" /></div>
 </div>
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="swap"/></span><span class="ptn__name">ハンドオフ<span class="ptn__en">Handoff</span></span></div>
-<div class="ptn__d">担当を<strong>順に引き継ぐ</strong>。<span class="ptn__ex">例: 一次受付 → 専門担当へ</span></div>
+<div class="ptn__foot"><div class="ptn__d">担当を<strong>順に引き継ぐ</strong>。<span class="ptn__ex">例: 一次受付 → 専門担当へ</span></div><PatternGlyph type="handoff" /></div>
 </div>
 
 <div class="ptn">
 <div class="ptn__h"><span class="ptn__ico"><Ico name="loop"/></span><span class="ptn__name">評価–改善ループ<span class="ptn__en">Evaluator–Optimizer</span></span></div>
-<div class="ptn__d"><strong>作る役と直す役</strong>で品質を上げる。<span class="ptn__ex">例: 生成 → 批評 → 修正</span></div>
+<div class="ptn__foot"><div class="ptn__d"><strong>作る役と直す役</strong>で品質を上げる。<span class="ptn__ex">例: 生成 → 批評 → 修正</span></div><PatternGlyph type="evaluator" /></div>
 </div>
 
 </div>
@@ -997,6 +1029,15 @@ chapter: "05 · 勘所とまとめ"
 </div>
 
 <div class="refgrp">
+<h4>グラフの兆し（Graph Engineering・未確定）</h4>
+
+- <a href="https://x.com/steipete/status/2078277297791189132" target="_blank">Peter Steinberger — X post</a> <span class="u">x.com · 2026-07-18</span>
+- <a href="https://x.com/HamelHusain/status/2078346425621237935" target="_blank">Hamel Husain — “Loop Engineering Is Dead. Enter Graph Engineering”</a> <span class="u">x.com · 2026-07-18</span>
+- <BrandMark name="langchain" class="refbm"/> <a href="https://docs.langchain.com/oss/python/langgraph/graph-api" target="_blank">LangGraph — Graph API overview</a> <span class="u">docs.langchain.com</span>
+
+</div>
+
+<div class="refgrp">
 <h4>プロトコル · MCP / マルチ</h4>
 
 - <a href="https://www.anthropic.com/news/model-context-protocol" target="_blank">Introducing MCP</a> <span class="u">anthropic.com</span>
@@ -1019,7 +1060,7 @@ chapter: "05 · 勘所とまとめ"
 <div class="tk muted">クリックで各公式サイトへ。<strong>一次情報</strong>を起点に追うのがキャッチアップの近道です。</div>
 
 <!--
-本文で触れた内容の出典（参考リンク集）をまとめたページです。「指示・文脈（Prompt→Context）」「足場・反復（Harness→Loop）」「プロトコル・MCP／マルチ」「フレームワーク」の4グループに整理してあり、それぞれ公式ドキュメントや代表的な論文へのリンクになっています。すべて一次情報なので、気になったテーマは、ここを起点に深掘りするのがいちばんの近道です。最初は飛ばして、あとでゆっくり見返す使い方でも構いません。
+本文で触れた内容の出典（参考リンク集）をまとめたページです。「指示・文脈（Prompt→Context）」「足場・反復（Harness→Loop）」「グラフの兆し（Graph Engineering・未確定）」「プロトコル・MCP／マルチ」「フレームワーク」の5グループに整理してあり、それぞれ公式ドキュメントや代表的な論文、本人の投稿へのリンクになっています。すべて一次情報なので、気になったテーマは、ここを起点に深掘りするのがいちばんの近道です。「グラフの兆し」は名前のとおりまだ確定していない話題なので、リンク先の日付にも注目してください。最初は飛ばして、あとでゆっくり見返す使い方でも構いません。
 -->
 
 ---

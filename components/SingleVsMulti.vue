@@ -29,5 +29,65 @@ const options: RevealItem[] = [
 </script>
 
 <template>
-  <RevealTabs :items="options" variant="pair" aria-label="単一エージェント か マルチか（選んで詳細）" />
+  <div class="sm-wrap">
+    <!-- Static topology header: lets the audience compare the two *shapes*
+         (1 agent＋tools  vs  orchestrator→specialists) before opening a tab.
+         Labels are structural only, so they don't duplicate the tab detail text.
+         SVG font-size uses px units (unitless is scaled ~4x by the Slidev/UnoCSS
+         reset). This header is projection-only; the portrait Reader keeps the
+         RevealTabs comparison (recipe extracts .tk + tabs, not this header). -->
+    <div class="sm-topo" aria-hidden="true">
+      <div class="sm-topo__side">
+        <div class="sm-topo__cap"><b>単一</b><span>Single</span></div>
+        <svg class="sm-topo__svg" viewBox="0 0 260 50" font-family="Noto Sans JP, sans-serif">
+          <!-- connectors: 1 agent → 3 tools -->
+          <g stroke="#22d3ee" stroke-opacity=".55" stroke-width="1.4" fill="none" stroke-linecap="round">
+            <path d="M102 25H150" />
+            <path d="M102 25C124 25 128 8 150 8" />
+            <path d="M102 25C124 25 128 42 150 42" />
+          </g>
+          <!-- agent node -->
+          <rect x="6" y="12" width="96" height="26" rx="8" fill="rgba(34,211,238,.1)" stroke="#22d3ee" stroke-opacity=".65" stroke-width="1.5" />
+          <text x="54" y="29" text-anchor="middle" fill="#eef1fb" font-size="12px" font-weight="800">エージェント</text>
+          <!-- 3 tools -->
+          <g>
+            <rect x="150" y="1" width="64" height="14" rx="5" fill="rgba(255,255,255,.04)" stroke="#8b93a7" stroke-opacity=".5" stroke-width="1.2" />
+            <text x="182" y="11" text-anchor="middle" fill="#c6cdda" font-size="9.5px" font-weight="700">道具</text>
+            <rect x="150" y="18" width="64" height="14" rx="5" fill="rgba(255,255,255,.04)" stroke="#8b93a7" stroke-opacity=".5" stroke-width="1.2" />
+            <text x="182" y="28" text-anchor="middle" fill="#c6cdda" font-size="9.5px" font-weight="700">道具</text>
+            <rect x="150" y="35" width="64" height="14" rx="5" fill="rgba(255,255,255,.04)" stroke="#8b93a7" stroke-opacity=".5" stroke-width="1.2" />
+            <text x="182" y="45" text-anchor="middle" fill="#c6cdda" font-size="9.5px" font-weight="700">道具</text>
+          </g>
+        </svg>
+      </div>
+
+      <span class="sm-topo__vs" aria-hidden="true">VS</span>
+
+      <div class="sm-topo__side">
+        <div class="sm-topo__cap"><b>マルチ</b><span>Multi</span></div>
+        <svg class="sm-topo__svg" viewBox="0 0 260 50" font-family="Noto Sans JP, sans-serif">
+          <!-- connectors: orchestrator → 3 specialists (fan-out) -->
+          <g stroke="#a855f7" stroke-opacity=".6" stroke-width="1.4" fill="none" stroke-linecap="round">
+            <path d="M130 25C130 31 45 30 45 35" />
+            <path d="M130 25V35" />
+            <path d="M130 25C130 31 215 30 215 35" />
+          </g>
+          <!-- orchestrator -->
+          <rect x="86" y="1" width="88" height="24" rx="8" fill="rgba(168,85,247,.12)" stroke="#a855f7" stroke-opacity=".7" stroke-width="1.5" />
+          <text x="130" y="17" text-anchor="middle" fill="#eef1fb" font-size="12px" font-weight="800">指揮役</text>
+          <!-- 3 specialists -->
+          <g>
+            <rect x="12" y="35" width="66" height="15" rx="6" fill="rgba(34,211,238,.08)" stroke="#22d3ee" stroke-opacity=".55" stroke-width="1.3" />
+            <text x="45" y="46" text-anchor="middle" fill="#d6e3f4" font-size="9.5px" font-weight="700">専門</text>
+            <rect x="97" y="35" width="66" height="15" rx="6" fill="rgba(34,211,238,.08)" stroke="#22d3ee" stroke-opacity=".55" stroke-width="1.3" />
+            <text x="130" y="46" text-anchor="middle" fill="#d6e3f4" font-size="9.5px" font-weight="700">専門</text>
+            <rect x="182" y="35" width="66" height="15" rx="6" fill="rgba(34,211,238,.08)" stroke="#22d3ee" stroke-opacity=".55" stroke-width="1.3" />
+            <text x="215" y="46" text-anchor="middle" fill="#d6e3f4" font-size="9.5px" font-weight="700">専門</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <RevealTabs :items="options" variant="pair" aria-label="単一エージェント か マルチか（選んで詳細）" />
+  </div>
 </template>

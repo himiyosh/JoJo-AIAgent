@@ -266,6 +266,7 @@ input:focus-visible,
   line-height: 1.16;
   letter-spacing: -0.025em;
   text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .reader-page__title p {
@@ -275,6 +276,7 @@ input:focus-visible,
   font-size: clamp(0.67rem, 1.45svh, 0.79rem);
   line-height: 1.38;
   text-wrap: pretty;
+  word-break: auto-phrase;
 }
 
 .reader-page__controls {
@@ -1220,36 +1222,51 @@ input:focus-visible,
   padding: 0.7rem;
 }
 
-.pv-mcp__art {
-  width: min(78%, 18rem);
-  min-height: 0;
-  justify-self: center;
-}
-
-.pv-mcp__shift {
+.pv-mcp__states {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
 }
 
-.pv-mcp__shift section {
+.pv-mcp__states section {
   min-width: 0;
-  padding: 0.5rem;
+  padding: 0.55rem 0.65rem;
   border: 1px solid var(--reader-line);
   border-radius: 0.6rem;
 }
 
-.pv-mcp__shift section.is-after {
+.pv-mcp__states section.is-rest {
+  border-color: rgb(103 232 249 / 40%);
+}
+
+.pv-mcp__states section.is-mcp {
   border-color: rgb(198 167 255 / 45%);
 }
 
-.pv-mcp__shift > span {
-  color: var(--reader-purple);
+.pv-mcp__states small {
+  color: var(--reader-muted);
+  font-family: var(--reader-mono);
 }
 
-.pv-mcp__shift h3 {
+.pv-mcp__states h3 {
   margin: 0.1rem 0;
+}
+
+.pv-mcp__states p {
+  margin: 0;
+  color: var(--reader-ink-soft);
+}
+
+.pv-mcp__bridge {
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgb(251 191 36 / 30%);
+  border-radius: 0.55rem;
+  color: var(--reader-ink-soft);
+  text-align: center;
+}
+
+.pv-mcp__bridge b {
+  color: var(--reader-ink);
 }
 
 /* Timeline */
@@ -1549,6 +1566,52 @@ input:focus-visible,
   right: -0.55rem;
   color: var(--reader-purple);
   font-size: 1.15rem;
+}
+
+/* Loop → Graph (single loop is one node inside a bigger execution graph) */
+.pv--loop-graph {
+  display: grid;
+  place-items: center;
+  padding: 0.65rem;
+}
+
+.pv-loop-graph {
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: 22rem;
+  height: 100%;
+  grid-template-rows: auto minmax(0, 1fr) auto auto auto auto;
+  gap: 0.4rem;
+}
+
+.pv-loop-graph__bands {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0;
+  list-style: none;
+}
+
+.pv-loop-graph__bands li {
+  padding: 0.4rem 0.6rem;
+  border: 1px dashed rgb(251 191 36 / 42%);
+  border-radius: 0.55rem;
+  color: var(--reader-amber);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.pv-loop-graph__bands li:nth-child(2) {
+  border-color: rgb(251 113 133 / 42%);
+  color: var(--reader-rose, #fb7185);
+}
+
+.pv-loop-graph__caption {
+  margin: 0;
+  color: var(--reader-soft);
+  font-size: 0.68rem;
+  line-height: 1.55;
+  text-align: center;
 }
 
 /* Rubberduck */

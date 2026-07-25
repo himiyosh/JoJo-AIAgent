@@ -212,18 +212,17 @@ function renderAnatomy(slide) {
 
 function renderMcp(slide) {
   const data = slide.visualData
-  const cards = data.cards ?? []
+  const states = data.states ?? []
   return figure(slide, `
-    <div class="pv-mcp__art">${first(data.art)}</div>
-    <div class="pv-mcp__shift" aria-label="MCP導入前後">
-      ${cards.map((card, index) => `
-        <section class="${index ? 'is-after' : 'is-before'}">
-          <small>${text(card.subtitle, 16)}</small>
-          <h3>${text(card.title, 28)}</h3>
-          <p>${groupSummary(card, 50)}</p>
-        </section>
-        ${index === 0 ? '<span aria-hidden="true">→</span>' : ''}`).join('')}
+    <div class="pv-mcp__states" aria-label="REST APIとMCPの役割比較">
+      ${states.map((state, index) => `
+        <section class="${index ? 'is-mcp' : 'is-rest'}">
+          <small>${text(state.subtitle, 32)}</small>
+          <h3>${text(state.title, 42)}</h3>
+          <p>${text((state.items ?? []).slice(0, 2).join(' ／ '), 78)}</p>
+        </section>`).join('')}
     </div>
+    <div class="pv-mcp__bridge"><b>MCP Server</b> の内側で <b>REST API</b> を使える</div>
   `)
 }
 
@@ -301,6 +300,30 @@ function renderRubberduck(slide) {
     <div class="pv-duck__art">${first(data.art)}</div>
     <div class="pv-duck__bubble pv-duck__bubble--right">${text(chips[1]?.title, 26)}</div>
     <div class="pv-duck__pattern">${text(chips[2]?.title, 30)}</div>
+  `)
+}
+
+function renderLoopGraph(slide) {
+  const data = slide.visualData
+  const start = first(data.pills)?.title || first(data.pills)?.text
+  const done = data.pills?.at(-1)?.title || data.pills?.at(-1)?.text
+  return figure(slide, `
+    <div class="pv-loop-graph">
+      <div class="pv-loop__terminal pv-loop__terminal--start">${text(start, 28)}</div>
+      <ol>
+        ${(data.nodes ?? []).map((node, index) => `
+          <li>
+            ${icon(node, String(index + 1))}
+            <span><b>${text(node.title, 18)}</b><small>${text(node.subtitle, 18)}</small></span>
+          </li>`).join('')}
+      </ol>
+      <div class="pv-loop__terminal pv-loop__terminal--done">${text(done, 28)}</div>
+      <div class="pv-loop__return" aria-hidden="true"><span>↺</span></div>
+      <ul class="pv-loop-graph__bands">
+        ${(data.bands ?? []).map(band => `<li>${text(band.text, 60)}</li>`).join('')}
+      </ul>
+      <p class="pv-loop-graph__caption">${text(first(data.caption), 96)}</p>
+    </div>
   `)
 }
 
@@ -493,6 +516,7 @@ const renderers = {
   xposts: renderQuotes,
   'agent-loop': renderAgentLoop,
   rubberduck: renderRubberduck,
+  'loop-graph': renderLoopGraph,
   'single-multi': renderSingleMulti,
   'decision-picker': renderDecision,
   patterns: renderPatterns,

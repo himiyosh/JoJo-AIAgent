@@ -27,6 +27,11 @@
    **`npm run export:handout` を実行して再生成する**のを最後の手順にする（フルビルド＋ブラウザ巡回で数十秒＝
    保存ごとの自動同期はしない手動の締め工程。生成物は `.gitignore`＝コミットしない・§10）。
 
+6. **README と CHANGELOG の公開導線を維持する。** README の主要導線には `./CHANGELOG.md` への相対リンクを
+   常設する。利用者に影響する機能・内容・操作・互換性・公開導線の変更は、同じ変更で `CHANGELOG.md` の
+   `[Unreleased]` に追記する。内部リファクタリングや CI のみで利用者影響がない変更は対象外とする。
+   リリース時は該当項目を `[vX.Y.Z] - YYYY-MM-DD` へ移し、末尾の比較リンクを新しい版へ更新する。
+
 ## 主要ファイル
 
 - `slides.md` … デッキ本体（Markdown ＋ 最小 HTML）
@@ -35,6 +40,8 @@
 - `composables/glossary.ts` … 用語集データ＋共有 ref
 - `global-bottom.vue` … 用語リンク（`.gterm`）の委譲ハンドラ
 - `setup/main.ts` … GitHub Pages ベースパスのナビ修正（Pages 公開に必須）
+- `README.md` … 公開入口と `CHANGELOG.md` への常設導線
+- `CHANGELOG.md` … 利用者に影響する変更を `[Unreleased]` から管理する変更履歴
 - `DESIGN.md` … デザイン規律・再利用手順（**最優先で参照**）
 
 ## JoJo 共通 Copilot カスタマイズ

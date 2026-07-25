@@ -112,6 +112,7 @@ export async function extractRecipeData(slide, recipe, slideNumber) {
           '.risk-stage__title > span',
           '.tl-step .k',
           '.aloop__jp',
+          '.lgraph__jp',
           '.card h3',
           'h2',
           'h3',
@@ -125,6 +126,7 @@ export async function extractRecipeData(slide, recipe, slideNumber) {
           '.risk-stage__title small',
           '.tl-step .d',
           '.aloop__en',
+          '.lgraph__en',
           '.card__ba',
           '.u',
         ])

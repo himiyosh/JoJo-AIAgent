@@ -158,7 +158,7 @@ function renderSearch(slides) {
         <header class="reader-dialog__header">
           <div>
             <p>SEARCH / CONTENTS</p>
-            <h3 id="reader-search-title">全31枚から検索</h3>
+            <h3 id="reader-search-title">全33枚から検索</h3>
           </div>
           <button class="reader-dialog__close" type="button" data-reader-close aria-label="検索を閉じる">×</button>
         </header>

@@ -7,7 +7,7 @@
   --direct-reader-muted: color-mix(in srgb, var(--muted, #8b93a7) 78%, white);
   --direct-reader-cyan: color-mix(in srgb, var(--brand-a, #22d3ee) 72%, white);
   --direct-reader-purple: color-mix(in srgb, var(--brand-b, #a855f7) 58%, white);
-  --direct-reader-top: 110px;
+  --direct-reader-top: 126px;
   --direct-reader-bottom: 72px;
 }
 
@@ -200,7 +200,7 @@ html[data-direct-reader] #slide-container:focus-visible {
 
 .direct-reader__context {
   display: grid;
-  min-height: 58px;
+  min-height: 74px;
   align-items: center;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
   gap: 0.5rem;
@@ -232,14 +232,13 @@ html[data-direct-reader] #slide-container:focus-visible {
 }
 
 .direct-reader__copy h1 {
-  overflow: hidden;
   margin: 0;
   color: var(--direct-reader-text);
-  font-size: 0.91rem;
+  font-size: 0.88rem;
   font-weight: 700;
   line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-wrap: balance;
+  word-break: auto-phrase;
 }
 
 .direct-reader__zoom {

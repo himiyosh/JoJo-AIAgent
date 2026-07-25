@@ -15,8 +15,8 @@ const SOURCE_PAGE_COUNTS = new Map([
   [7, 5],
   [13, 5],
   [16, 2],
-  [21, 1],
-  [26, 1],
+  [23, 1],
+  [28, 1],
 ])
 function readArg(name, fallback) {
   const exact = args.indexOf(name)
@@ -101,13 +101,13 @@ async function validateGeneratedFiles(out, routerMode) {
   assert(html.includes('data-reader-visual-kind="canonical-four-trait-map"') && (html.match(/class="pf07__icon"/g) ?? []).length >= 8, 'Reader pilot Source 07 does not preserve the canonical four-trait icon system.')
   assert(html.includes('class="pf13__nest"') && html.includes('data-reader-visual-kind="canonical-evolution-nesting"'), 'Reader pilot Source 13 does not preserve the evolution and nesting relationship.')
   assert((html.match(/class="pf16__post pf16__post--/g) ?? []).length === 2 && html.includes('class="pf16__agreement"'), 'Reader pilot Source 16 does not show both canonical posts in one viewport.')
-  assert(html.includes('class="pf21__choice pf21__choice--split"') && html.includes('class="pf21__choice pf21__choice--single"'), 'Reader pilot Source 21 does not preserve the two-way decision comparison.')
-  assert([1, 2, 3].every(stage => html.includes(`class="pf26__phase pf26__phase--${stage}"`)), 'Reader pilot Source 26 does not preserve all three lifecycle stages in one viewport.')
+  assert(html.includes('class="pf23__choice pf23__choice--split"') && html.includes('class="pf23__choice pf23__choice--single"'), 'Reader pilot Source 23 does not preserve the two-way decision comparison.')
+  assert([1, 2, 3].every(stage => html.includes(`class="pf28__phase pf28__phase--${stage}"`)), 'Reader pilot Source 28 does not preserve all three lifecycle stages in one viewport.')
   assert((html.match(/data-note-excerpt-for=/g) ?? []).length === 4, 'Reader pilot does not surface the four interpretation-critical presenter-note excerpts.')
   assert(plan.find(page => page.id === 'slide-06-01')?.legacyIds.includes('slide-06-02'), 'Reader pilot dropped the merged Source 06 deep-link alias.')
   assert(plan.find(page => page.id === 'slide-16-02')?.renderer === 's16-translations', 'Reader pilot does not preserve both Source 16 translations on their shared page.')
-  assert(plan.find(page => page.id === 'slide-21-01')?.legacyIds.includes('slide-21-02'), 'Reader pilot dropped the merged Source 21 deep-link alias.')
-  assert(['slide-26-02', 'slide-26-03'].every(id => plan.find(page => page.id === 'slide-26-01')?.legacyIds.includes(id)), 'Reader pilot dropped a merged Source 26 deep-link alias.')
+  assert(plan.find(page => page.id === 'slide-23-01')?.legacyIds.includes('slide-23-02'), 'Reader pilot dropped the merged Source 23 deep-link alias.')
+  assert(['slide-28-02', 'slide-28-03'].every(id => plan.find(page => page.id === 'slide-28-01')?.legacyIds.includes(id)), 'Reader pilot dropped a merged Source 28 deep-link alias.')
 
   const sourceFiles = [
     'reader/content-model.mjs',
@@ -120,8 +120,8 @@ async function validateGeneratedFiles(out, routerMode) {
     'reader/pilot-pages/slide-07.mjs',
     'reader/pilot-pages/slide-13.mjs',
     'reader/pilot-pages/slide-16.mjs',
-    'reader/pilot-pages/slide-21.mjs',
-    'reader/pilot-pages/slide-26.mjs',
+    'reader/pilot-pages/slide-23.mjs',
+    'reader/pilot-pages/slide-28.mjs',
   ]
   for (const relative of sourceFiles) {
     const code = await fs.readFile(path.join(ROOT, relative), 'utf8')
@@ -338,8 +338,8 @@ async function validateViewport(browser, baseUrl, viewport, expectedHeight) {
             return 0
           return Math.max(0, rect.height - (Math.max(...textRects.map(item => item.bottom)) - Math.min(...textRects.map(item => item.top))))
         })
-      const splitBranch = element.querySelector('.pf21__choice--split')?.getBoundingClientRect()
-      const singleBranch = element.querySelector('.pf21__choice--single')?.getBoundingClientRect()
+      const splitBranch = element.querySelector('.pf23__choice--split')?.getBoundingClientRect()
+      const singleBranch = element.querySelector('.pf23__choice--single')?.getBoundingClientRect()
       return {
         id: element.id,
         height: element.getBoundingClientRect().height,
@@ -374,7 +374,7 @@ async function validateViewport(browser, baseUrl, viewport, expectedHeight) {
         contentOverlaps,
         clippedContent: [...new Set(clippedContent)],
         p13ListSlack: p13ListSlack.length ? Math.max(...p13ListSlack) : 0,
-        p21BranchGap: splitBranch && singleBranch
+        p23BranchGap: splitBranch && singleBranch
           ? Math.max(splitBranch.top, singleBranch.top) - Math.min(splitBranch.bottom, singleBranch.bottom)
           : 0,
       }
@@ -405,7 +405,7 @@ async function validateViewport(browser, baseUrl, viewport, expectedHeight) {
     assert(metrics.contentOverlaps.length === 0, `${metrics.id} overlaps visible text: ${metrics.contentOverlaps.join(', ')}.`)
     assert(metrics.clippedContent.length === 0, `${metrics.id} clips visible text: ${metrics.clippedContent.join(', ')}.`)
     assert(metrics.p13ListSlack <= 18, `${metrics.id} stretches a Source 13 list row by ${metrics.p13ListSlack.toFixed(1)}px beyond its text.`)
-    assert(metrics.p21BranchGap <= 180, `${metrics.id} stretches its decision axis to ${metrics.p21BranchGap.toFixed(1)}px.`)
+    assert(metrics.p23BranchGap <= 180, `${metrics.id} stretches its decision axis to ${metrics.p23BranchGap.toFixed(1)}px.`)
     layout.push(metrics)
   }
   const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
@@ -473,7 +473,7 @@ async function validatePendingDialogHistoryRace(browser, baseUrl, plan) {
   await page.locator('#slide-13-05 [data-pilot-search]').click()
   await page.locator('[data-pilot-search-input]').fill('迷ったら単一から')
   const result = page.locator('[data-pilot-search-results] a')
-  assert(await result.count() === 1 && await result.getAttribute('data-pilot-open-dialog') === 'pilot-dialog-slide-21-01', 'Reader pilot race fixture did not resolve the note dialog result.')
+  assert(await result.count() === 1 && await result.getAttribute('data-pilot-open-dialog') === 'pilot-dialog-slide-23-01', 'Reader pilot race fixture did not resolve the note dialog result.')
   await result.click()
   await page.goBack()
   await waitForPage(page, indexFor(plan, 'slide-13-05'))
@@ -493,12 +493,12 @@ async function validatePendingDialogHistoryRace(browser, baseUrl, plan) {
     document.querySelector('#slide-13-05 [data-pilot-contents]')?.click()
   })
   await stackingPage.waitForTimeout(1300)
-  await waitForPage(stackingPage, indexFor(plan, 'slide-21-01'))
+  await waitForPage(stackingPage, indexFor(plan, 'slide-23-01'))
   assert(await stackingPage.locator('.pilot-dialog[open]').count() === 1, 'Reader pilot stacked a pending detail dialog over another modal.')
   assert(await stackingPage.locator('#pilot-contents-dialog[open]').count() === 1, 'Reader pilot did not preserve the newer dialog after cancelling a pending open.')
   assert(await stackingPage.locator('.pilot-pages').evaluate(element => element.classList.contains('pilot-pages--dialog-open')), 'Reader pilot stale close event removed the active dialog scroll lock.')
   await stackingPage.keyboard.press('Escape')
-  assert(await stackingPage.locator('#slide-21-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot returned focus to an off-screen dialog opener.')
+  assert(await stackingPage.locator('#slide-23-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot returned focus to an off-screen dialog opener.')
   await stackingContext.close()
 }
 
@@ -513,9 +513,9 @@ async function validateInteractions(browser, server, inventory, plan) {
   await malformedPage.close()
 
   const legacyPage = await context.newPage()
-  await legacyPage.goto(`${server.baseUrl}reader-pilot/#slide-21-02`, { waitUntil: 'networkidle' })
-  await waitForPage(legacyPage, indexFor(plan, 'slide-21-01'))
-  assert(legacyPage.url().endsWith('#slide-21-01'), 'Reader pilot did not canonicalize a merged v2 deep link.')
+  await legacyPage.goto(`${server.baseUrl}reader-pilot/#slide-23-02`, { waitUntil: 'networkidle' })
+  await waitForPage(legacyPage, indexFor(plan, 'slide-23-01'))
+  assert(legacyPage.url().endsWith('#slide-23-01'), 'Reader pilot did not canonicalize a merged v2 deep link.')
   await legacyPage.close()
 
   const page = await context.newPage()
@@ -529,7 +529,7 @@ async function validateInteractions(browser, server, inventory, plan) {
 
   const currentReader = await fetch(`${server.baseUrl}reader-legacy/`)
   const currentReaderHtml = await currentReader.text()
-  assert(currentReader.ok && (currentReaderHtml.match(/<article\s+class="reader-page\b/g) ?? []).length === 31, 'Comparison Reader was not preserved.')
+  assert(currentReader.ok && (currentReaderHtml.match(/<article\s+class="reader-page\b/g) ?? []).length === 33, 'Comparison Reader was not preserved.')
   assert((await fetch(`${server.baseUrl}reader-pilot/pilot.css`)).ok && (await fetch(`${server.baseUrl}reader-pilot/pilot.js`)).ok, 'Reader pilot assets do not resolve through the configured base.')
 
   await page.locator('#slide-13-05 [data-pilot-contents]').click()
@@ -554,12 +554,12 @@ async function validateInteractions(browser, server, inventory, plan) {
     }
   })
   assert(safeArea.paddingBottom >= 46 && safeArea.finalBottom <= 810, `Reader pilot dialog controls enter the mobile safe area: ${JSON.stringify(safeArea)}`)
-  await contents.locator('a[href="#slide-21-01"]').click()
-  await waitForPage(page, indexFor(plan, 'slide-21-01'))
-  assert(page.url().endsWith('#slide-21-01'), 'Reader pilot contents navigation did not synchronize the hash.')
-  assert(await page.locator('#slide-21-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot contents navigation did not focus the destination.')
+  await contents.locator('a[href="#slide-23-01"]').click()
+  await waitForPage(page, indexFor(plan, 'slide-23-01'))
+  assert(page.url().endsWith('#slide-23-01'), 'Reader pilot contents navigation did not synchronize the hash.')
+  assert(await page.locator('#slide-23-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot contents navigation did not focus the destination.')
 
-  const searchButton = page.locator('#slide-21-01 [data-pilot-search]')
+  const searchButton = page.locator('#slide-23-01 [data-pilot-search]')
   await searchButton.click()
   const search = page.locator('#pilot-search-dialog')
   const input = search.locator('[data-pilot-search-input]')
@@ -567,49 +567,49 @@ async function validateInteractions(browser, server, inventory, plan) {
   assert(await search.locator('[data-pilot-search-results] a').count() === PILOT_PAGE_COUNT, `Reader pilot search does not expose all ${PILOT_PAGE_COUNT} pages.`)
   await input.fill('迷ったら単一から')
   const noteResult = search.locator('[data-pilot-search-results] a')
-  assert(await noteResult.count() === 1 && await noteResult.getAttribute('href') === '#slide-21-01', 'Reader pilot search did not index the closed presenter note.')
+  assert(await noteResult.count() === 1 && await noteResult.getAttribute('href') === '#slide-23-01', 'Reader pilot search did not index the closed presenter note.')
   await noteResult.click()
-  await waitForPage(page, indexFor(plan, 'slide-21-01'))
-  const detail = page.locator('#pilot-dialog-slide-21-01')
+  await waitForPage(page, indexFor(plan, 'slide-23-01'))
+  const detail = page.locator('#pilot-dialog-slide-23-01')
   assert(await detail.getAttribute('open') !== null, 'Reader pilot note search did not open the matching supplemental dialog.')
   assert(await detail.locator('[data-pilot-close]').evaluate(element => element === document.activeElement), 'Reader pilot detail dialog did not receive focus.')
   await page.keyboard.press('Escape')
   assert(await detail.getAttribute('open') === null, 'Reader pilot detail dialog did not close with Escape.')
-  assert(await page.locator('#slide-21-01 [data-pilot-dialog]').evaluate(element => element === document.activeElement), 'Reader pilot detail dialog did not return focus to its opener.')
+  assert(await page.locator('#slide-23-01 [data-pilot-dialog]').evaluate(element => element === document.activeElement), 'Reader pilot detail dialog did not return focus to its opener.')
 
-  const opener = page.locator('#slide-21-01 [data-pilot-dialog]')
+  const opener = page.locator('#slide-23-01 [data-pilot-dialog]')
   await opener.click()
   assert(await detail.getAttribute('open') !== null, 'Reader pilot detail dialog did not open.')
   const scroll = detail.locator('.pilot-dialog__scroll')
   await scroll.focus()
   await page.keyboard.press('PageDown')
-  assert(await detail.getAttribute('open') !== null && page.url().endsWith('#slide-21-01'), 'Reader pilot navigated behind an open dialog.')
+  assert(await detail.getAttribute('open') !== null && page.url().endsWith('#slide-23-01'), 'Reader pilot navigated behind an open dialog.')
   await detail.evaluate(element => element.dispatchEvent(new MouseEvent('click', { bubbles: true })))
   assert(await detail.getAttribute('open') === null, 'Reader pilot backdrop click did not close the dialog.')
 
-  const next = page.locator('#slide-21-01 .pilot-control--step').last()
+  const next = page.locator('#slide-23-01 .pilot-control--step').last()
   await next.click()
-  await waitForPage(page, indexFor(plan, 'slide-26-01'))
-  assert(page.url().endsWith('#slide-26-01'), 'Reader pilot next control did not move one page.')
+  await waitForPage(page, indexFor(plan, 'slide-28-01'))
+  assert(page.url().endsWith('#slide-28-01'), 'Reader pilot next control did not move one page.')
   await page.goBack()
-  await waitForPage(page, indexFor(plan, 'slide-21-01'))
-  assert(page.url().endsWith('#slide-21-01'), 'Reader pilot browser Back did not restore the previous page.')
+  await waitForPage(page, indexFor(plan, 'slide-23-01'))
+  assert(page.url().endsWith('#slide-23-01'), 'Reader pilot browser Back did not restore the previous page.')
   await page.goForward()
-  await waitForPage(page, indexFor(plan, 'slide-26-01'))
-  assert(page.url().endsWith('#slide-26-01'), 'Reader pilot browser Forward did not restore the intended page.')
+  await waitForPage(page, indexFor(plan, 'slide-28-01'))
+  assert(page.url().endsWith('#slide-28-01'), 'Reader pilot browser Forward did not restore the intended page.')
   await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur())
   await page.keyboard.press('ArrowUp')
-  await waitForPage(page, indexFor(plan, 'slide-21-01'))
-  assert(page.url().endsWith('#slide-21-01'), 'Reader pilot ArrowUp did not move one page.')
+  await waitForPage(page, indexFor(plan, 'slide-23-01'))
+  assert(page.url().endsWith('#slide-23-01'), 'Reader pilot ArrowUp did not move one page.')
   await page.keyboard.press('PageDown')
-  await waitForPage(page, indexFor(plan, 'slide-26-01'))
-  assert(page.url().endsWith('#slide-26-01'), 'Reader pilot PageDown did not move one page.')
+  await waitForPage(page, indexFor(plan, 'slide-28-01'))
+  assert(page.url().endsWith('#slide-28-01'), 'Reader pilot PageDown did not move one page.')
   await page.keyboard.press('Shift+Space')
-  await waitForPage(page, indexFor(plan, 'slide-21-01'))
-  assert(page.url().endsWith('#slide-21-01'), 'Reader pilot Shift+Space did not move to the previous normal page.')
+  await waitForPage(page, indexFor(plan, 'slide-23-01'))
+  assert(page.url().endsWith('#slide-23-01'), 'Reader pilot Shift+Space did not move to the previous normal page.')
   await page.keyboard.press(' ')
-  await waitForPage(page, indexFor(plan, 'slide-26-01'))
-  assert(page.url().endsWith('#slide-26-01'), 'Reader pilot Space did not move one normal page.')
+  await waitForPage(page, indexFor(plan, 'slide-28-01'))
+  assert(page.url().endsWith('#slide-28-01'), 'Reader pilot Space did not move one normal page.')
 
   await page.evaluate(() => {
     document.documentElement.style.fontSize = '32px'
@@ -626,9 +626,9 @@ async function validateInteractions(browser, server, inventory, plan) {
     }
   })
   assert(fallbackState.enabled === 'true', `Reader pilot did not enable the 200% text fallback: ${JSON.stringify(fallbackState)}`)
-  const overflowStage = page.locator('#slide-26-01 [data-pilot-stage]')
+  const overflowStage = page.locator('#slide-28-01 [data-pilot-stage]')
   assert(await overflowStage.getAttribute('tabindex') === '0', 'Reader pilot overflow stage is not keyboard reachable.')
-  assert(await page.locator('#slide-26-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot lost destination heading focus before zoom navigation.')
+  assert(await page.locator('#slide-28-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot lost destination heading focus before zoom navigation.')
   await overflowStage.evaluate(element => { element.scrollTop = 0 })
   const headingZoomHash = new URL(page.url()).hash
   await page.keyboard.press('PageDown')
@@ -636,11 +636,11 @@ async function validateInteractions(browser, server, inventory, plan) {
     await overflowStage.evaluate(element => element.scrollTop > 0) && new URL(page.url()).hash === headingZoomHash,
     'Reader pilot destination heading bypassed enlarged stage content.',
   )
-  await page.evaluate(() => document.querySelector('#slide-26-01 .pilot-control--step:first-child')?.click())
-  await waitForPage(page, indexFor(plan, 'slide-21-01'))
+  await page.evaluate(() => document.querySelector('#slide-28-01 .pilot-control--step:first-child')?.click())
+  await waitForPage(page, indexFor(plan, 'slide-23-01'))
   await page.goBack()
-  await waitForPage(page, indexFor(plan, 'slide-26-01'))
-  const restoredOverflowFocus = await page.locator('#slide-26-01').evaluate((pilotPage) => {
+  await waitForPage(page, indexFor(plan, 'slide-28-01'))
+  const restoredOverflowFocus = await page.locator('#slide-28-01').evaluate((pilotPage) => {
     const stage = pilotPage.querySelector('[data-pilot-stage]')
     const title = pilotPage.querySelector('.pilot-page__title')
     if (!(stage instanceof HTMLElement) || !(title instanceof HTMLElement))
@@ -657,7 +657,7 @@ async function validateInteractions(browser, server, inventory, plan) {
     restoredOverflowFocus?.scrollTop === 0 && restoredOverflowFocus.focused && restoredOverflowFocus.titleVisible,
     `Reader pilot restored an overflow page with off-screen heading focus: ${JSON.stringify(restoredOverflowFocus)}`,
   )
-  await page.locator('#slide-26-01 [data-pilot-search]').focus()
+  await page.locator('#slide-28-01 [data-pilot-search]').focus()
   await page.keyboard.press('Tab')
   assert(await overflowStage.evaluate(element => element === document.activeElement), 'Reader pilot Tab order skips the overflow stage.')
   await overflowStage.evaluate(element => { element.scrollTop = 0 })
@@ -667,7 +667,7 @@ async function validateInteractions(browser, server, inventory, plan) {
     await overflowStage.evaluate(element => element.scrollTop > 0) && new URL(page.url()).hash === zoomHash,
     'Reader pilot PageDown navigated away before scrolling enlarged content.',
   )
-  const zoom = await page.locator('#slide-26-01').evaluate((element) => {
+  const zoom = await page.locator('#slide-28-01').evaluate((element) => {
     const stage = element.querySelector('[data-pilot-stage]')
     const chrome = element.querySelector('.pilot-page__chrome')
     const controls = element.querySelector('.pilot-page__controls')
@@ -775,7 +775,7 @@ async function captureArtifacts(browser, server, plan, output, v2Screenshots, ca
   await page.close()
   const mobile390Files = await capturePilotSet(browser, server, plan, { width: 390, height: 844 }, mobile390Dir)
   const mobile430Files = await capturePilotSet(browser, server, plan, { width: 430, height: 932 }, mobile430Dir)
-  const desktopIds = new Set(['slide-06-01', 'slide-07-03', 'slide-13-01', 'slide-13-05', 'slide-16-01', 'slide-16-02', 'slide-21-01', 'slide-26-01'])
+  const desktopIds = new Set(['slide-06-01', 'slide-07-03', 'slide-13-01', 'slide-13-05', 'slide-16-01', 'slide-16-02', 'slide-23-01', 'slide-28-01'])
   const desktopFiles = await capturePilotSet(
     browser,
     server,
