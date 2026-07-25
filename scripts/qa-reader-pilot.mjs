@@ -134,6 +134,10 @@ async function waitForPage(page, index) {
   await page.locator(`.pilot-pages[data-pilot-ready="true"][data-pilot-current="${index + 1}"][data-pilot-settled="${index + 1}"]`).waitFor()
 }
 
+async function waitForFocus(page, selector) {
+  await page.waitForFunction((target) => document.activeElement === document.querySelector(target), selector)
+}
+
 function indexFor(plan, id) {
   const index = plan.findIndex(page => page.id === id)
   assert(index >= 0, `Reader pilot plan is missing ${id}.`)
@@ -498,6 +502,7 @@ async function validatePendingDialogHistoryRace(browser, baseUrl, plan) {
   assert(await stackingPage.locator('#pilot-contents-dialog[open]').count() === 1, 'Reader pilot did not preserve the newer dialog after cancelling a pending open.')
   assert(await stackingPage.locator('.pilot-pages').evaluate(element => element.classList.contains('pilot-pages--dialog-open')), 'Reader pilot stale close event removed the active dialog scroll lock.')
   await stackingPage.keyboard.press('Escape')
+  await waitForFocus(stackingPage, '#slide-23-01 .pilot-page__title')
   assert(await stackingPage.locator('#slide-23-01 .pilot-page__title').evaluate(element => element === document.activeElement), 'Reader pilot returned focus to an off-screen dialog opener.')
   await stackingContext.close()
 }
@@ -575,6 +580,7 @@ async function validateInteractions(browser, server, inventory, plan) {
   assert(await detail.locator('[data-pilot-close]').evaluate(element => element === document.activeElement), 'Reader pilot detail dialog did not receive focus.')
   await page.keyboard.press('Escape')
   assert(await detail.getAttribute('open') === null, 'Reader pilot detail dialog did not close with Escape.')
+  await waitForFocus(page, '#slide-23-01 [data-pilot-dialog]')
   assert(await page.locator('#slide-23-01 [data-pilot-dialog]').evaluate(element => element === document.activeElement), 'Reader pilot detail dialog did not return focus to its opener.')
 
   const opener = page.locator('#slide-23-01 [data-pilot-dialog]')
