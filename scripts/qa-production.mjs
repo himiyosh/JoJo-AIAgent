@@ -144,12 +144,77 @@ function maxPositionDelta(before, after) {
   return Math.max(...Object.keys(before).map(key => Math.abs(before[key] - after[key])))
 }
 
+async function testCoverGraph(slide) {
+  const metrics = await slide.evaluate((root) => {
+    const svg = root.querySelector('.hero__svg')
+    const graph = svg?.querySelector('[data-layer="graph"]')
+    const hull = graph?.querySelector('.hero__graph-hull')
+    const ring = svg?.querySelector('.hero__loop-ring')
+    const graphBox = graph?.getBBox()
+    const viewBox = svg?.viewBox.baseVal
+    const graphNodes = [...(graph?.querySelectorAll('.hero__graph-node') ?? [])]
+    const insideViewBox = Boolean(graphBox && viewBox
+      && graphBox.x >= viewBox.x
+      && graphBox.y >= viewBox.y
+      && graphBox.x + graphBox.width <= viewBox.x + viewBox.width
+      && graphBox.y + graphBox.height <= viewBox.y + viewBox.height)
+    const ringSampleCount = 64
+    const ringSamplesOutsideHull = []
+    if (svg && hull instanceof SVGGeometryElement && ring instanceof SVGGeometryElement) {
+      const hullProbe = hull.cloneNode()
+      hullProbe.style.fill = '#000'
+      hullProbe.style.stroke = 'none'
+      hullProbe.style.visibility = 'hidden'
+      svg.append(hullProbe)
+      const ringLength = ring.getTotalLength()
+      for (let index = 0; index < ringSampleCount; index += 1) {
+        const point = ring.getPointAtLength((ringLength * index) / ringSampleCount)
+        if (!hullProbe.isPointInFill(point))
+          ringSamplesOutsideHull.push(index)
+      }
+      hullProbe.remove()
+    }
+    const enclosesRing = ringSamplesOutsideHull.length === 0
+      && hull instanceof SVGGeometryElement
+      && ring instanceof SVGGeometryElement
+    const outerNodes = graphNodes.every((node) => {
+      const x = Number(node.getAttribute('cx'))
+      const y = Number(node.getAttribute('cy'))
+      return Math.hypot(x - 166, y - 138) > 96
+    })
+    return {
+      provisional: graph?.getAttribute('data-provisional'),
+      graphLabel: graph?.querySelector('.hero__graph-label')?.textContent?.trim(),
+      graphNote: graph?.querySelector('.hero__graph-note')?.textContent?.trim(),
+      graphNodes: graphNodes.length,
+      graphEdges: graph?.querySelectorAll('.hero__graph-edge').length ?? 0,
+      stageNumbers: [...(svg?.querySelectorAll('.hero__n') ?? [])].map(node => node.textContent?.trim()),
+      stageLabels: [...(svg?.querySelectorAll('.hero__lab') ?? [])].map(node => node.textContent?.trim()),
+      insideViewBox,
+      enclosesRing,
+      ringSamples: ringSampleCount,
+      ringSamplesOutsideHull,
+      outerNodes,
+    }
+  })
+  assert(metrics.provisional === 'true'
+    && metrics.graphLabel === 'GRAPH?'
+    && metrics.graphNote === 'PROVISIONAL', `Cover Graph cue is not explicitly provisional: ${JSON.stringify(metrics)}`)
+  assert(metrics.graphNodes === 4
+    && metrics.graphEdges === 4
+    && metrics.outerNodes, `Cover Graph must be an outer node/edge topology: ${JSON.stringify(metrics)}`)
+  assert(JSON.stringify(metrics.stageNumbers) === JSON.stringify(['1', '2', '3', '4'])
+    && JSON.stringify(metrics.stageLabels) === JSON.stringify(['PROMPT', 'CONTEXT', 'HARNESS', 'LOOP']), `Cover changed the established four-stage axis: ${JSON.stringify(metrics)}`)
+  assert(metrics.insideViewBox && metrics.enclosesRing, `Cover Graph does not enclose the Loop system inside the SVG safe area: ${JSON.stringify(metrics)}`)
+}
+
 async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFontSize = 144) {
   const number = slide.locator('.section__chno')
   assert(await number.count() === 1, `Slide ${slideNumber}: chapter numeral is missing or duplicated.`)
   assert(await number.evaluate(element => element.tagName === 'SPAN' && !element.textContent?.trim()), `Slide ${slideNumber}: chapter numeral wrapper must be an empty span.`)
   assert(await number.getAttribute('data-number') === expectedNumber, `Slide ${slideNumber}: expected chapter numeral ${expectedNumber}.`)
   assert(await number.getAttribute('aria-hidden') === 'true', `Slide ${slideNumber}: chapter numeral is not decorative.`)
+  await slide.evaluate(root => root.getAnimations({ subtree: true }).forEach(animation => animation.finish()))
 
   const metrics = await slide.evaluate((root) => {
     const layer = root.querySelector('.section__chno')
@@ -185,6 +250,11 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
       titleRects.push(...range.getClientRects())
     }
     const bounds = root.getBoundingClientRect()
+    const flow = ['.section__mark', '.section__context', 'h1', '.section__lead', '.section__route']
+      .map(selector => root.querySelector(selector))
+    const flowRects = flow.map(element => element?.getBoundingClientRect())
+    const flowParent = flow[2]?.parentElement
+    const scale = bounds.width / 980
     const result = {
       content: pseudo?.content.replace(/^['"]|['"]$/g, ''),
       fontSize: Number.parseFloat(pseudo?.fontSize ?? '0'),
@@ -213,6 +283,21 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
         const right = Math.max(...rects.map(rect => rect.right))
         return Math.abs((left + right - bounds.left - bounds.right) / 2)
       })(),
+      compositionVerticalCenterDelta: flowRects.every(Boolean)
+        ? Math.abs((flowRects[0].top + flowRects.at(-1).bottom - bounds.top - bounds.bottom) / 2)
+        : Infinity,
+      flow: {
+        directChildren: flow.every(element => element?.parentElement === flowParent),
+        rowGap: Number.parseFloat(getComputedStyle(flowParent).rowGap),
+        margins: flow.map((element) => {
+          const style = getComputedStyle(element)
+          return [Number.parseFloat(style.marginTop), Number.parseFloat(style.marginBottom)]
+        }),
+        gaps: flowRects.slice(1).map((rect, index) => rect.top - flowRects[index].bottom),
+        safeTop: flowRects[0]?.top - bounds.top,
+        safeBottom: bounds.bottom - flowRects.at(-1)?.bottom,
+        scale,
+      },
       markCenterDelta: mark ? Math.abs((mark.left + mark.right - bounds.left - bounds.right) / 2) : Infinity,
       rightRatio: (bounds.right - numeral.right) / bounds.width,
       bottomGap: bounds.bottom - numeral.bottom,
@@ -234,6 +319,15 @@ async function testChapterDivider(slide, slideNumber, expectedNumber, expectedFo
   assert(metrics.foregroundAlign.every(alignment => alignment === 'center')
     && metrics.routeJustify === 'center', `Slide ${slideNumber}: chapter composition is not centered.`)
   assert(metrics.compositionCenterDelta <= 1 && metrics.markCenterDelta <= 1, `Slide ${slideNumber}: chapter axis is off-center by ${metrics.compositionCenterDelta}px (mark ${metrics.markCenterDelta}px).`)
+  assert(metrics.compositionVerticalCenterDelta <= 1, `Slide ${slideNumber}: chapter composition is vertically off-center by ${metrics.compositionVerticalCenterDelta}px.`)
+  assert(metrics.flow.directChildren
+    && Math.abs(metrics.flow.rowGap - 16) <= 0.1
+    && metrics.flow.margins.flat().every(margin => Math.abs(margin) <= 0.1), `Slide ${slideNumber}: chapter rhythm is not owned by one 1rem parent gap: ${JSON.stringify(metrics.flow)}`)
+  assert(metrics.flow.gaps.every(gap => gap >= 2 * metrics.flow.scale)
+    && metrics.flow.gaps[2] >= 12 * metrics.flow.scale
+    && metrics.flow.gaps[3] >= 12 * metrics.flow.scale, `Slide ${slideNumber}: chapter groups overlap or lack title/lead/route breathing room: ${JSON.stringify(metrics.flow.gaps)}`)
+  assert(metrics.flow.safeTop >= 48 * metrics.flow.scale
+    && metrics.flow.safeBottom >= 48 * metrics.flow.scale, `Slide ${slideNumber}: chapter composition violates the 48px safe area: ${JSON.stringify(metrics.flow)}`)
   assert(Math.abs(metrics.rightRatio - 0.025) <= 0.002 && Math.abs(metrics.bottomGap) <= 1, `Slide ${slideNumber}: chapter numeral is not anchored at right 2.5% / bottom 0.`)
   assert(!metrics.titleOverlap && !metrics.markOverlap, `Slide ${slideNumber}: chapter numeral overlaps foreground content.`)
 }
@@ -753,6 +847,15 @@ async function testReader(browser, server, screenshots) {
       }
       const titleLineList = titleH2 ? titleLines(titleH2) : []
       const titleBadLeading = titleLineList.slice(1).some(line => badLeadingRe.test(line.trim()))
+      // Regression guard for the broad figure[data-reader-visual] word-break:auto-phrase
+      // rule (reader.css): every pv-* text node carrying Japanese text must compute
+      // auto-phrase, so a future more-specific override can't silently reopen a
+      // mid-word split (the "エンジニアリング"/"コンテンツ" class of bug).
+      const cjkRe = /[\u3040-\u30ff\u3400-\u9fff]/
+      const visualTextNodes = visual ? [...visual.querySelectorAll('h1, h2, h3, h4, p, span, small, dt, dd, li, blockquote')] : []
+      const visualWordBreakViolations = visualTextNodes
+        .filter(node => cjkRe.test(node.textContent) && getComputedStyle(node).wordBreak !== 'auto-phrase')
+        .map(node => node.textContent.trim().slice(0, 24))
       return {
         height: element.getBoundingClientRect().height,
         internalOverflow: element.scrollHeight - element.clientHeight,
@@ -765,6 +868,7 @@ async function testReader(browser, server, screenshots) {
         titleWordBreak: titleH2 ? getComputedStyle(titleH2).wordBreak : '',
         titleLines: titleLineList,
         titleBadLeading,
+        visualWordBreakViolations,
         visualKind: visual?.getAttribute('data-reader-visual-kind') ?? '',
         visualText: visual?.textContent?.replace(/\s+/g, '').length ?? 0,
         visualStructure: visual?.querySelectorAll(meaningfulSelector).length ?? 0,
@@ -785,6 +889,7 @@ async function testReader(browser, server, screenshots) {
     assert(metrics.title && metrics.titleId === `slide-title-${number}`, `Reader page ${number} title is missing or disconnected.`)
     assert(metrics.titleWordBreak === 'auto-phrase', `Reader page ${number} title lost its word-break:auto-phrase protection (mid-word break risk).`)
     assert(!metrics.titleBadLeading, `Reader page ${number} title wraps with a bad line-start character: ${JSON.stringify(metrics.titleLines)}`)
+    assert(metrics.visualWordBreakViolations.length === 0, `Reader page ${number} visual has Japanese text without word-break:auto-phrase (mid-word break risk): ${JSON.stringify(metrics.visualWordBreakViolations)}`)
     assert(metrics.visualKind && metrics.visualStructure >= 1, `Reader page ${number} lacks a meaningful native visual structure.`)
     assert(metrics.visualText >= 4 && metrics.visualText <= 380, `Reader page ${number} has ${metrics.visualText} visible visual characters.`)
     assert(metrics.figure && metrics.figure.width >= 300 && metrics.figure.height >= 120, `Reader page ${number} portrait visual is too small at 390x844.`)
@@ -941,29 +1046,29 @@ async function testReader(browser, server, screenshots) {
 
   const next = page.locator('#slide-23 .reader-page__controls a[href="#slide-24"]')
   await next.click()
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 24)
   assert(page.url().endsWith('#slide-24'), 'Reader next control did not update the hash.')
   await page.goBack()
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 23)
   assert(page.url().endsWith('#slide-23'), 'Reader browser Back did not restore the prior page.')
   await page.goForward()
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 24)
   assert(page.url().endsWith('#slide-24'), 'Reader browser Forward did not restore the intended page.')
   await page.goBack()
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 23)
   assert(page.url().endsWith('#slide-23'), 'Reader second browser Back did not restore the prior page.')
   await page.evaluate(() => document.activeElement instanceof HTMLElement && document.activeElement.blur())
   await page.keyboard.press('ArrowDown')
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 24)
   assert(page.url().endsWith('#slide-24'), 'Reader ArrowDown did not move to the next page.')
   await page.keyboard.press('PageDown')
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 25)
   assert(page.url().endsWith('#slide-25'), 'Reader PageDown did not move to the next page.')
   await page.keyboard.press('ArrowUp')
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 24)
   assert(page.url().endsWith('#slide-24'), 'Reader ArrowUp did not move to the previous page.')
   await page.keyboard.press('PageUp')
-  await page.waitForTimeout(100)
+  await waitForReaderSlide(page, 23)
   assert(page.url().endsWith('#slide-23'), 'Reader PageUp did not move to the previous page.')
 
   await page.evaluate(() => {
@@ -1152,10 +1257,21 @@ try {
 
     const overflow = await visibleOverflow(slide)
     assert(overflow.length === 0, `Slide ${number} overflows at 1280x720: ${JSON.stringify(overflow)}`)
+    // Regression guard: any Japanese text inside a .tk (takeaway/conclusion) element
+    // must compute word-break:auto-phrase (style.css), so a shared-class change can't
+    // silently reopen a mid-word split (e.g. "複数" -> "複"/"数の", DESIGN.md §133/§134).
+    const tkViolations = await slide.evaluate((root) => {
+      const cjkRe = /[\u3040-\u30ff\u3400-\u9fff]/
+      return [...root.querySelectorAll('.tk')]
+        .filter(node => cjkRe.test(node.textContent) && getComputedStyle(node).wordBreak !== 'auto-phrase')
+        .map(node => node.textContent.trim().slice(0, 24))
+    })
+    assert(tkViolations.length === 0, `Slide ${number}: .tk element lost word-break:auto-phrase (mid-word break risk): ${JSON.stringify(tkViolations)}`)
     assert(await slide.locator('.ico[aria-hidden="true"][role]').count() === 0, `Slide ${number}: decorative Ico has a conflicting role.`)
     if (number === 1) {
       assert(await slide.locator('.cover__reader').count() === 0, 'Cover retained the obsolete mobile Reader CTA.')
       assert(!(await slide.textContent()).includes('スマホで拡大'), 'Cover retained obsolete mobile Reader copy.')
+      await testCoverGraph(slide)
     }
     if (CHAPTER_NUMBERS.has(number))
       await testChapterDivider(slide, number, CHAPTER_NUMBERS.get(number))
@@ -1181,7 +1297,7 @@ try {
         assert(Math.abs(before.y - after.y) <= 1, `Slide ${number}: citation shifted the slide layout.`)
     }
 
-    if (screenshots && [5, 7, 28].includes(number)) {
+    if (screenshots && [1, 5, 7, 12, 15, 21, 26, 28].includes(number)) {
       await page.evaluate(() => (document.activeElement instanceof HTMLElement) && document.activeElement.blur())
       await page.screenshot({ path: path.join(screenshots, `after-slide-${String(number).padStart(2, '0')}.png`) })
     }
@@ -1207,7 +1323,7 @@ try {
   await testPrimaryReader(browser, server)
   await testReader(browser, server, screenshots)
   assert(consoleErrors.length === 0, `Browser console errors: ${consoleErrors.join(' | ')}`)
-  console.log('Production QA passed: 33 slides, accessible tabs/citations, direct horizontal Reader, and legacy portrait Reader.')
+  console.log('Production QA passed: 33 slides, cover Graph topology, chapter spacing, accessible tabs/citations, direct horizontal Reader, and legacy portrait Reader.')
 }
 finally {
   await browser.close()
