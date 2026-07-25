@@ -4,6 +4,8 @@ on:
   # main への push で自動公開
   push:
     branches: [main]
+  # 公開前に同じ build / QA 契約を PR 上でも検証
+  pull_request:
   # 手動実行も可能
   workflow_dispatch:
 
@@ -13,10 +15,10 @@ permissions:
   pages: write
   id-token: write
 
-# 同時実行を1つに（進行中のデプロイはキャンセルしない）
+# 公開 run は維持し、PR 検証だけを最新 commit へ集約
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -28,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -47,26 +49,53 @@ jobs:
           test -f dist/reader/reader-manifest.json
           test ! -d dist/reader/images
           test -d dist/reader/thumbnails
-          node -e "const fs=require('node:fs'),path=require('node:path'); const d=JSON.parse(fs.readFileSync('dist/reader/reader-data.json')); if(d.version!==2||d.slides?.length!==31||d.slides.some((s,i)=>s.number!==i+1||!s.thumbnail||!fs.existsSync(path.join('dist/reader',s.thumbnail)))) process.exit(1)"
-          node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync('dist/reader/reader-manifest.json')); if(m.source!=='slides.md'||m.slides?.length!==31||m.slides.some((s,i)=>s.number!==i+1||!s.note||!s.type||!s.variant)) process.exit(1)"
+          # scripts/build-reader.mjs が canonical 件数を検証するため、workflow は件数を重複管理しない。
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'
+          import path from 'node:path'
+
+          const data = JSON.parse(fs.readFileSync('dist/reader/reader-data.json'))
+          const manifest = JSON.parse(fs.readFileSync('dist/reader/reader-manifest.json'))
+          if (data.version !== 2 || !Array.isArray(data.slides) || data.slides.length === 0)
+            throw new Error('Reader data is missing its canonical slide mappings.')
+          if (data.slides.some((slide, index) => slide.number !== index + 1
+            || !slide.thumbnail
+            || !fs.existsSync(path.join('dist/reader', slide.thumbnail))))
+            throw new Error('Reader data has an invalid slide number or thumbnail mapping.')
+          if (manifest.source !== 'slides.md'
+            || !Array.isArray(manifest.slides)
+            || manifest.slides.length !== data.slides.length)
+            throw new Error('Reader manifest does not match the canonical Reader data.')
+          if (manifest.slides.some((slide, index) => slide.number !== index + 1
+            || !slide.note
+            || !slide.type
+            || !slide.variant))
+            throw new Error('Reader manifest has an incomplete canonical slide mapping.')
+          NODE
           test -f dist/reader-legacy/index.html
           test -f dist/reader-legacy/reader.js
           test -f dist/reader-pilot/index.html
           test -f dist/reader-pilot/coverage-report.json
+
+      - name: Verify production surfaces
+        run: npm run qa:production -- --base /${{ github.event.repository.name }}/ --out dist
 
       # Pilotの件数・構成契約は専用QAへ集約し、workflowとの二重管理を避ける。
       - name: Verify Reader pilot
         run: npm run qa:reader-pilot -- --base /${{ github.event.repository.name }}/ --out dist
 
       - name: Setup Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
   deploy:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:

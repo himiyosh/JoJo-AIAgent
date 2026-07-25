@@ -4,6 +4,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "JoJo「情報強者までいかずとも、情報弱者にならないためのコンテンツ」シリーズ #01 — AIエージェント入門 (Slidev)",
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "scripts": {
     "dev": "slidev --open",
     "build": "node scripts/build.mjs",

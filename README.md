@@ -81,7 +81,7 @@
 <details>
 <summary>ローカルで動かす／ビルド／GitHub Pages 公開の手順</summary>
 
-必要環境: **Node.js 20 以上** / npm
+必要環境: **Node.js 22.18 以上** / npm
 
 ```bash
 npm install          # 依存関係をインストール
