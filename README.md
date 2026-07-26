@@ -95,6 +95,7 @@ npm run qa:reader-pilot -- --base /JoJo-AIAgent/     # pilot v3 180/180 coverage
 npm run qa:mobile-pilot -- --base /JoJo-AIAgent/     # 横型3枚のfit・pinch・pan・dialog・historyを検証
 npm run qa:mobile-reader -- --base /JoJo-AIAgent/    # 横型全33枚・目次・検索・zoom/pan・root/baseを検証
 npm run qa:build-wrapper                              # entry判定・Windows互換CLI起動を検証
+npm run qa:action-runtimes                            # 公式 Actions の承認済み major と参照形式を検証
 npm run export           # PDF などにエクスポート（要 playwright-chromium）
 npm run export:handout   # 配布用ハンドアウト PDF（クリック式タブの全状態を1ページずつ）→ handout.pdf
 ```
