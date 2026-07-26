@@ -4,9 +4,9 @@
 // chain (Trigger → Planner → Loop → Evaluator → Done) plus two labelled
 // feedback bands under it (retry into the Loop / escalate to a Human), and a
 // dashed "State" frame that visually groups the nodes sharing checkpointed
-// state. The Loop node carries a small "①" badge so the contrast with the
-// single ReAct loop (previous slide) reads in ~2s: that whole familiar loop
-// is just ONE box here.
+// state. The comparison strip makes the scope change explicit: Loop Engineering
+// improves one repeating execution unit, while provisional Graph Engineering
+// connects multiple execution units into a workflow.
 </script>
 
 <template>
@@ -63,10 +63,18 @@
       </div>
     </div>
 
-    <p class="lgraph__cap">
-      <strong>①（Loop）</strong>は、前ページの反復そのもの＝<span class="whitespace-nowrap">Graph の中の1つの node</span> にすぎない。
-      <span class="whitespace-nowrap">分岐・合流・状態・Human の確認</span>まで配線するのが Graph 全体。
-    </p>
+    <div class="lgraph__compare" role="group" aria-label="Loop EngineeringとGraph Engineeringの違い">
+      <div class="lgraph__compare-item is-loop-scope">
+        <span class="lgraph__compare-label">LOOP ENGINEERING</span>
+        <strong>1つの実行単位をどう反復させるか</strong>
+        <small>終了条件 · 評価 · 再試行</small>
+      </div>
+      <div class="lgraph__compare-item is-graph-scope">
+        <span class="lgraph__compare-label">GRAPH ENGINEERING（暫定）</span>
+        <strong>複数の実行単位をどう接続するか</strong>
+        <small>分岐 · 合流 · 共有State · Humanへの引継ぎ</small>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -177,12 +185,29 @@
 }
 .lgraph__inline-node .ico { font-size: .95em; color: var(--accent-warn); }
 
-.lgraph__cap {
-  max-width: 46em; margin: .55rem auto 0; text-align: center;
-  font-size: .86rem; line-height: 1.55; color: var(--ink-soft); text-wrap: balance;
+.lgraph__compare {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  width: min(92%, 780px); margin: .5rem auto 0;
+  border-block: 1px solid var(--line);
+}
+.lgraph__compare-item {
+  display: flex; flex-direction: column; align-items: center; min-width: 0;
+  padding: .38rem .7rem .42rem; text-align: center; color: var(--ink-soft);
+}
+.lgraph__compare-item + .lgraph__compare-item { border-left: 1px solid var(--line); }
+.lgraph__compare-label {
+  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .55rem;
+  letter-spacing: .22em; line-height: 1.3; color: var(--brand-b);
+}
+.is-graph-scope .lgraph__compare-label { color: var(--brand-a); }
+.lgraph__compare-item strong {
+  margin-top: .16rem; font-size: .78rem; line-height: 1.3; color: #fff;
   word-break: auto-phrase;
 }
-.lgraph__cap strong { color: #fff; }
+.lgraph__compare-item small {
+  margin-top: .08rem; font-size: .64rem; line-height: 1.3; color: var(--muted);
+  word-break: auto-phrase;
+}
 
 @media (prefers-reduced-motion: reduce) {
   .lgraph__statewrap::before { animation: none; }
