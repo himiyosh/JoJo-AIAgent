@@ -47,7 +47,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   { id: 'multi-agent', term: 'マルチエージェント', en: 'Multi-agent',
     short: '役割を分けた複数のエージェントが協調して1つのタスクを解く構成。対義は単一エージェント。' },
   { id: 'graph-engineering', term: 'グラフエンジニアリング', en: 'Graph Engineering（未確定）',
-    short: '2026年7月に急浮上した呼び名。Loop・Tool・Humanをnode／edge／stateで束ねる設計と暫定的に整理される。標準化された定義はまだ無い。' },
+    short: '1つの実行単位の反復を磨くLoop Engineeringに対し、複数の実行単位をnode／edge／stateで接続する設計の暫定名。標準定義はまだ無い。' },
 ]
 
 /** id of the term to highlight on the Glossary slide (set when a `.gterm` link is clicked). */

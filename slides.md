@@ -615,14 +615,14 @@ foot: false
 
 ---
 
-# 「Graph」は複数の<span class="grad">Loop</span>をつなぐ配線
+# Loopは「反復」、<span class="grad">Graphは「配線」</span>
 
 <div class="eyebrow">GRAPH ENGINEERING（暫定）· NODE / EDGE / STATE</div>
 
 <LoopGraph class="mt-2" />
 
 <div class="tk concl mt-2">
-<a class="gterm" data-term="graph-engineering"><strong>Graph Engineering</strong></a> は Loop を<span class="hot">置き換える</span>のではなく、複数の Loop を束ねる<span class="grad" style="font-weight:700">“上位の配線”</span>（現時点の暫定的な整理）。
+<a class="gterm" data-term="graph-engineering"><strong>Graph Engineering</strong></a> は Loop の次の<span class="hot">“反復”</span>ではなく、Loopをnodeとして含む<span class="grad" style="font-weight:700">“全体の配線”</span>（現時点の暫定的な整理）。
 </div>
 
 <Cite :items="[
@@ -631,7 +631,7 @@ foot: false
 ]" />
 
 <!--
-前ページの“暫定ワード”が、具体的に何を指しているのかを図解するページです。①（紫のバッジ）が付いたLoopノードは、前ページ・前々ページで見たReActループそのもの——つまり「知覚→思考→行動→観察」の反復です。Graph Engineeringが加えるのは、その前後・周辺の配線だと暫定的に整理されています：Plannerが仕事を割り振り、Loopの結果はEvaluator（検証ゲート）で合流・判定され、OKなら統合完了、NGならLoopへ差し戻し（再試行）、人の判断が要るときはHumanへエスカレーションしてから完了へ合流します。点線の枠は、これらのノードが同じState（進捗・チェックポイント）を共有していることを示します。実は、こうしたnode／edge／stateによる実行グラフの仕組み自体はLangGraphなど既存フレームワークにすでにあり、目新しい技術ではありません。新しいのは「複数のLoopをどう束ねるか」という設計対象への注目そのもの——次章「一体で作る? 分ける?」で扱う、単一 vs マルチエージェントの話と地続きです。
+Loop Engineeringが設計するのは、1つの実行単位をどう反復させるかです。終了条件・評価・再試行を磨き、1つの輪を回し切ります。対してGraph Engineeringは、Loopや手順をnodeとして並べ、その間の分岐・合流・共有State・Humanへの引継ぎをedgeでどう接続するか、という全体設計の暫定名です。図ではPlannerが仕事を分け、検証ゲートが結果を判定し、NGならLoopへ戻し、判断が必要ならHumanへ渡します。GraphはLoopを置き換えず、その反復を一部として含みます。node／edge／stateの仕組み自体はLangGraphなどに以前からあり、新しいのは複数の実行単位を束ねる設計対象への注目です。
 -->
 
 ---

@@ -331,7 +331,14 @@ function renderLoopGraph(slide) {
       <ul class="pv-loop-graph__bands">
         ${(data.bands ?? []).map(band => `<li>${text(band.text, 60)}</li>`).join('')}
       </ul>
-      <p class="pv-loop-graph__caption">${text(first(data.caption), 96)}</p>
+      <div class="pv-loop-graph__compare" aria-label="Loop EngineeringとGraph Engineeringの設計対象">
+        ${(data.comparison ?? []).map((scope, index) => `
+          <section class="pv-loop-graph__scope pv-loop-graph__scope--${index + 1}">
+            <small>${text(scope.title, 34)}</small>
+            <b>${text(scope.subtitle, 44)}</b>
+            <p>${text(groupSummary(scope, 52), 52)}</p>
+          </section>`).join('')}
+      </div>
     </div>
   `)
 }

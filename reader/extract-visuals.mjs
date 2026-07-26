@@ -113,6 +113,7 @@ export async function extractRecipeData(slide, recipe, slideNumber) {
           '.tl-step .k',
           '.aloop__jp',
           '.lgraph__jp',
+          '.lgraph__compare-label',
           '.card h3',
           'h2',
           'h3',
@@ -127,6 +128,7 @@ export async function extractRecipeData(slide, recipe, slideNumber) {
           '.tl-step .d',
           '.aloop__en',
           '.lgraph__en',
+          '.lgraph__compare-item strong',
           '.card__ba',
           '.u',
         ])
@@ -148,6 +150,7 @@ export async function extractRecipeData(slide, recipe, slideNumber) {
             '.ptn__d',
             '.gl__def',
             '.card p',
+            '.lgraph__compare-item small',
             'dd',
             'p',
           ])
