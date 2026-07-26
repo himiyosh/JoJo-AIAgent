@@ -39,6 +39,9 @@ jobs:
       - name: Verify GitHub Actions runtime majors
         run: npm run qa:action-runtimes
 
+      - name: Verify agent context circuit breaker
+        run: npm run qa:agent-context
+
       # base パスはリポジトリ名を自動注入（ハードコードしない）
       # 例: リポジトリが owner/my-repo なら base = /my-repo/
       - name: Build
