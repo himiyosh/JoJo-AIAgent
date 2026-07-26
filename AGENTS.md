@@ -32,6 +32,8 @@
    `[Unreleased]` に追記する。内部リファクタリングや CI のみで利用者影響がない変更は対象外とする。
    リリース時は該当項目を `[vX.Y.Z] - YYYY-MM-DD` へ移し、末尾の比較リンクを新しい版へ更新する。
 
+7. **コンテキスト上限を待たず、physical session を強制的に世代交代する。** `.github/instructions/session-context.instructions.md` を正本とし、各 coordinator turn と新しい tool batch の前に context preflight を行う。mandatory rollover signal 後は circuit breaker を解除せず、`/safe-session-suspend` による handoff と、履歴を継承しない fresh session への交代だけを行う。oversized session を fork・再読込・再送しない。
+
 ## 主要ファイル
 
 - `slides.md` … デッキ本体（Markdown ＋ 最小 HTML）
@@ -43,6 +45,7 @@
 - `README.md` … 公開入口と `CHANGELOG.md` への常設導線
 - `CHANGELOG.md` … 利用者に影響する変更を `[Unreleased]` から管理する変更履歴
 - `DESIGN.md` … デザイン規律・再利用手順（**最優先で参照**）
+- `.github/instructions/session-context.instructions.md` … request-size failure 前に発動するセッション世代交代の circuit breaker
 
 ## JoJo 共通 Copilot カスタマイズ
 

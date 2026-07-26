@@ -16,6 +16,7 @@
     "qa:production": "node scripts/qa-production.mjs",
     "qa:build-wrapper": "node scripts/qa-build-wrapper.mjs",
     "qa:action-runtimes": "node scripts/qa-action-runtime-versions.mjs",
+    "qa:agent-context": "node scripts/qa-agent-context-policy.mjs",
     "qa:reader-pilot": "node scripts/qa-reader-pilot.mjs",
     "qa:mobile-pilot": "node scripts/qa-mobile-pilot.mjs",
     "qa:mobile-reader": "node scripts/qa-mobile-pilot.mjs --route reader"
