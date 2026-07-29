@@ -6,62 +6,77 @@
 // dashed "State" frame that visually groups the nodes sharing checkpointed
 // state. The comparison strip makes the scope change explicit: Loop Engineering
 // improves one repeating execution unit, while provisional Graph Engineering
-// connects multiple execution units into a workflow.
+// connects multiple execution units into a workflow. The caption stays alongside
+// that strip (never replaced by it): DESIGN.md §221 requires the frame + the ①
+// badge + a plain sentence naming both, or the badge degrades into a bare glyph.
+// Every edge carries its verdict label and points the way its wording reads
+// (NG returns left into the Loop, escalation continues right into Done).
 </script>
 
 <template>
   <div class="lgraph">
-    <div class="lgraph__frame" aria-hidden="true"><span class="lgraph__frame-tag">GRAPH＝実行グラフ全体</span></div>
+    <div class="lgraph__graph">
+      <span class="lgraph__frame-tag">GRAPH＝実行グラフ全体</span>
 
-    <div class="lgraph__row">
-      <div class="lgraph__pill lgraph__pill--in">
-        <Ico name="target" /><span>依頼・Issue</span>
-      </div>
-      <span class="lgraph__chev" aria-hidden="true">›</span>
+      <div class="lgraph__row">
+        <div class="lgraph__pill lgraph__pill--in">
+          <Ico name="target" /><span>依頼・Issue</span>
+        </div>
+        <span class="lgraph__chev" aria-hidden="true">›</span>
 
-      <div class="lgraph__node is-plan">
-        <span class="lgraph__tile"><Ico name="split" /></span>
-        <span class="lgraph__jp">Planner</span>
-        <span class="lgraph__en">計画・分岐</span>
-      </div>
-      <span class="lgraph__chev" aria-hidden="true">›</span>
+        <div class="lgraph__node is-plan">
+          <span class="lgraph__tile"><Ico name="split" /></span>
+          <span class="lgraph__jp">Planner</span>
+          <span class="lgraph__en">計画・分岐</span>
+        </div>
+        <span class="lgraph__chev" aria-hidden="true">›</span>
 
-      <div class="lgraph__statewrap">
-        <span class="lgraph__state-tag">State（進捗・チェックポイント）を共有</span>
-        <div class="lgraph__state-row">
-          <div class="lgraph__node is-loop">
-            <span class="lgraph__badge" aria-hidden="true">①</span>
-            <span class="lgraph__tile"><Ico name="loop" /></span>
-            <span class="lgraph__jp">Loop：実装</span>
-            <span class="lgraph__en">Agent Loop</span>
+        <div class="lgraph__statewrap">
+          <span class="lgraph__state-tag">State（進捗・チェックポイント）を共有</span>
+          <div class="lgraph__state-row">
+            <div class="lgraph__node is-loop">
+              <span class="lgraph__badge" aria-hidden="true">①</span>
+              <span class="lgraph__tile"><Ico name="loop" /></span>
+              <span class="lgraph__jp">Loop：実装</span>
+              <span class="lgraph__en">Agent Loop</span>
+            </div>
+            <span class="lgraph__chev" aria-hidden="true">›</span>
+            <div class="lgraph__node is-eval">
+              <span class="lgraph__tile"><Ico name="scales" /></span>
+              <span class="lgraph__jp">検証ゲート</span>
+              <span class="lgraph__en">Evaluator</span>
+            </div>
           </div>
-          <span class="lgraph__chev" aria-hidden="true">›</span>
-          <div class="lgraph__node is-eval">
-            <span class="lgraph__tile"><Ico name="scales" /></span>
-            <span class="lgraph__jp">検証ゲート</span>
-            <span class="lgraph__en">Evaluator</span>
-          </div>
+        </div>
+
+        <span class="lgraph__edge lgraph__edge--ok">
+          <span class="lgraph__edge-label">OK</span>
+          <span class="lgraph__chev lgraph__chev--ok" aria-hidden="true">›</span>
+        </span>
+        <div class="lgraph__pill lgraph__pill--done">
+          <Ico name="check" /><span>統合・完了</span>
         </div>
       </div>
 
-      <span class="lgraph__chev lgraph__chev--ok" aria-hidden="true">›</span>
-      <div class="lgraph__pill lgraph__pill--done">
-        <Ico name="check" /><span>統合・完了</span>
+      <div class="lgraph__bands">
+        <span class="lgraph__bands-tag">検証ゲートの判定で、残り2本の edge が分かれる</span>
+        <div class="lgraph__band is-retry">
+          <span class="lgraph__band-line" aria-hidden="true"></span>
+          <span class="lgraph__band-label"><b>NG</b> → <strong>Loop へ差し戻し</strong>（再試行）</span>
+        </div>
+        <div class="lgraph__band is-escalate">
+          <span class="lgraph__band-label"><b>要判断</b> →
+            <span class="lgraph__inline-node"><Ico name="user" />Human確認</span>
+            → <strong>統合・完了へ合流</strong></span>
+          <span class="lgraph__band-line lgraph__band-line--fwd" aria-hidden="true"></span>
+        </div>
       </div>
     </div>
 
-    <div class="lgraph__bands">
-      <div class="lgraph__band is-retry">
-        <span class="lgraph__band-line" aria-hidden="true"></span>
-        <span class="lgraph__band-label">NG → <strong>Loopへ差し戻し</strong>（再試行）</span>
-      </div>
-      <div class="lgraph__band is-escalate">
-        <span class="lgraph__band-line" aria-hidden="true"></span>
-        <span class="lgraph__band-label">要判断 →
-          <span class="lgraph__inline-node"><Ico name="user" />Human確認</span>
-          → 完了へ合流</span>
-      </div>
-    </div>
+    <p class="lgraph__cap">
+      <strong>①（Loop）</strong>は、前ページの反復そのもの＝<span class="whitespace-nowrap">Graph の中の1つの node にすぎない</span>。
+      <span class="whitespace-nowrap">分岐・合流・状態・Human の確認</span>まで配線するのが Graph 全体。
+    </p>
 
     <div class="lgraph__compare" role="group" aria-label="Loop EngineeringとGraph Engineeringの違い">
       <div class="lgraph__compare-item is-loop-scope">
@@ -81,12 +96,17 @@
 <style scoped>
 .lgraph { display: flex; flex-direction: column; align-items: center; gap: .5rem; margin: 1rem auto 0; position: relative; }
 
-/* ---- outer "this whole picture is the Graph" frame (wraps main row + both
-   feedback bands = every node/edge; excludes only the grounding caption) ---- */
-.lgraph__frame {
-  position: absolute; inset: -.55rem -.5rem 3.65rem;
+/* ---- outer "this whole picture is the Graph" frame. It is a real wrapper
+   around the main row + both feedback bands (= every node/edge), NOT an
+   absolutely positioned overlay with a hand-tuned bottom inset: the caption and
+   the comparison strip sit outside it as siblings, so adding or resizing either
+   can never leave the frame swallowing them (that magic number was the reason
+   the frame had to be re-measured on every content change) ---- */
+.lgraph__graph {
+  position: relative; width: 100%;
+  padding: 0 .5rem .55rem;
   border: 1.4px dashed color-mix(in srgb, var(--brand-b) 30%, var(--line));
-  border-radius: 1.1rem; pointer-events: none;
+  border-radius: 1.1rem;
 }
 .lgraph__frame-tag {
   position: absolute; top: -.62em; left: 1.1rem; padding: 0 .5em;
@@ -126,6 +146,15 @@
 .lgraph__chev { font-size: 1.3rem; font-weight: 700; color: var(--muted); line-height: 1; }
 .lgraph__chev--ok { color: #22c55e; }
 
+/* the only main-chain edge that carries a verdict ("OK") — the green colour alone
+   would be an unlabelled glyph (§8 / §288), so the word rides above the chevron */
+.lgraph__edge { display: inline-flex; flex-direction: column; align-items: center; gap: .04rem; }
+.lgraph__edge-label {
+  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .55rem;
+  letter-spacing: .1em; line-height: 1;
+}
+.lgraph__edge--ok .lgraph__edge-label { color: #22c55e; }
+
 .lgraph__pill {
   display: inline-flex; align-items: center; gap: .32rem;
   padding: .48rem .68rem; border-radius: .6rem; font-weight: 700; font-size: .85rem;
@@ -160,21 +189,37 @@
 .lgraph__state-row { position: relative; z-index: 1; display: flex; align-items: center; gap: .3rem; }
 
 /* ---- feedback bands (same visual grammar as AgentLoop's single "retry" band, extended to two) ---- */
-.lgraph__bands { display: flex; flex-direction: column; align-items: center; gap: .42rem; width: min(88%, 760px); margin-top: .1rem; }
+.lgraph__bands { display: flex; flex-direction: column; align-items: center; gap: .42rem; width: 100%; margin-top: .1rem; }
+.lgraph__bands-tag {
+  align-self: flex-start; margin: 0 0 -.1rem .6rem;
+  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .56rem;
+  letter-spacing: .04em; color: var(--muted);
+}
 .lgraph__band { display: flex; align-items: center; gap: .6rem; width: 100%; }
+/* Each dashed edge has to END under the node its wording names, otherwise the
+   arrowhead points into empty canvas and the reader cannot tell which box the
+   edge returns to (§288). The offsets are percentages of the graph frame, which
+   is the same box the row above is centred in, so both bands stay anchored to
+   their nodes at any canvas scale: retry stops under the Loop node, escalation
+   runs on to 統合・完了. */
+.is-retry { padding-left: 47%; }
+.is-escalate { padding-left: 20%; padding-right: 11.5%; }
 .lgraph__band-line { flex: 1; height: 0; border-top: 1.5px dashed; position: relative; }
 /* arrowhead tip (not a card side-accent) — same zero-size border-triangle
    technique as AgentLoop.vue's .aloop__back-line::before, kept for visual
-   consistency between the deck's two feedback-loop diagrams */
+   consistency between the deck's two feedback-loop diagrams. The head sits at
+   the end the wording travels toward, so direction and copy can never disagree */
 .lgraph__band-line::before {
   content: ""; position: absolute; left: 0; top: -4px;
   border: 5px solid transparent; border-right-width: 6px; border-left: 0;
 }
+.lgraph__band-line--fwd::before { left: auto; right: 0; border: 5px solid transparent; border-left-width: 6px; border-right: 0; }
 .is-retry .lgraph__band-line { border-top-color: color-mix(in srgb, var(--accent-warm) 55%, var(--line)); }
 .is-retry .lgraph__band-line::before { border-right-color: color-mix(in srgb, var(--accent-warm) 65%, var(--line)); }
 .is-escalate .lgraph__band-line { border-top-color: color-mix(in srgb, var(--accent-warn) 55%, var(--line)); }
-.is-escalate .lgraph__band-line::before { border-right-color: color-mix(in srgb, var(--accent-warn) 65%, var(--line)); }
+.is-escalate .lgraph__band-line--fwd::before { border-left-color: color-mix(in srgb, var(--accent-warn) 65%, var(--line)); }
 .lgraph__band-label { font-size: .78rem; color: var(--ink-soft); white-space: nowrap; display: inline-flex; align-items: center; gap: .3rem; }
+.lgraph__band-label b { font-weight: 800; color: #fff; }
 .is-retry .lgraph__band-label strong { color: var(--accent-warm-ink); }
 .is-escalate .lgraph__band-label strong { color: var(--accent-warn); }
 .lgraph__inline-node {
@@ -184,6 +229,13 @@
   background: color-mix(in srgb, var(--accent-warn) 10%, transparent);
 }
 .lgraph__inline-node .ico { font-size: .95em; color: var(--accent-warn); }
+
+.lgraph__cap {
+  max-width: 46em; margin: .45rem auto 0; text-align: center;
+  font-size: .78rem; line-height: 1.45; color: var(--ink-soft); text-wrap: balance;
+  word-break: auto-phrase;
+}
+.lgraph__cap strong { color: var(--brand-b); }
 
 .lgraph__compare {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

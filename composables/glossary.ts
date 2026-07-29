@@ -33,7 +33,7 @@ export const GLOSSARY: GlossaryEntry[] = [
   { id: 'mcp', term: 'MCP', en: 'Model Context Protocol',
     short: 'モデルと外部ツール・データを繋ぐ“共通プラグ”の規格（Anthropic 提唱）。' },
   { id: 'agent', term: 'エージェント', en: 'Agent',
-    short: 'モデルに足場（ツール・記憶・ループ）を与え、自律的にタスクをこなす仕組み。' },
+    short: 'ツール・記憶・ループという足場をモデルに与え、自律的にタスクをこなす仕組み。' },
   { id: 'reflection', term: 'リフレクション', en: '自己点検 / Reflexion',
     short: '出力を自分で振り返り、誤りを直してから次へ進む手法（Reflexion が代表）。' },
   { id: 'guardrails', term: 'ガードレール', en: 'Guardrails',
