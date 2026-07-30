@@ -599,7 +599,7 @@ foot: false
 </div>
 
 <div class="note mt-3">
-きっかけは<strong>1行の問いかけ</strong>→その<strong class="hot">約4時間半後</strong>に出た<span class="whitespace-nowrap">“死亡宣告”記事</span>。<span class="whitespace-nowrap">標準化された定義・比較検証はまだ無い</span>（2026-07時点）。
+<strong>1行の問いかけ</strong>→<strong class="hot">約4時間半後</strong>に<span class="whitespace-nowrap">“死亡宣告”記事</span>。<span class="whitespace-nowrap">標準化された定義・比較検証はまだ無い</span>（2026-07時点）。
 </div>
 
 <div class="tk concl">新語は鵜呑みにも無視もせず、<span class="whitespace-nowrap">「誰が・いつ・何を根拠に」を先に見る</span>＝<span class="grad" style="font-weight:700">それが「情報弱者にならない」姿勢</span>。</div>

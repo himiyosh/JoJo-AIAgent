@@ -239,11 +239,11 @@ html { color-scheme: dark; }
 .tl-arrow { display: flex; align-items: center; color: var(--brand-a); font-weight: 800; }
 
 /* ---- Nesting figure: Prompt ⊂ Context ⊂ Harness ⊂ Loop ---- */
-.nest { display: inline-block; border-radius: 1.15rem; padding: 1.55rem 1.7rem;
+.nest { display: inline-block; border-radius: 1.15rem; padding: 1.45rem 1.7rem;
   border: 1px solid color-mix(in srgb, #38bdf8 55%, var(--line)); background: color-mix(in srgb, #38bdf8 8%, transparent);
   --rc: #38bdf8; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: 1.35s; }
-.nest .lbl { font-family: 'JetBrains Mono', monospace; font-size: .92rem; letter-spacing: .08em; opacity: .92; display: block; margin-bottom: .65rem; }
-.nest-2 { border-radius: .95rem; padding: 1.4rem 1.55rem; border: 1px solid color-mix(in srgb, #22d3ee 55%, var(--line)); background: color-mix(in srgb, #22d3ee 8%, transparent);
+.nest .lbl { font-family: 'JetBrains Mono', monospace; font-size: .92rem; letter-spacing: .08em; opacity: .92; display: block; margin-bottom: .48rem; }
+.nest-2 { border-radius: .95rem; padding: 1.3rem 1.55rem; border: 1px solid color-mix(in srgb, #22d3ee 55%, var(--line)); background: color-mix(in srgb, #22d3ee 8%, transparent);
   --rc: #22d3ee; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: .9s; }
 .nest-3 { border-radius: .8rem; padding: 1.25rem 1.4rem; border: 1px solid color-mix(in srgb, #818cf8 55%, var(--line)); background: color-mix(in srgb, #818cf8 9%, transparent);
   --rc: #818cf8; animation: nestpulse 4.4s ease-in-out infinite; animation-delay: .45s; }
@@ -261,7 +261,7 @@ html { color-scheme: dark; }
 }
 
 /* ---- Trend feed（X ポスト風カードの縦積み：XPost.vue）---- */
-.xfeed { display: flex; flex-direction: column; gap: .5rem; width: 100%; margin: .6rem auto 0; }
+.xfeed { display: flex; flex-direction: column; gap: .42rem; width: 100%; margin: .6rem auto 0; }
 /* Align the "chrome" (X ロゴ＋リアクションアイコン列) across stacked posts:
    when a feed contains a mascot card (.xp--deco reserves --xp-gutter on the
    right), the sibling cards without a mascot reserve the SAME right inset on
@@ -298,14 +298,17 @@ html { color-scheme: dark; }
   display: flex; align-items: stretch; justify-content: center; gap: 1.2rem;
   margin: 0 0 .2rem; padding: 0 .4rem;
 }
-.sm-topo__side { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: .05rem; }
+/* The label sits beside the diagram, not above it: the shapes are far narrower
+   than their column, so stacking the caption only spent vertical budget that
+   §111 needs for the title's 48px safe area. */
+.sm-topo__side { flex: 1 1 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: .55rem; }
 .sm-topo__cap {
-  display: inline-flex; align-items: baseline; gap: .4rem;
+  display: inline-flex; flex-direction: column; align-items: flex-end; line-height: 1.2;
   font-size: .72rem; color: var(--ink-soft);
 }
 .sm-topo__cap b { color: #eef1f8; font-weight: 800; }
 .sm-topo__cap span { font-family: 'JetBrains Mono', monospace; font-size: .6rem; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
-.sm-topo__svg { width: 100%; max-width: 232px; height: auto; display: block; }
+.sm-topo__svg { width: 100%; max-width: 205px; height: auto; display: block; }
 .sm-topo__vs {
   flex: none; align-self: center;
   font-family: 'JetBrains Mono', monospace; font-size: .72rem; font-weight: 800;
@@ -584,14 +587,14 @@ html { color-scheme: dark; }
 .srcfoot b { color: var(--ink-soft); font-weight: 700; }
 
 /* ---- References slide ---- */
-.refs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .65rem 1.1rem; margin-top: 1rem; }
-.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .7rem .85rem; background: rgba(255,255,255,.02); }
+.refs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem 1.1rem; margin-top: 1rem; }
+.refgrp { border: 1px solid var(--line); border-radius: .7rem; padding: .55rem .85rem; background: rgba(255,255,255,.02); }
 .refgrp h4 {
-  margin: 0 0 .35rem; font-family: 'JetBrains Mono', monospace; font-size: .66rem;
+  margin: 0 0 .24rem; font-family: 'JetBrains Mono', monospace; font-size: .66rem;
   letter-spacing: .1em; text-transform: uppercase; color: var(--brand-a); font-weight: 800;
 }
 .refgrp ul { margin: 0; padding-left: .95rem; }
-.refgrp li { font-size: .74rem; line-height: 1.42; color: var(--ink-soft); margin: .12rem 0; }
+.refgrp li { font-size: .74rem; line-height: 1.38; color: var(--ink-soft); margin: .06rem 0; }
 .refgrp .u { font-family: 'JetBrains Mono', monospace; font-size: .64rem; color: var(--muted); }
 
 /* ---- Pitfalls / icon grid (2×N) ---- */
@@ -650,11 +653,11 @@ html { color-scheme: dark; }
 /* ---- Pitfalls grouped by lifecycle stage ---- */
 .solid-a { color: var(--brand-a); }
 .risk-intro { margin: .15rem 0 0; font-size: .92rem; color: var(--muted); }
-.risk-stacks { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
+.risk-stacks { display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem; }
 .risk-stage {
   --risk-c: var(--brand-a);
   display: grid; grid-template-columns: 9.5rem 1fr; align-items: center; gap: 1rem;
-  padding: .68rem .85rem;
+  padding: .52rem .85rem;
   border-block: 1px solid color-mix(in srgb, var(--risk-c) 22%, var(--line));
   background: linear-gradient(90deg, color-mix(in srgb, var(--risk-c) 7%, transparent), transparent 48%);
 }
@@ -778,7 +781,7 @@ html { color-scheme: dark; }
 
 /* inline clarifier note — concept contrast; full border (no side-stripe), subtle tint */
 .note {
-  padding: .55rem .9rem; border: 1px solid var(--line); border-radius: 10px;
+  padding: .48rem .9rem; border: 1px solid var(--line); border-radius: 10px;
   background: color-mix(in srgb, var(--brand-a) 6%, transparent);
   color: var(--ink-soft); font-size: 1.02rem; line-height: 1.5; text-wrap: balance;
   word-break: auto-phrase;

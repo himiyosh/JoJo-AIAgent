@@ -6,6 +6,7 @@ import { extractRecipeData } from '../reader/extract-visuals.mjs'
 import { SLIDE_RECIPES } from '../reader/slide-recipes.mjs'
 import { normalizeBase, startStaticServer } from './lib/static-server.mjs'
 import { PROSE_SELECTOR, collectBreakDefects, formatDefect } from './qa-line-breaks.mjs'
+import { measureSafeArea, checkSafeArea } from './qa-safe-area.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -1289,6 +1290,14 @@ try {
         .filter(glyph => symbolic.test(glyph) && !prose.includes(glyph))
     })
     assert(orphanBadges.length === 0, `Slide ${number}: diagram badge(s) ${JSON.stringify(orphanBadges)} are never named in prose (DESIGN.md §221).`)
+    // Regression guard (DESIGN.md §4/§111): the 48px safe area and the 48px h1 top
+    // are the deck's breathing room. Slidev centres the column, so *any* additive
+    // change bleeds symmetrically into the padding until the title welds itself to
+    // the top edge — which is exactly how one extra caption line took slide 20 from
+    // 55px to 19px without a single test noticing. Measure it on every slide.
+    const safeArea = await page.evaluate(measureSafeArea)
+    const safeAreaProblems = checkSafeArea(number, safeArea)
+    assert(safeAreaProblems.length === 0, `Slide ${number}: breathing room lost — ${safeAreaProblems.join(' | ')} (DESIGN.md §4/§111).`)
     assert(await slide.locator('.ico[aria-hidden="true"][role]').count() === 0, `Slide ${number}: decorative Ico has a conflicting role.`)
     if (number === 1) {
       assert(await slide.locator('.cover__reader').count() === 0, 'Cover retained the obsolete mobile Reader CTA.')

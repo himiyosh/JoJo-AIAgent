@@ -84,9 +84,9 @@ const popDir = computed(() => (props.place === 'tr' ? 'down' : 'up'))
 /* ---- placements ---- */
 /* corner-pinned variants anchor to the slide (a positioned ancestor exists,
    same mechanism as .srcfoot) so they never sit on top of body copy. */
-.cite--tr { position: absolute; top: 2.5rem; right: 2.7rem; z-index: 30; }
+.cite--tr { position: absolute; top: 3rem; right: 3rem; z-index: 30; }
 /* lifted clear of the persistent page-number footer (.deck-foot ≈ bottom .95rem) */
-.cite--br { position: absolute; right: 3rem; bottom: 2.5rem; z-index: 30; }
+.cite--br { position: absolute; right: 3rem; bottom: 3rem; z-index: 30; }
 .cite--inline {
   font-size: .6rem;
   vertical-align: .35em; margin-left: .3em;   /* superscript-ish marker */

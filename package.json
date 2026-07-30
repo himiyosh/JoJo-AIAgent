@@ -15,6 +15,7 @@
     "preview:production": "node scripts/serve-production.mjs",
     "qa:production": "node scripts/qa-production.mjs",
     "qa:line-breaks": "node scripts/qa-line-breaks.mjs",
+    "qa:safe-area": "node scripts/qa-safe-area.mjs",
     "qa:build-wrapper": "node scripts/qa-build-wrapper.mjs",
     "qa:action-runtimes": "node scripts/qa-action-runtime-versions.mjs",
     "qa:reader-pilot": "node scripts/qa-reader-pilot.mjs",

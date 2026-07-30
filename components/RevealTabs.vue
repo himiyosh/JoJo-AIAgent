@@ -318,7 +318,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 </template>
 
 <style scoped>
-.rt { display: flex; flex-direction: column; gap: .45rem; min-height: 0; position: relative; }
+.rt { display: flex; flex-direction: column; gap: .35rem; min-height: 0; position: relative; }
 /* off-screen height probe: renders every tab's panel out of flow so we can reserve
    the tallest height. It must actually LAY OUT to be measurable — do NOT collapse it
    with height:0/overflow:hidden. Safari/WKWebView (the app's canvas engine) can skip
@@ -335,7 +335,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 .rt__measure > .rt__detail { margin-bottom: 0; }
 
 /* ---------- tabs (clickable cards) ---------- */
-.rt__tabs { display: flex; gap: .6rem; flex: none; margin-bottom: .6rem; }
+.rt__tabs { display: flex; gap: .6rem; flex: none; margin-bottom: .42rem; }
 .rt--row .rt__tabs { flex-wrap: wrap; }
 .rt--timeline .rt__tabs { align-items: stretch; gap: .85rem; margin-bottom: .4rem; }
 .rt--pair .rt__tabs { display: grid; grid-template-columns: 1fr auto 1fr; align-items: stretch; gap: .9rem; }
@@ -375,7 +375,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 .rt__tag { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--muted); }
 .rt__sub { font-size: .78rem; color: var(--ink-soft); line-height: 1.32; }
 
-.rt--pair .rt__tab { padding: .8rem 1rem; }
+.rt--pair .rt__tab { padding: .58rem 1rem; }
 .rt--pair .rt__k { font-size: 1.15rem; }
 
 /* permanent "いま/NOW" marker — amber = the current era (warm accent on the
@@ -491,9 +491,9 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 .rt__stage { display: flex; flex-direction: column; position: relative; flex: 0 1 auto; min-height: 0; }
 .rt__stage > .rt__detail { flex: 1 1 auto; }
 .rt__detail {
-  flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; gap: .5rem;
+  flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; gap: .38rem;
   border: 1px solid color-mix(in srgb, var(--brand-a) 26%, var(--line));
-  border-radius: .85rem; padding: .55rem .95rem;
+  border-radius: .85rem; padding: .42rem .95rem;
   background: rgba(255, 255, 255, .015);
   box-shadow: inset 0 2px 10px -3px rgba(0, 0, 0, .55);
 }
@@ -506,7 +506,7 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
    row 2 = [body | side card]. */
 .rt__detail--card {
   display: grid; grid-template-columns: 1fr .82fr; grid-template-rows: auto 1fr;
-  column-gap: .95rem; row-gap: .4rem; align-items: stretch;
+  column-gap: .95rem; row-gap: .3rem; align-items: stretch;
 }
 .rt__detail--card > .rt__head { grid-column: 1 / -1; grid-row: 1; }
 .rt__detail--card > .rt__viewport { grid-column: 1; grid-row: 2; min-height: 0; }
@@ -545,18 +545,18 @@ onBeforeUnmount(() => window.removeEventListener('resize', measureTallest))
 
 .rt__main { min-width: 0; }
 
-.rt__points { list-style: none; margin: 0; padding: 0; display: grid; gap: .28rem; }
+.rt__points { list-style: none; margin: 0; padding: 0; display: grid; gap: .18rem; }
 .rt__points li {
-  position: relative; padding-left: 1.05rem; font-size: .9rem; line-height: 1.5; color: var(--ink-soft);
+  position: relative; padding-left: 1.05rem; font-size: .9rem; line-height: 1.42; color: var(--ink-soft);
 }
 .rt__points li::before { content: "▸"; position: absolute; left: 0; color: var(--brand-a); font-size: .78rem; }
 .rt__points :deep(strong) { color: #eef1f8; }
 
-.rt__pc { display: grid; gap: .25rem; }
+.rt__pc { display: grid; gap: .18rem; }
 .rt__card {
   border: 1px solid color-mix(in srgb, var(--brand-a) 22%, var(--line));
-  border-radius: .7rem; padding: .7rem .85rem; background: rgba(255, 255, 255, .02);
-  display: flex; flex-direction: column; gap: .35rem; justify-content: flex-start;
+  border-radius: .7rem; padding: .55rem .85rem; background: rgba(255, 255, 255, .02);
+  display: flex; flex-direction: column; gap: .28rem; justify-content: flex-start;
 }
 .rt__detail.is-now .rt__card { border-color: color-mix(in srgb, var(--brand-b) 26%, var(--line)); }
 /* align-self:start pins the card's TOP (aligned with the left column's first

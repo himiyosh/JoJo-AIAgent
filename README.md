@@ -90,8 +90,9 @@ npm run dev          # 開発サーバー（http://localhost:3030）— slides.m
 npm run build            # 16:9、全33枚スマホReader、比較用Readerを単一ソースから生成
 npm run build -- slides-compare.md --out dist-compare  # 別entryはデッキだけを生成（Readerはcanonical専用）
 npm run preview:production -- --base /JoJo-AIAgent/  # Pages と同じ base path で確認
-npm run qa:production -- --base /JoJo-AIAgent/       # 33枚・操作UI・改行・Readerを検証
+npm run qa:production -- --base /JoJo-AIAgent/       # 33枚・操作UI・改行・余白・Readerを検証
 npm run qa:line-breaks -- http://localhost:3030      # dev サーバの全33枚を実描画で改行走査（開発中の即時確認用）
+npm run qa:safe-area -- http://localhost:3030        # dev サーバの全33枚の h1-top・48px safe area を実測（開発中の即時確認用）
 npm run qa:reader-pilot -- --base /JoJo-AIAgent/     # pilot v3 180/180 coverage・15ページ・実文字可視性・操作を検証
 npm run qa:mobile-pilot -- --base /JoJo-AIAgent/     # 横型3枚のfit・pinch・pan・dialog・historyを検証
 npm run qa:mobile-reader -- --base /JoJo-AIAgent/    # 横型全33枚・目次・検索・zoom/pan・root/baseを検証

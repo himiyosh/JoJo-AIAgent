@@ -61,7 +61,7 @@ const avGrad = computed(() =>
   text-align: left;
   border: 1px solid var(--line);
   border-radius: 1rem;
-  padding: .52rem 1.1rem .4rem;
+  padding: .42rem 1.05rem .34rem;
   background:
     radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--xc) 9%, transparent), transparent 42%),
     color-mix(in srgb, var(--xc) 3%, rgba(255, 255, 255, .015));
@@ -74,9 +74,9 @@ const avGrad = computed(() =>
 }
 .xp__hd { display: flex; align-items: center; gap: .6rem; }
 .xp__av {
-  width: 42px; height: 42px; border-radius: 50%; flex: none;
+  width: 36px; height: 36px; border-radius: 50%; flex: none;
   display: grid; place-items: center;
-  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .9rem; color: #fff; letter-spacing: .03em;
+  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .82rem; color: #fff; letter-spacing: .03em;
   background: var(--av);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), 0 2px 12px -3px var(--xc);
 }
@@ -89,10 +89,10 @@ const avGrad = computed(() =>
 .xp__logo { width: 1.18rem; height: 1.18rem; margin-left: auto; flex: none; opacity: .82; }
 .xp__logo path { fill: var(--ink); }
 
-.xp__bd { margin: .4rem 0 0; font-size: 1rem; line-height: 1.42; color: var(--ink); font-weight: 500; text-wrap: pretty; }
+.xp__bd { margin: .3rem 0 0; font-size: 1rem; line-height: 1.38; color: var(--ink); font-weight: 500; text-wrap: pretty; }
 .xp__bd :deep(em) { font-style: normal; font-weight: 800; color: var(--xc); }
 
-.xp__jp { margin: .26rem 0 0; font-size: .78rem; line-height: 1.46; color: var(--ink-soft); }
+.xp__jp { margin: .2rem 0 0; font-size: .76rem; line-height: 1.4; color: var(--ink-soft); }
 .xp__tr {
   display: inline-block; margin-right: .45rem; padding: .02rem .4rem; border-radius: .35rem;
   font-family: 'JetBrains Mono', monospace; font-size: .62rem; letter-spacing: .04em; vertical-align: .06em;
@@ -100,7 +100,7 @@ const avGrad = computed(() =>
 }
 
 .xp__ft {
-  margin-top: .32rem; padding-top: .32rem; border-top: 1px solid var(--line);
+  margin-top: .24rem; padding-top: .24rem; border-top: 1px solid var(--line);
   display: flex; align-items: center; justify-content: space-between; gap: .6rem;
 }
 .xp__when { font-family: 'JetBrains Mono', monospace; font-size: .68rem; color: var(--muted); letter-spacing: .02em; display: inline-flex; align-items: center; gap: .35rem; min-width: 0; }

@@ -59,13 +59,12 @@
       </div>
 
       <div class="lgraph__bands">
-        <span class="lgraph__bands-tag">検証ゲートの判定で、残り2本の edge が分かれる</span>
         <div class="lgraph__band is-retry">
           <span class="lgraph__band-line" aria-hidden="true"></span>
-          <span class="lgraph__band-label"><b>NG</b> → <strong>Loop へ差し戻し</strong>（再試行）</span>
+          <span class="lgraph__band-label"><b>検証ゲート</b>が NG → <strong>Loop へ差し戻し</strong>（再試行）</span>
         </div>
         <div class="lgraph__band is-escalate">
-          <span class="lgraph__band-label"><b>要判断</b> →
+          <span class="lgraph__band-label"><b>検証ゲート</b>が 要判断 →
             <span class="lgraph__inline-node"><Ico name="user" />Human確認</span>
             → <strong>統合・完了へ合流</strong></span>
           <span class="lgraph__band-line lgraph__band-line--fwd" aria-hidden="true"></span>
@@ -75,7 +74,6 @@
 
     <p class="lgraph__cap">
       <strong>①（Loop）</strong>は、前ページの反復そのもの＝<span class="whitespace-nowrap">Graph の中の1つの node にすぎない</span>。
-      <span class="whitespace-nowrap">分岐・合流・状態・Human の確認</span>まで配線するのが Graph 全体。
     </p>
 
     <div class="lgraph__compare" role="group" aria-label="Loop EngineeringとGraph Engineeringの違い">
@@ -104,7 +102,7 @@
    the frame had to be re-measured on every content change) ---- */
 .lgraph__graph {
   position: relative; width: 100%;
-  padding: 0 .5rem .55rem;
+  padding: 0 .5rem .45rem;
   border: 1.4px dashed color-mix(in srgb, var(--brand-b) 30%, var(--line));
   border-radius: 1.1rem;
 }
@@ -115,16 +113,16 @@
   letter-spacing: .08em; color: color-mix(in srgb, var(--brand-b) 78%, var(--ink-soft));
 }
 
-.lgraph__row { display: flex; align-items: center; justify-content: center; gap: .3rem; flex-wrap: nowrap; padding: 1.3rem .4rem .2rem; }
+.lgraph__row { display: flex; align-items: center; justify-content: center; gap: .3rem; flex-wrap: nowrap; padding: 1.05rem .4rem .15rem; }
 
 .lgraph__node {
-  display: flex; flex-direction: column; align-items: center; gap: .12rem; position: relative;
-  padding: .55rem .55rem .5rem; border-radius: .7rem; min-width: 5.2rem;
+  display: flex; flex-direction: column; align-items: center; gap: .1rem; position: relative;
+  padding: .42rem .5rem .38rem; border-radius: .7rem; min-width: 5.2rem;
   border: 1px solid var(--line); background: rgba(255, 255, 255, .025);
 }
 .lgraph__tile {
-  width: 2.35rem; height: 2.35rem; border-radius: .55rem; margin-bottom: .1rem;
-  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  width: 2.05rem; height: 2.05rem; border-radius: .5rem; margin-bottom: .08rem;
+  display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
 }
 .lgraph__jp { font-weight: 800; font-size: .88rem; color: #eef1fb; line-height: 1.15; white-space: nowrap; }
 .lgraph__en { font-family: 'JetBrains Mono', monospace; font-size: .58rem; letter-spacing: .02em; color: var(--muted); white-space: nowrap; }
@@ -166,7 +164,7 @@
 .lgraph__pill--done .ico { color: #22c55e; }
 
 /* ---- State frame: dashed box grouping the Loop + Evaluator (nodes that read/write shared state) ---- */
-.lgraph__statewrap { position: relative; padding: 1rem .6rem .5rem; }
+.lgraph__statewrap { position: relative; padding: .85rem .55rem .38rem; }
 .lgraph__statewrap::before {
   content: ""; position: absolute; inset: .55rem 0 0; border-radius: .85rem;
   border: 1.3px dashed color-mix(in srgb, var(--brand-a) 42%, var(--line));
@@ -189,12 +187,7 @@
 .lgraph__state-row { position: relative; z-index: 1; display: flex; align-items: center; gap: .3rem; }
 
 /* ---- feedback bands (same visual grammar as AgentLoop's single "retry" band, extended to two) ---- */
-.lgraph__bands { display: flex; flex-direction: column; align-items: center; gap: .42rem; width: 100%; margin-top: .1rem; }
-.lgraph__bands-tag {
-  align-self: flex-start; margin: 0 0 -.1rem .6rem;
-  font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: .56rem;
-  letter-spacing: .04em; color: var(--muted);
-}
+.lgraph__bands { display: flex; flex-direction: column; align-items: center; gap: .34rem; width: 100%; margin-top: .1rem; }
 .lgraph__band { display: flex; align-items: center; gap: .6rem; width: 100%; }
 /* Each dashed edge has to END under the node its wording names, otherwise the
    arrowhead points into empty canvas and the reader cannot tell which box the
@@ -202,8 +195,8 @@
    is the same box the row above is centred in, so both bands stay anchored to
    their nodes at any canvas scale: retry stops under the Loop node, escalation
    runs on to 統合・完了. */
-.is-retry { padding-left: 47%; }
-.is-escalate { padding-left: 20%; padding-right: 11.5%; }
+.is-retry { padding-left: 43%; }
+.is-escalate { padding-left: 14%; padding-right: 11.5%; }
 .lgraph__band-line { flex: 1; height: 0; border-top: 1.5px dashed; position: relative; }
 /* arrowhead tip (not a card side-accent) — same zero-size border-triangle
    technique as AgentLoop.vue's .aloop__back-line::before, kept for visual
@@ -244,7 +237,7 @@
 }
 .lgraph__compare-item {
   display: flex; flex-direction: column; align-items: center; min-width: 0;
-  padding: .38rem .7rem .42rem; text-align: center; color: var(--ink-soft);
+  padding: .3rem .7rem .32rem; text-align: center; color: var(--ink-soft);
 }
 .lgraph__compare-item + .lgraph__compare-item { border-left: 1px solid var(--line); }
 .lgraph__compare-label {
