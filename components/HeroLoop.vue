@@ -67,7 +67,7 @@ defineProps<{ }>()
 
       <!-- stage labels -->
       <text x="166" y="16" class="hero__lab" text-anchor="middle">PROMPT</text>
-      <text x="285" y="138" class="hero__lab" text-anchor="start">CONTEXT</text>
+      <text x="281" y="138" class="hero__lab" text-anchor="start">CONTEXT</text>
       <text x="166" y="260" class="hero__lab" text-anchor="middle">HARNESS</text>
       <text x="47" y="138" class="hero__lab hero__lab--now" text-anchor="end">LOOP</text>
 
@@ -142,7 +142,13 @@ defineProps<{ }>()
   fill: #8b93a7;
   font-family: 'JetBrains Mono', monospace;
   font-weight: 700;
-  font-size: 11px;
+  /* The stage labels are SVG text, so their ink width follows the platform's
+     glyph advance and cannot be constrained by the viewBox. At 11px the widest
+     one (CONTEXT) overhung the diagram far enough to land on the 48px safe-area
+     line — and 1.3px past it on Linux CI. 10px pulls CONTEXT back inside with
+     real headroom and simultaneously moves the end-anchored LOOP label away from
+     the cover title it was nearly touching. */
+  font-size: 10px;
   letter-spacing: 0.14em;
   dominant-baseline: central;
 }
