@@ -5,6 +5,8 @@ import { chromium } from 'playwright-chromium'
 import { extractRecipeData } from '../reader/extract-visuals.mjs'
 import { SLIDE_RECIPES } from '../reader/slide-recipes.mjs'
 import { normalizeBase, startStaticServer } from './lib/static-server.mjs'
+import { PROSE_SELECTOR, collectBreakDefects, formatDefect } from './qa-line-breaks.mjs'
+import { measureSafeArea, checkSafeArea } from './qa-safe-area.mjs'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const args = process.argv.slice(2)
@@ -1267,6 +1269,35 @@ try {
         .map(node => node.textContent.trim().slice(0, 24))
     })
     assert(tkViolations.length === 0, `Slide ${number}: .tk element lost word-break:auto-phrase (mid-word break risk): ${JSON.stringify(tkViolations)}`)
+    // Regression guard: computed word-break only proves the *rule* survived, not
+    // that the rendered result is readable — `text-wrap: balance` still splits
+    // quoted compounds and orphans particles. Scan the real glyph boxes of every
+    // prose block (DESIGN.md §130/§132); this is what the Reader-only Range scan
+    // above never covered for the 16:9 deck.
+    const breakDefects = await page.evaluate(collectBreakDefects, { selector: PROSE_SELECTOR })
+    assert(breakDefects.length === 0, `Slide ${number}: rendered line-break defects: ${breakDefects.map(defect => formatDefect(number, defect)).join(' | ')}`)
+    // Regression guard (DESIGN.md §221): a *symbolic* badge (a circled number or
+    // single character) inside a diagram is a bare glyph unless prose on the same
+    // slide names it. The Graph slide shipped exactly that defect once a later
+    // edit replaced the grounding caption with a comparison strip but left the ①
+    // badge on the Loop node. Badges that spell out their own label are fine.
+    const orphanBadges = await slide.evaluate((root) => {
+      const symbolic = /^[\u2460-\u2473\u24EA0-9A-Za-z]$/
+      const prose = [...root.querySelectorAll('.tk, .note, .lead, .concl, p')]
+        .map(node => node.textContent ?? '').join('')
+      return [...root.querySelectorAll('[class*="__badge"]')]
+        .map(node => node.textContent?.trim() ?? '')
+        .filter(glyph => symbolic.test(glyph) && !prose.includes(glyph))
+    })
+    assert(orphanBadges.length === 0, `Slide ${number}: diagram badge(s) ${JSON.stringify(orphanBadges)} are never named in prose (DESIGN.md §221).`)
+    // Regression guard (DESIGN.md §4/§111): the 48px safe area and the 48px h1 top
+    // are the deck's breathing room. Slidev centres the column, so *any* additive
+    // change bleeds symmetrically into the padding until the title welds itself to
+    // the top edge — which is exactly how one extra caption line took slide 20 from
+    // 55px to 19px without a single test noticing. Measure it on every slide.
+    const safeArea = await page.evaluate(measureSafeArea)
+    const safeAreaProblems = checkSafeArea(number, safeArea)
+    assert(safeAreaProblems.length === 0, `Slide ${number}: breathing room lost — ${safeAreaProblems.join(' | ')} (DESIGN.md §4/§111).`)
     assert(await slide.locator('.ico[aria-hidden="true"][role]').count() === 0, `Slide ${number}: decorative Ico has a conflicting role.`)
     if (number === 1) {
       assert(await slide.locator('.cover__reader').count() === 0, 'Cover retained the obsolete mobile Reader CTA.')

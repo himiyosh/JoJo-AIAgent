@@ -56,7 +56,7 @@ function back() {
 </template>
 
 <style scoped>
-.gl { position: relative; margin-top: .25rem; }
+.gl { position: relative; margin-top: 0; }
 
 .gl__back {
   position: absolute; top: -3.1rem; right: 0;
@@ -76,7 +76,7 @@ function back() {
 }
 .gl__item {
   border: 1px solid var(--line); border-radius: .6rem;
-  padding: .28rem .6rem; background: rgba(255, 255, 255, .02);
+  padding: .22rem .6rem; background: rgba(255, 255, 255, .02);
   transition: border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .25s ease;
 }
 .gl__term {
@@ -88,7 +88,7 @@ function back() {
   font-family: 'JetBrains Mono', monospace; font-size: .58rem; font-weight: 600;
   letter-spacing: .02em; color: var(--brand-a);
 }
-.gl__def { margin: .12rem 0 0; font-size: .65rem; line-height: 1.36; color: var(--ink-soft); word-break: auto-phrase; }
+.gl__def { margin: .1rem 0 0; font-size: .65rem; line-height: 1.3; color: var(--ink-soft); word-break: auto-phrase; }
 
 /* highlight when arrived via an inline 用語 link */
 .gl__item.is-hit {

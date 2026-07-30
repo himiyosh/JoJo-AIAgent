@@ -177,6 +177,7 @@ export const SLIDE_RECIPES = [
       { key: 'pills', selector: '.lgraph__pill', mode: 'groups', required: true },
       { key: 'nodes', selector: '.lgraph__node', mode: 'groups', required: true },
       { key: 'bands', selector: '.lgraph__band', mode: 'groups', required: true },
+      { key: 'caption', selector: '.lgraph__cap', mode: 'texts', required: true },
       { key: 'comparison', selector: '.lgraph__compare-item', mode: 'groups', required: true },
       { key: 'takeaway', selector: '.tk', mode: 'texts', required: true },
     ],
