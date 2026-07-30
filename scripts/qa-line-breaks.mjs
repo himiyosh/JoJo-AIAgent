@@ -59,16 +59,27 @@ export function collectBreakDefects({ selector }) {
         range.setEnd(textNode, i + 1)
         const rects = range.getClientRects()
         if (!rects.length) continue
-        chars.push({ ch: value[i], top: Math.round(rects[0].top) })
+        const rect = rects[0]
+        chars.push({ ch: value[i], left: rect.left, bottom: rect.bottom })
       }
     }
+    // Group glyphs into *visual* lines. Grouping by glyph `top` alone is wrong:
+    // that is the inline box top, so an inline run with a different font-size or
+    // vertical-align (e.g. `.kome` at .68em, `.rt__en`, an inline citation chip)
+    // starts a bogus "line" mid-sentence and every rule below is then evaluated
+    // at a boundary that is not a line break. Instead detect the wrap itself:
+    // in LTR flow x advances monotonically within a line, so a real break is the
+    // one place where the pen returns leftwards *and* drops to a lower baseline.
     const lines = []
     let current = ''
-    let top = null
+    let previous = null
     for (const c of chars) {
-      if (top === null) top = c.top
-      if (c.top !== top) { lines.push(current); current = ''; top = c.top }
+      const wrapped = previous
+        && c.left < previous.left - 1
+        && c.bottom > previous.bottom + 1
+      if (wrapped) { lines.push(current); current = '' }
       current += c.ch
+      previous = c
     }
     if (current) lines.push(current)
     return lines.map(line => line.trim()).filter(Boolean)
